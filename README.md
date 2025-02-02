@@ -2,7 +2,7 @@
 An Inkscape template for creating Ethos switch maps showing each model's control assignments.
 
 The template looks like this:
-![x20-x20pro_template](https://github.com/user-attachments/assets/26e9a1eb-ca74-44e3-9358-db508fd7cbb0)
+![x20-x20pro_template](https://github.com/user-attachments/assets/e7f897bb-1eda-4cf6-a4bb-9ea73aaf50b8)
 
 This is an example for my Ng2 glider:
 ![ng 2m_example](https://github.com/user-attachments/assets/bf522c1d-4ac5-4dd2-99a3-18156efa92bd)
