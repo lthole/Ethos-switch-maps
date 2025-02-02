@@ -7,7 +7,7 @@ The template looks like this:
 This is an example for my Ng2 glider:
 ![ng 2m_example](https://github.com/user-attachments/assets/bf522c1d-4ac5-4dd2-99a3-18156efa92bd)
 
-You can find instructions in the 'instructions' folder.
+You can find instructions in the 'docs' folder.
 
 Examples are in the 'examples' folder. These are not suitable for loading in a radio, because they have a background layer.
 
