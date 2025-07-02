@@ -1,4 +1,4 @@
-# Ethos-switch-maps
+# Ethos-switch-maps (manual)
 An Inkscape template for creating Ethos switch maps showing each model's control assignments.
 
 The template looks like this:
