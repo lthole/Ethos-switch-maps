@@ -14,7 +14,7 @@ My widget draws on earlier versions by ronron, Static and Benno. I have also ben
 ### Installation:
 Download and unzip the file. Copy the ’swmap’ folder and all its contents to the scripts folder on your radio’s SD card or eMMC.
 
-Make sure you are in the correct model, then go into ‘Configure Screens’ and add a new screen, selecting the ‘Full screen’ option. Tap on the ‘Create widget’ button, and select the ’Switch maps’ widget. If you have not used the pre-load option, the ‘Configure widget’ form will open as a blank canvas for you to fill in.
+Make sure you are in the correct model, then go into ‘Configure Screens’ and add a new screen, selecting the ‘Full screen’ option. Tap on the ‘Change widget’ button, and select the ’Switch maps’ widget. If you have not used the pre-load option, the ‘Configure widget’ form will open as a blank canvas for you to fill in.
 
 ### Upload option:
 To make it easier to configure widgets for similar models, for example aerobats or gliders, the widget will upload the designations from a template file if it exists in the "/scripts/swmap/templates/“ folder when the widget is first created for a model. Use the supplied 'template master.’luv as the base, and save it as 'template.lua. Alternately I have included a few example upload files. To try one out make a copy and name it template.lua.
