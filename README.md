@@ -3,7 +3,7 @@ Here is my new Switch Mapping widget for the X20/S, X20R/RS, X20 Pro/AW and X18R
 
 To make it easier to configure widgets for similar models, there is an upload mechanism.
 
-Widget options:
+### Widget options:
 1. ‘Display all?’ - display all elements
 2. ‘Display switch names?’ - display names as well as user text.
 3. Select text and lines colour.
@@ -11,12 +11,12 @@ Widget options:
 
 My widget draws on earlier versions by ronron, Static and Benno. I have also benefited from strgaltdel’s help and Lua Tutorial in GitHub. Bertrand very kindly reviewed it and made some valuable suggestions. 
 
-Installation:
+### Installation:
 Download and unzip the file. Copy the ’swmap’ folder and all its contents to the scripts folder on your radio’s SD card or eMMC.
 
 Make sure you are in the correct model, then go into ‘Configure Screens’ and add a new screen, selecting the ‘Full screen’ option. Tap on the ‘Create widget’ button, and select the ’Switch maps’ widget. If you have not used the pre-load option, the ‘Configure widget’ form will open as a blank canvas for you to fill in.
 
-Upload option:
+### Upload option:
 To make it easier to configure widgets for similar models, for example aerobats or gliders, the widget will upload the designations from a template file if it exists in the "/scripts/swmap/templates/“ folder when the widget is first created for a model. Use the supplied 'template master.’luv as the base, and save it as 'template.lua. Alternately I have included a few example upload files. To try one out make a copy and name it template.lua.
 
 After creating the new widget, the contents of the template.txt file should already be pre-loaded. You can then add new entries or edit the pre-loaded ones.
