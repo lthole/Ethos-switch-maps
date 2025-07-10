@@ -21,7 +21,7 @@ To make it easier to configure widgets for similar models, for example aerobats 
 
 After creating the new widget, the contents of the template.txt file should already be pre-loaded. You can then add new entries or edit the pre-loaded ones.
 
-Backups:
+### Backups:
 A configuration file is saved for every model in the "/scripts/swmap/models/“ folder under the model name. These can also be used as templates by copying them as ’template.lua’ into the templates folder.
 
 Note that cloned models will use the same widget until you change the model name in Model / Edit model.
