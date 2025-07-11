@@ -32,5 +32,5 @@ return {
   T5text = "Trim T5",
   T6text = "Trim T6",
   TextColor = "Text Color",
-  ControlsColor = "Controls Color="
+  ControlsColor = "Controls Color"
 }
