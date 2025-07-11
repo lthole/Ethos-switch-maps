@@ -1,4 +1,4 @@
-return {
+verwendungreturn {
   scriptName = "Switch maps",
   DisplayAll = "Display All?",
   DisplaySwitchNames = "Display Switch Names?",
