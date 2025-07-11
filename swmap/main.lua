@@ -22,20 +22,18 @@ local curposx=0
 local curposy=0
 local SKandSL=false
 local T5andT6=false
---local bitmap1
 local def_text_color = lcd.RGB(0, 0xFF, 0xFF)
 local def_ctrls_color = lcd.RGB(0xF8, 0xC0, 0x00)
 
 local file ="SCRIPTS:/swmap/templates/template.lua"
 local file2="SCRIPTS:/swmap/models/"
---local file2 = "/scripts/swmap/templates/template_used.txt"
 
 -- Get information for Transmitter
 local sys = system.getVersion()   	
 local RADIO=sys.board
 
 
-if string.sub(RADIO,1,6)=="X20PRO" then
+if string.sub(RADIO,1,6)=="X20PRO" or string.sub(RADIO,1,2)=="XE" then
 	SKandSL=true
 	T5andT6=true
 else if string.sub(RADIO,1,4)=="X20R" then
@@ -67,14 +65,6 @@ local STR = assert(loadfile("i18n/i18n.lua"))().translate
 -- **************************************************************************************
 -- ***		     name widget					                                      *** 
 -- **************************************************************************************
---[[
-local translations = {en="Switch maps"}
-
-local function name(widget)					-- name script, appears in widget selection list
-  local locale = system.getLocale()
-	 return translations[locale] or translations["en"]
-end
-]]--
 
 local function name()		-- name script, appears in widget selection list
   return STR("scriptName")
@@ -100,11 +90,9 @@ local function create()
 
 	-- check if template load file exists
   -- if it does, read switches config from it
-
 	local file_info = os.stat(file)
 	if file_info then
     if debug_mode then print("Reading config from table template file") end
-
 		ltab = assert(loadfile(file)())
     if debug_mode then 
 			print("DisplayAll=", ltab.DisplayAll)
@@ -141,18 +129,6 @@ local function create()
 			print("TextColor=", ltab.TextColor)
 			print("ControlsColor=", ltab.ControlsColor)
 		end
-
-
---[[
-		-- now remove the template file to avoid loading it again
-		result, message = os.remove(file)
-		-- if file is removed
-		if result then
-			print("File deleted successfully.")
-		else
-			print("File deletion failed.", message)
-		end 
-]]--
 
 		if not(ltab.TextColor) then
 			ltab.TextColor = def_text_color end
