@@ -20,7 +20,7 @@ return {
   RStext = "Leva Laterale RS",
   S1text = "Pot S1",
   S2text = "Pot S2",
-  S3text = "Pot  Centrale S3",
+  S3text = "Pot Centrale S3",
   FS1text = "Interruttore Fn FS1",
   FS2text = "Interruttore Fn FS2",
   FS3text = "Interruttore Fn FS3",
