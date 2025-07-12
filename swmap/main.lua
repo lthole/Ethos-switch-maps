@@ -86,6 +86,8 @@ end
 local function create()
 	-- load model name
 	mname = model.name()
+	-- subsititute wrong characters in the model name for use as filename
+	mname = string.gsub(mname,'[^%w_-]', '-')
 	-- if debug_mode then print ("modelname=",mname) end
 
 	-- check if template load file exists
@@ -872,8 +874,8 @@ local function write(widget)
 	local cc = math.tointeger(widget.ControlsColor)
 	--print ("write textcolor="..(widget.TextColor)) -- debug
 	--print ("write textcolor="..(tc)) -- debug
-	io.write(f,"\n   TextColor = " .. tc .. ",\n")
-  io.write(f,"\n   ControlsColor = " .. cc .. "\n")
+	io.write(f,"\n   TextColor = " .. widget.TextColor .. ",\n")
+  io.write(f,"\n   ControlsColor = " .. widget.ControlsColor .. "\n")
   io.write(f,"}")
 	--print ("write type textcolor="..type(tc)) -- debug
 	--print ("write int textcolor="..(tc)) -- debug
