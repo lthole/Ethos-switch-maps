@@ -16,8 +16,10 @@ Download and unzip the file. Copy the ’swmap’ folder and all its contents to
 
 Make sure you are in the correct model, then go into ‘Configure Screens’ and add a new screen, selecting the ‘Full screen’ option. Tap on the ‘Change widget’ button, and select the ’Switch maps’ widget. If you have not used the pre-load option, the ‘Configure widget’ form will open as a blank canvas for you to fill in.
 
+Note: Version 0.5 now uses file i/o for storage in your eMMC or SD drive, due to insufficient storage in the widget read/write area. This also make it easier to make your own master template files. Simply copy your model.lua file in the models folder, and save it as template.lua in the templates folder. IT will then be used when you create a switch map widget.
+
 ### Upload option:
-To make it easier to configure widgets for similar models, for example aerobats or gliders, the widget will upload the designations from a template file if it exists in the "/scripts/swmap/templates/“ folder when the widget is first created for a model. Use the supplied 'template master.’luv as the base, and save it as 'template.lua. Alternately I have included a few example upload files. To try one out make a copy and name it template.lua.
+To make it easier to configure widgets for similar models, for example aerobats or gliders, the widget will upload the designations from a template file if it exists in the "/scripts/swmap/templates/“ folder when the widget is first created for a model. Use the supplied 'template master.lua' as the base, and save it as 'template.lua. Alternately I have included a few example upload files. To try one out make a copy and name it template.lua.
 
 After creating the new widget, the contents of the template.txt file should already be pre-loaded. You can then add new entries or edit the pre-loaded ones.
 
