@@ -16,7 +16,7 @@
 -- **************************************************************************************
 
 local version="0.5"
-local debug_mode=1
+local debug_mode=0
 local curposx=0
 local curposy=0
 local def_text_color = lcd.RGB(0, 0xFF, 0xFF)
