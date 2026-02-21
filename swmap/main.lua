@@ -16,7 +16,7 @@
 -- **************************************************************************************
 
 local version="0.5"
-local debug_mode=0
+local debug_mode=false -- true or false only
 local curposx=0
 local curposy=0
 local def_text_color = lcd.RGB(0, 0xFF, 0xFF)
@@ -139,7 +139,7 @@ local function paint(widget)
     end
 
     lcd.font(FONT_S)
-    if sys.simulation==true and debug_mode==1 then
+    if sys.simulation==true and debug_mode then
         lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
         --lcd.drawText(1, widget.h-s_font_h,"Pos left:"..curposx.."    Pos high: "..curposh-s_font_h)
         lcd.drawText(1, 10,curposx..", "..curposy)
@@ -205,7 +205,7 @@ end
 -- If using the simulator with debug mode on, clicking the mouse pointer on the screen
 -- will cause the cursor position to be returned to assist with working out line coordinates.
 local function event(widget, category, value, x, y)
-    if sys.simulation==true and debug_mode==1 then
+    if sys.simulation==true and debug_mode then
         if category == EVT_KEY then return false end
         curposx=x
         curposy=y
