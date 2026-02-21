@@ -154,9 +154,33 @@ local function paint(widget)
             local y = lines[1][2]
             if not align and x < widget_w/2 then align = TEXT_LEFT end
             if not align and x >= widget_w/2 then align = TEXT_RIGHT end
-            lcd.drawText(x, y - (offset and offset or vOffset), (showPrefix and (prefix.." ") or "") .. label, align)
+            lcd.font(FONT_S_BOLD)
+            local pw = lcd.getTextSize(prefix .." ")
+            if showPrefix then
+                if align == TEXT_RIGHT then
+                    lcd.font(FONT_S_BOLD)
+                    lcd.drawText(x, y - (offset and offset or vOffset), prefix, align)
+                    lcd.font(FONT_S)
+                    lcd.drawText(x - pw, y - (offset and offset or vOffset), label, align)
+                elseif align == TEXT_CENTERED then
+                    local lw = lcd.getTextSize(label) -- not UTF8 compatible on ethos < 1.7 but acceptable for one or two accentuated chars (slight misplacement)
+                    lcd.font(FONT_S_BOLD)
+                    lcd.drawText(x - pw/4 -lw/2, y - (offset and offset or vOffset), prefix, align)
+                    lcd.font(FONT_S)
+                    lcd.drawText(x + pw/2, y - (offset and offset or vOffset), label, align)
+                else
+                    lcd.font(FONT_S_BOLD)
+                    lcd.drawText(x, y - (offset and offset or vOffset), prefix, align)
+                    lcd.font(FONT_S)
+                    lcd.drawText(x + pw, y - (offset and offset or vOffset), label, align)
+                end
+            else
+                lcd.drawText(x, y - (offset and offset or vOffset), label, align)
+            end
             for _,rect in pairs(lines) do
+                lcd.pen(PEN_DASHED)
                 lcd.drawLine(rect[1], rect[2], rect[3], rect[4])
+                lcd.pen(PEN_SOLID)
             end
         end
     end
