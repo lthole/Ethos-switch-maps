@@ -1,4 +1,4 @@
--- swmap X18RS definition
+-- swmap X18RS definition for 800x480
 -- T5/T6 horizontal
 -- no SK/SL
 -- no S3
@@ -18,7 +18,7 @@ return {
     },
     ["S3"] = {
         ["lines"]=nil,
-        ["draw"]=function () end,
+        ["draw"]=nil,
     },
     ["SA"] = {
         ["lines"]={{5,185,94,185}, {94,185,118,161}},
@@ -62,11 +62,11 @@ return {
     },
     ["SK"] = {
         ["lines"]=nil,
-        ["draw"]=function () end,
+        ["draw"]=nil,
     },
     ["SL"] = {
         ["lines"]=nil,
-        ["draw"]=function () end,
+        ["draw"]=nil,
     },
     ["FS1"] = {
         ["lines"]={{5,356,315,356}},

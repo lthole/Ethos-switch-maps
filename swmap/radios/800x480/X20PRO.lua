@@ -1,6 +1,6 @@
--- swmap X20R/X20RS definition
--- T5/T6 horizontal
--- no SK/SL
+-- swmap X20PRO definition for 800x480
+-- T5/T6 vertical
+-- SK/SL
 
 --[[ important:
   in lines the first two points of the first line are the text coordinates
@@ -62,12 +62,12 @@ return {
         ["draw"]=function () lcd.drawCircle(700,240, 8) end,
     },
     ["SK"] = {
-        ["lines"]=nil,
-        ["draw"]=function () end,
+        ["lines"]={{5,161,76,161}},
+        ["draw"]=function () lcd.drawCircle(77,161, 8) end,
     },
     ["SL"] = {
-        ["lines"]=nil,
-        ["draw"]=function () end,
+        ["lines"]={{795,161,734,161}},
+        ["draw"]=function () lcd.drawCircle(734,161, 8) end,
     },
     ["FS1"] = {
         ["lines"]={{5,356,315,356}},
@@ -102,8 +102,8 @@ return {
         ["draw"]=function() lcd.drawAnnulusSector(618, 240, 43, 44, 50, 130) lcd.drawLine(652,240,668,240) end
     },
     ["T1"] = {
-        ["lines"]={{795,335,576,335}},
-        ["draw"]=function() lcd.drawRectangle(539,327, 40, 16) lcd.drawLine(559,327,559,342) end
+        ["lines"]={{795,307,488,307}},
+        ["draw"]=function() lcd.drawRectangle(451,299, 40, 16) lcd.drawLine(471,299,471,314) end
     },
     ["T2"] = {
         ["lines"]={{795,283,479,283}, {479,283,460,264}},
@@ -114,21 +114,21 @@ return {
         ["draw"]=function() lcd.drawRectangle(331,227, 16, 40) lcd.drawLine(331,247,346,247) end
     },
     ["T4"] = {
-        ["lines"]={{5,335,224,335}},
-        ["draw"]=function() lcd.drawRectangle(222,327, 40, 16) lcd.drawLine(242,327,242,342) end
-    },
-    ["T5"] = {
         ["lines"]={{5,307,312,307}},
         ["draw"]=function() lcd.drawRectangle(306,299, 40, 16) lcd.drawLine(326,299,326,314) end
     },
-    ["T6"] = {
-        ["lines"]={{795,307,488,307}},
-        ["draw"]=function() lcd.drawRectangle(451,299, 40, 16) lcd.drawLine(471,299,471,314) end
+    ["T5"] = {
+        ["lines"]={{5,331,178,331}},
+        ["draw"]=function() lcd.drawRectangle(174,312, 16, 40) lcd.drawLine(174,332,189,332) end
     },
-    ["_LH STICK"]={
+    ["T6"] = {
+        ["lines"]={{795,331,622,331}},
+        ["draw"]=function() lcd.drawRectangle(605,312, 16, 40) lcd.drawLine(605,332,620,332) end
+    },
+    ["LH STICK"]={
         ["draw"]=function() lcd.drawCircle(242,241, 74) lcd.drawCircle(242,241, 10) end
     },
-    ["_RH STICK"]={
+    ["RH STICK"]={
         ["draw"]=function() lcd.drawCircle(559,241, 74) lcd.drawCircle(559,241, 10) end
     },
 }

@@ -1,5 +1,5 @@
 local locale = system.getLocale()
-print("Get system language flag: ", locale)
+--print("Get system language flag: ", locale)
 
 local i18nMap = {
   en = assert(loadfile("i18n/en.lua"))(),

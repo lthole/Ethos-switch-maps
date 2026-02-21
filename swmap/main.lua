@@ -29,14 +29,6 @@ local file2="SCRIPTS:/swmap/models/"
 -- Get information for Transmitter
 local sys = system.getVersion()
 
-local function loadRadioDefinition(board)
-    local function load(basename) return assert(loadfile(string.format("radios/%s.lua", basename)))() end
-    if string.sub(board,1,6)=="X20PRO" or string.sub(board,1,2)=="XE" then return load('X20PRO') end
-    if string.sub(board,1,4)=="X20R" then return load('X20R') end
-    if string.sub(board,1,5)=="X18RS" then return load('X18RS') end
-    return load('X20')
-end
-local radio = loadRadioDefinition(sys.board)
 local radioSwitches = { -- supported switches in display order
     "SA", "SB", "SC", "SD", "SE", "SF", "SG", "SH", "SI", "SJ", "SK", "SL",
     "LS", "RS",
@@ -44,6 +36,37 @@ local radioSwitches = { -- supported switches in display order
     "T1", "T2", "T3", "T4", "T5", "T6",
     "FS1", "FS2", "FS3", "FS4", "FS5", "FS6"
 }
+local function getRadioId(board)
+    -- do return 'X18RS' end
+    if board:sub(1,6)=="X20PRO" or board:sub(1,2)=="XE" then return 'X20PRO' end
+    if board:sub(1,5)=="X20RS" then return 'X20R' end -- explicitly show X20RS support
+    if board:sub(1,4)=="X20R" then return 'X20R' end
+    if board:sub(1,5)=="X18RS" then return 'X18RS' end
+    return 'X20'
+end
+local function loadRadioDefinition(board, w, h)
+    local function load(basename)
+        return assert(loadfile(string.format("radios/%dx%d/%s.lua", w, h, basename)))()
+    end
+    return load(getRadioId(board))
+end
+local function isWindowSizeSupported(board, w, h)
+    local supported = {
+        ["X20PRO"]={{800,480}, {784, 316}},
+        ["X20R"]={{800,480}, {784, 316}},
+        ["X18RS"]={{800,480}, {784, 316}},
+        ["X20"]={{800,480}, {784, 316}},
+    }
+    local radioId=board
+    if not supported[radioId] then return false end
+    for _, def in pairs(supported[radioId]) do
+        if w == def[1] and h == def[2] then
+            return true
+        end
+    end
+    return false
+end
+
 --define function for retrieving translations from translation files
 local STR = assert(loadfile("i18n/i18n.lua"))().translate
 
@@ -118,6 +141,21 @@ local function create()
 
 end
 
+local function wakeup(widget)
+    local w, h = lcd.getWindowSize()
+    -- load once the radio definition
+    if not widget.radio and isWindowSizeSupported(sys.board, w, h) then
+        widget.radio = loadRadioDefinition(sys.board, w, h)
+        lcd.invalidate()
+    end
+    -- detects if layout has changed
+    if w~= widget.windowW or h ~= widget.windowH then
+        widget.windowW = w
+        widget.windowH = h
+        widget.radio = nil
+        lcd.invalidate()
+    end
+end
 -- **************************************************************************************
 -- ***		     "display handler"					                                  ***
 -- *** The paint handler is responsible for graphical representations in a script,    ***
@@ -128,10 +166,11 @@ local function paint(widget)
     local widget_w, widget_h = lcd.getWindowSize()
     --print("widget_w:",widget_w)
     --print("widget_h:",widget_h)
-    if( widget_w ~= 800 or widget_h ~= 480 ) then
+    if not widget.radio then
         lcd.drawText( 0, 0, "Unsupported widget size, Full Screen only")
         return
     end
+
     if lcd.hasFocus() then
         -- show the focus through a border of 4px
         lcd.color(lcd.themeColor(THEME_DEFAULT_BGCOLOR))
@@ -185,12 +224,12 @@ local function paint(widget)
         end
     end
 
-    for id, specs in pairs(radio) do
+    for id, specs in pairs(widget.radio) do
         --print(string.format("%s: %s",id.."text", widget[id.."text"]))
         lcd.color(widget.TextColor)
         if specs["lines"] and widget[id.."text"] then addLegend(widget[id.."text"], id, specs["lines"], specs["align"], specs["offset"]) end
         lcd.color(widget.ControlsColor)
-        specs["draw"]()
+        if type(specs["draw"]) == "function" then specs["draw"]() end
     end
 
 end
@@ -226,7 +265,7 @@ local function configure(widget)
     line = form.addLine(STR("DisplaySwitchNames"))
     form.addBooleanField(line, nil, function() return widget.DisplaySwitchNames end, function(value) widget.DisplaySwitchNames = value end)
     for _, k in pairs(radioSwitches) do
-        if radio[k]["lines"] then -- no lines means no legend or disabled switch
+        if widget.radio and widget.radio[k]["lines"] then -- no lines means no legend or disabled switch
             line = form.addLine(STR(k.."text"))
             form.addTextField(line, nil, function() return widget[k.."text"] end, function(value) widget[k.."text"] = value end)
         end
@@ -311,7 +350,7 @@ end
 --
 local function init()
     --system.registerWidget({key="swmap", name=name, create=create, build=build, wakeup=wakeup, paint=paint, configure=configure, read=read, write=write, event=event, title=false})
-    system.registerWidget({key="swmap", name=name, create=create, build=nil, paint=paint, configure=configure, read=read, write=write, event=event, title=false})
+    system.registerWidget({key="swmap", name=name, create=create, wakeup=wakeup, paint=paint, configure=configure, read=read, write=write, event=event, title=false})
     --bitmap1 = lcd.loadBitmap("/scripts/swmap/bitmaps/x20pro.bmp")
 end
 

@@ -1,4 +1,4 @@
--- swmap X20 definition
+-- swmap X20 definition for 800x480
 -- no T5/T6
 -- no SK/SL
 
@@ -63,11 +63,11 @@ return {
     },
     ["SK"] = {
         ["lines"]=nil,
-        ["draw"]=function () end,
+        ["draw"]=nil,
     },
     ["SL"] = {
         ["lines"]=nil,
-        ["draw"]=function () end,
+        ["draw"]=nil,
     },
     ["FS1"] = {
         ["lines"]={{5,356,315,356}},
