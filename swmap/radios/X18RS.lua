@@ -13,9 +13,8 @@ return {
         ["draw"]=function () lcd.drawCircle(353,181, 20) end,
     },
     ["S2"] = {
-        ["lines"]={{419,89,560,89}, {449,89,449,160}},
+        ["lines"]={{560, 89, 419, 89}, {449,89,449,160}},
         ["draw"]=function () lcd.drawCircle(449,181, 20) end,
-        ["align"]=TEXT_LEFT
     },
     ["S3"] = {
         ["lines"]=nil,
