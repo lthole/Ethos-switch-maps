@@ -30,7 +30,6 @@ local file2="SCRIPTS:/swmap/models/"
 local sys = system.getVersion()
 
 local function loadRadioDefinition(board)
-    board = "X20R"
     local function load(basename) return assert(loadfile(string.format("radios/%s.lua", basename)))() end
     if string.sub(board,1,6)=="X20PRO" or string.sub(board,1,2)=="XE" then return load('X20PRO') end
     if string.sub(board,1,4)=="X20R" then return load('X20R') end
