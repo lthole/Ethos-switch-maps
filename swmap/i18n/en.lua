@@ -1,5 +1,5 @@
 return {
-  scriptName = "Switch maps",
+  ScriptName = "Switch maps",
   DisplayAll = "Display All?",
   DisplaySwitchNames = "Display Switch Names?",
   SAtext = "Switch SA",
@@ -32,5 +32,16 @@ return {
   T5text = "Trim T5",
   T6text = "Trim T6",
   TextColor = "Text Color",
-  ControlsColor = "Controls Color"
+  ControlsColor = "Controls Color",
+  SwitchExpansionTitle="Switch labels",
+  ConfirmDialogTitle="Confirm",
+  WidgetInformation="Widget Information",
+  ButtonNo="No",
+  ButtonYes="Yes, Reset",
+  Reset="Reset",
+  LoadPreset="Load Preset (overwrite)",
+  TemplateChoiceTitle="Overwrite with :", -- no accentuated chars
+  ResetConfirmMessage="Erase the current configuration and reset to defaults ?",
+  ExampleLine="Quick setup",
+  ExampleButton="Add Example Configuration"
 }

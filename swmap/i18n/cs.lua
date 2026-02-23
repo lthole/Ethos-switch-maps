@@ -1,5 +1,5 @@
 return {
-  scriptName = "Switch maps",
+  ScriptName = "Switch maps",
   DisplayAll = "Zobrazit vše?",
   DisplaySwitchNames = "Zobrazit názvy přepínačů?",
   SAtext = "Přepínač SA",
@@ -32,5 +32,16 @@ return {
   T5text = "Trim T5",
   T6text = "Trim T6",
   TextColor = "Barva textu",
-  ControlsColor = "Barva ovladačů"
+  ControlsColor = "Barva ovladačů",
+  SwitchExpansionTitle="Switch labels",
+  ConfirmDialogTitle="Confirm",
+  WidgetInformation="Widget Information",
+  ButtonNo="No",
+  ButtonYes="Yes, Reset",
+  Reset="Reset",
+  LoadPreset="Load Preset (overwrite)",
+  TemplateChoiceTitle="Overwrite with :", -- no accentuated chars
+  ResetConfirmMessage="Erase the current configuration and reset to defaults ?",
+  ExampleLine="Quick setup",
+  ExampleButton="Load an example"
 }

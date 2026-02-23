@@ -13,14 +13,20 @@ for _, value in ipairs(i18nFiles) do
 end
 
 local function translate(key, paramTable)
+  local ANSI_BOLD_YELLOW = "\27[1;33m"
+  local ANSI_RESET = "\27[0m"
   local map = i18nMap[locale] or i18nMap['en']
-  local string = map[key] or i18nMap['en'][key]
+  local translation = map[key] or i18nMap['en'][key]
+  if not translation then
+    warn(ANSI_BOLD_YELLOW..string.format("translate key \"%s\" is missing", key)..ANSI_RESET)
+    return key
+  end
   if paramTable ~= nil and type(paramTable) == 'table' then
-    string = string:gsub("{{%s*(%w+)%s*}}", function(replacement)
+    translation = translation:gsub("{{%s*(%w+)%s*}}", function(replacement)
       return tostring(paramTable[replacement] or "")
     end)
   end
-  return string
+  return translation
 end
 
 return { translate = translate }

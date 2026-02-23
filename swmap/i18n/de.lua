@@ -1,5 +1,5 @@
 return {
-  scriptName = "Geberverwendung",
+  ScriptName = "Geberverwendung",
   DisplayAll = "Alle Geber anzeigen",
   DisplaySwitchNames = "Gebernamen anzeigen?",
   SAtext = "Schalter SA",
@@ -32,5 +32,16 @@ return {
   T5text = "Trimmtaster T5",
   T6text = "Trimmtaster T6",
   TextColor = "Textfarbe",
-  ControlsColor = "Geberfarbe"
+  ControlsColor = "Geberfarbe",
+  SwitchExpansionTitle="Switch labels",
+  ConfirmDialogTitle="Confirm",
+  WidgetInformation="Widget Information",
+  ButtonNo="No",
+  ButtonYes="Yes, Reset",
+  Reset="Reset",
+  LoadPreset="Load Preset (overwrite)",
+  TemplateChoiceTitle="Overwrite with :", -- no accentuated chars
+  ResetConfirmMessage="Erase the current configuration and reset to defaults ?",
+  ExampleLine="Quick setup",
+  ExampleButton="Load an example"
 }
