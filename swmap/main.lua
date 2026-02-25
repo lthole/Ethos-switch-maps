@@ -126,7 +126,7 @@ local function isWindowSizeSupported(board, w, h)
         ["X18RS"]={{800,480}, {784, 316}},
         ["X20"]={{800,480}, {784, 316}},
     }
-    local radioId=board
+    local radioId = getRadioId(board)
     if not supported[radioId] then return false end
     for _, def in pairs(supported[radioId]) do
         if w == def[1] and h == def[2] then
@@ -214,7 +214,8 @@ local function paint(widget)
     lcd.drawFilledRectangle(border, border, w - (2 * border), h - (2 * border))
 
     if not widget.radio then
-        lcd.drawText( 0, 0, string.format("%sx%s : unsupported widget size, Try Full Screen", w, h))
+        lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
+        lcd.drawText( 0, 0, string.format("%sx%s : unsupported widget size for %s, Try Full Screen", w, h, sys.board))
         return
     end
 
