@@ -61,7 +61,7 @@ return {
 
    T6text = "",
 
-   TextColor = 251660287,
+   TextColor = lcd.RGB(0x00, 0xfc, 0xf8),
 
-   ControlsColor = 251723264
+   ControlsColor = lcd.RGB(0xf8, 0xb0, 0x38),
 }

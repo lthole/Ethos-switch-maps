@@ -1,7 +1,6 @@
--- swmap X18RS definition
+-- swmap X20R/X20RS definition for 800x480
 -- T5/T6 horizontal
 -- no SK/SL
--- no S3
 
 --[[ important:
   in lines the first two points of the first line are the text coordinates
@@ -13,12 +12,14 @@ return {
         ["draw"]=function () lcd.drawCircle(353,181, 20) end,
     },
     ["S2"] = {
-        ["lines"]={{419,89,560,89}, {449,89,449,160}},
+        ["lines"]={{560, 89, 419, 89}, {449,89,449,160}},
         ["draw"]=function () lcd.drawCircle(449,181, 20) end,
     },
     ["S3"] = {
-        ["lines"]=nil,
-        ["draw"]=function () end,
+        ["lines"]={{400, 428, 460,428},{400,387,400,428}, {340,428,440,428}},
+        ["draw"]=function () lcd.drawLine(400,290,400,387) lcd.drawLine(390,340,410,340) end,
+        ["offset"]= -2,
+        ["align"]=TEXT_CENTERED
     },
     ["SA"] = {
         ["lines"]={{5,185,94,185}, {94,185,118,161}},
@@ -62,11 +63,11 @@ return {
     },
     ["SK"] = {
         ["lines"]=nil,
-        ["draw"]=function () end,
+        ["draw"]=nil,
     },
     ["SL"] = {
         ["lines"]=nil,
-        ["draw"]=function () end,
+        ["draw"]=nil,
     },
     ["FS1"] = {
         ["lines"]={{5,356,315,356}},

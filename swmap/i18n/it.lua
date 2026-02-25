@@ -1,5 +1,5 @@
 return {
-  scriptName = "Mappa Interruttori",
+  ScriptName = "Mappa Interruttori",
   DisplayAll="Visualizza Tutti?",
   DisplaySwitchNames="Visualizza Nomi Interruttori?",
   SAtext = "Interruttore SA",
@@ -32,5 +32,16 @@ return {
   T5text = "Trim T5",
   T6text = "Trim T6",
   TextColor= "Colore Testo",
-  ControlsColor= "Colore Controlli"
+  ControlsColor= "Colore Controlli",
+  SwitchExpansionTitle="Switch labels",
+  ConfirmDialogTitle="Confirm",
+  WidgetInformation="Widget Information",
+  ButtonNo="No",
+  ButtonYes="Yes, Reset",
+  Reset="Reset",
+  LoadPreset="Load Preset (overwrite)",
+  TemplateChoiceTitle="Overwrite with :", -- no accentuated chars
+  ResetConfirmMessage="Erase the current configuration and reset to defaults ?",
+  ExampleLine="Quick setup",
+  ExampleButton="Load an example"
 }

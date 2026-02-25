@@ -1,6 +1,6 @@
--- swmap X20PRO definition
--- T5/T6 vertical
--- SK/SL
+-- swmap X20 definition for 800x480
+-- no T5/T6
+-- no SK/SL
 
 --[[ important:
   in lines the first two points of the first line are the text coordinates
@@ -12,7 +12,7 @@ return {
         ["draw"]=function () lcd.drawCircle(353,181, 20) end,
     },
     ["S2"] = {
-        ["lines"]={{419,89,560,89}, {449,89,449,160}},
+        ["lines"]={{560, 89, 419, 89}, {449,89,449,160}},
         ["draw"]=function () lcd.drawCircle(449,181, 20) end,
     },
     ["S3"] = {
@@ -62,12 +62,12 @@ return {
         ["draw"]=function () lcd.drawCircle(700,240, 8) end,
     },
     ["SK"] = {
-        ["lines"]={{5,161,76,161}},
-        ["draw"]=function () lcd.drawCircle(77,161, 8) end,
+        ["lines"]=nil,
+        ["draw"]=nil,
     },
     ["SL"] = {
-        ["lines"]={{795,161,734,161}},
-        ["draw"]=function () lcd.drawCircle(734,161, 8) end,
+        ["lines"]=nil,
+        ["draw"]=nil,
     },
     ["FS1"] = {
         ["lines"]={{5,356,315,356}},
@@ -118,17 +118,17 @@ return {
         ["draw"]=function() lcd.drawRectangle(306,299, 40, 16) lcd.drawLine(326,299,326,314) end
     },
     ["T5"] = {
-        ["lines"]={{5,331,178,331}},
-        ["draw"]=function() lcd.drawRectangle(174,312, 16, 40) lcd.drawLine(174,332,189,332) end
+        ["lines"]=nil,
+        ["draw"]=function() end
     },
     ["T6"] = {
-        ["lines"]={{795,331,622,331}},
-        ["draw"]=function() lcd.drawRectangle(605,312, 16, 40) lcd.drawLine(605,332,620,332) end
+        ["lines"]=nil,
+        ["draw"]=function() end
     },
-    ["LH STICK"]={
+    ["_LH STICK"]={
         ["draw"]=function() lcd.drawCircle(242,241, 74) lcd.drawCircle(242,241, 10) end
     },
-    ["RH STICK"]={
+    ["_RH STICK"]={
         ["draw"]=function() lcd.drawCircle(559,241, 74) lcd.drawCircle(559,241, 10) end
     },
 }
