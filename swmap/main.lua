@@ -7,6 +7,22 @@
 -- 2025-06-28 v0.3 add color selection, supoort for X20R/RS, moved the sliders and Si/SJ, only show relevant elements in config form
 -- 2025-07-09 v0.4 add file io for config storage due to widget.write memory limitations
 -- 2025-07-10 v0.5 ehancements per @Alex00101: move model.filename(); use 'SCRIPTS:/swmap/...' in paths; add localization; make STR local.
+-- 2026-02-25 v1.0 enhancements from @flyingeek:
+--     decoupled the code from radio definition files
+--     added X18RS
+--     changed trim on X20R and X20RS (horizontal)
+--     added focus border
+--     fix Pot S2 placement
+--     added bold switch names and dashed lines
+--     added multiple resolutions compatibility per radio to allow full screen and non full screen
+--     in simulator, only handles evt_touch category to still allow the use of other controls
+--     revised template loading implemented
+--     write routine is now quote safe (if case you tape a quote in the switch description)
+--     write routine now write colors like this: "lcd.RGB(0xf8, 0xc0, 0x00)", config file using the old syntax are still valid.
+--     moved switches inside a panel on the configure page
+--     added widget version in configure page
+--     no more focus border on full screen, instead the widget information (bottom right) is shown in the focus color
+--     light mode theme support
 --
 --
 -- **************************************************************************************
@@ -15,7 +31,7 @@
 -- *** load (radio start).                                                            ***
 -- **************************************************************************************
 
-local version="0.5"
+local version="1.0"
 -- Get information for Transmitter
 local sys = system.getVersion()
 
