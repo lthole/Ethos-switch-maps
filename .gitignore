@@ -3,3 +3,4 @@
 .vscode
 .markdownlint.json
 swmap/radios/convert_784_316.py
+swmap/models/*.lua
