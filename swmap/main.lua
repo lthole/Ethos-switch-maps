@@ -395,7 +395,7 @@ local function configure(widget)
             model.dirty()
             form.clear()
             return configure(widget)
-        end)
+        end):focus()
     else
         line = form.addLine(count > 0 and STR("LoadPreset") or "")
         slots = form.getFieldSlots(line, {0, 100})
