@@ -52,9 +52,8 @@ local radioSwitches = {
     "FS1", "FS2", "FS3", "FS4", "FS5", "FS6"
 }
 
-local fullScreenLayout = string.format("%dx%d", sys.lcdWidth, sys.lcdHeight) -- used to detect full screen in paint()
-local function isFullScreen(layout)
-    return layout == fullScreenLayout
+local function isFullScreen(w, h)
+    return w == sys.lcdWidth and h == sys.lcdHeight
 end
 
 --- returns the configuration pathname
@@ -95,11 +94,11 @@ end
 ---@return string our identification used to find the radio definitions
 local function getRadioId(board)
     -- do return 'X18RS' end
-    if board:sub(1,6)=="X20PRO" or board:sub(1,2)=="XE" then return 'X20PRO' end
-    if board:sub(1,5)=="X20RS" then return 'X20R' end -- explicitly show X20RS support
-    if board:sub(1,4)=="X20R" then return 'X20R' end
-    if board:sub(1,5)=="X18RS" then return 'X18RS' end
-    return 'X20'
+    if board:sub(1,6)=="X20PRO" or board:sub(1,2)=="XE" then return 'X20PRO'
+    elseif board:sub(1,5)=="X20RS" then return 'X20R' -- explicitly show X20RS support
+    elseif board:sub(1,4)=="X20R" then return 'X20R'
+    elseif board:sub(1,5)=="X18RS" then return 'X18RS'
+    else return 'X20' end
 end
 
 --- returns the radio definition file for a board and a window resolution
@@ -169,7 +168,8 @@ local function create()
         TextColor=defaultTextColor(),
         ControlsColor=defaultCtrlsColor(),
         --- others
-        layout=nil, -- to detect screen layout change
+        windowWidth =nil, -- to detect screen layout change
+        windowHeight =nil,
         curposx=0, -- cursor x position in simulator
         curposy=0,-- cursor y position in simulator
     }
@@ -186,16 +186,17 @@ end
 local function wakeup(widget)
     local w, h = lcd.getWindowSize()
     -- load once the radio definition
-    if not widget.radio and isWindowSizeSupported(sys.board, w, h) then
+    if widget.radio == nil and isWindowSizeSupported(sys.board, w, h) then
         widget.radio = loadRadioDefinition(sys.board, w, h)
         lcd.invalidate()
     end
     -- detects if layout has changed
     local layout = tostring(w).."x"..tostring(h)
-    if layout ~= widget.layout then
-        widget.layout = layout
-        widget.radio = nil
-        lcd.invalidate()
+    if w ~= widget.windowWidth or h ~= widget.windowHeight then
+        widget.windowWidth = w
+        widget.windowHeight = h
+        widget.radio = nil -- will invalidate next wakeup
+
     end
 end
 
@@ -209,7 +210,7 @@ local function paint(widget)
     local w, h = lcd.getWindowSize()
 
     -- show the focus through a border of 4px except on full screen
-    local border = isFullScreen(widget.layout) and 0 or 3
+    local border = isFullScreen(w, h) and 0 or 3
     lcd.color(lcd.themeColor(THEME_DEFAULT_BGCOLOR))
     lcd.drawFilledRectangle(border, border, w - (2 * border), h - (2 * border))
 
@@ -220,7 +221,7 @@ local function paint(widget)
     end
 
     -- show widget information on Full Screen, color based on lcd.hasFocus
-    if isFullScreen(widget.layout) then
+    if isFullScreen(w, h) then
         lcd.font(FONT_XS)
         lcd.color(lcd.hasFocus() and lcd.themeColor(THEME_FOCUS_COLOR) or lcd.themeColor(14)) -- 14 is the theme color for widget titles
         lcd.drawText(w - 4, h - select(2, lcd.getTextSize("")) - 4, STR("ScriptName")..' v'..version, TEXT_RIGHT)
