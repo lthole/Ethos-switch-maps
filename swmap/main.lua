@@ -113,11 +113,11 @@ local function loadRadioDefinition(board, w, h)
     return load(getRadioId(board))
 end
 
----checks if resolution is supported for the given board
+---checks if resolution is supported for the given board or gives the first supported resolution
 ---@param board string a board returned by sys.board
----@param w integer the window with
----@param h integer the window height
----@return boolean
+---@param w integer|nil the window with
+---@param h integer|nil the window height
+---@return boolean|table
 local function isWindowSizeSupported(board, w, h)
     local supported = {
         ["X20PRO"]={{800,480}, {784, 316}},
@@ -127,6 +127,9 @@ local function isWindowSizeSupported(board, w, h)
     }
     local radioId = getRadioId(board)
     if not supported[radioId] then return false end
+    if w == nil and h == nil then
+        return supported[radioId][1]
+    end
     for _, def in pairs(supported[radioId]) do
         if w == def[1] and h == def[2] then
             return true
@@ -363,7 +366,21 @@ local function configure(widget)
         end
         return choices, indexes
     end
-    local line, slots, choice, panel, exampleButton
+    local radioDefinition
+    if widget.radio == nil then
+        -- handles the case when we call configure from the screens page without having display the widget
+        local defaultResolution = isWindowSizeSupported(sys.board)
+        if type(defaultResolution) ~= "table" then
+            -- unsupported radio (unimplemented as we always return a default radio)
+        else
+            -- get the first radio definition to use something for the switches
+            radioDefinition = loadRadioDefinition(sys.board, table.unpack(defaultResolution))
+        end
+    else
+        -- handles normal case
+        radioDefinition = widget.radio
+    end
+    local line, slots, choice, panel
     local configChoices, configIndexes = buildChoices()
     local count = #(configChoices)
 
@@ -382,7 +399,7 @@ local function configure(widget)
     panel = form.addExpansionPanel(STR("SwitchExpansionTitle"))
     local isFirst
     for _, k in pairs(radioSwitches) do
-        if widget.radio and widget.radio[k]["lines"] then -- no lines means no legend or disabled switch
+        if radioDefinition and radioDefinition[k] and radioDefinition[k]["lines"] then -- no lines means no legend or disabled switch
             line = panel:addLine(STR(k.."text"))
             local textField = form.addTextField(line, nil, function() return widget[k] or "" end, function(value) widget[k] = value end)
             if isFirst == nil then textField:focus() isFirst = false end
