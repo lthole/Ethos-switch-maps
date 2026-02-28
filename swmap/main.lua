@@ -395,7 +395,7 @@ local function configure(widget)
             loadExample()
             model.dirty()
             form.clear()
-            return configure(widget)
+            configure(widget)
         end):focus()
     else
         line = form.addLine(count > 0 and STR("LoadPreset") or "")
@@ -406,7 +406,7 @@ local function configure(widget)
                     loadTemplate(configIndexes[newValue])
                     model.dirty()
                     form.clear()
-                    return configure(widget)
+                    configure(widget)
                 end
             )
             choice:title(STR("TemplateChoiceTitle"))
@@ -417,7 +417,7 @@ local function configure(widget)
                 title=string.format(STR("ConfirmDialogTitle")),
                 message=STR("ResetConfirmMessage"),
                 buttons={
-                    {label=STR("ButtonYes"), action=function() loadTemplate() model.dirty() form.clear() return configure(widget) or true end},
+                    {label=STR("ButtonYes"), action=function() loadTemplate() model.dirty() form.clear() configure(widget) return true end},
                     {label=STR("ButtonNo"), action=function() return true end},
                 },
                 options=TEXT_LEFT
