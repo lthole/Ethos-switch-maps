@@ -310,7 +310,7 @@ end
 local function configure(widget)
     local function _checkIfEmpty()
         for _, k in pairs(radioSwitches) do
-            if widget[k] ~= "" and widget[k] ~= "" then
+            if widget[k] ~= "" then
                 return false
             end
         end
