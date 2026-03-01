@@ -23,6 +23,8 @@
 --     added widget version in configure page
 --     no more focus border on full screen, instead the widget information (bottom right) is shown in the focus color
 --     light mode theme support
+-- 2026-02-26 v1.0.1 Some radios not working (Discussion #6)
+-- 2026-02-28 v1.0.2 fix the configuration form when first launched from Screens page
 --
 --
 -- **************************************************************************************
@@ -31,7 +33,7 @@
 -- *** load (radio start).                                                            ***
 -- **************************************************************************************
 
-local version="1.0"
+local version="1.0.2"
 -- Get information for Transmitter
 local sys = system.getVersion()
 
