@@ -52,9 +52,8 @@ local radioSwitches = {
     "FS1", "FS2", "FS3", "FS4", "FS5", "FS6"
 }
 
-local fullScreenLayout = string.format("%dx%d", sys.lcdWidth, sys.lcdHeight) -- used to detect full screen in paint()
-local function isFullScreen(layout)
-    return layout == fullScreenLayout
+local function isFullScreen(w, h)
+    return w == sys.lcdWidth and h == sys.lcdHeight
 end
 
 --- returns the configuration pathname
@@ -95,11 +94,11 @@ end
 ---@return string our identification used to find the radio definitions
 local function getRadioId(board)
     -- do return 'X18RS' end
-    if board:sub(1,6)=="X20PRO" or board:sub(1,2)=="XE" then return 'X20PRO' end
-    if board:sub(1,5)=="X20RS" then return 'X20R' end -- explicitly show X20RS support
-    if board:sub(1,4)=="X20R" then return 'X20R' end
-    if board:sub(1,5)=="X18RS" then return 'X18RS' end
-    return 'X20'
+    if board:sub(1,6)=="X20PRO" or board:sub(1,2)=="XE" then return 'X20PRO'
+    elseif board:sub(1,5)=="X20RS" then return 'X20R' -- explicitly show X20RS support
+    elseif board:sub(1,4)=="X20R" then return 'X20R'
+    elseif board:sub(1,5)=="X18RS" then return 'X18RS'
+    else return 'X20' end
 end
 
 --- returns the radio definition file for a board and a window resolution
@@ -114,11 +113,11 @@ local function loadRadioDefinition(board, w, h)
     return load(getRadioId(board))
 end
 
----checks if resolution is supported for the given board
+---checks if resolution is supported for the given board or gives the first supported resolution
 ---@param board string a board returned by sys.board
----@param w integer the window with
----@param h integer the window height
----@return boolean
+---@param w integer|nil the window with
+---@param h integer|nil the window height
+---@return boolean|table
 local function isWindowSizeSupported(board, w, h)
     local supported = {
         ["X20PRO"]={{800,480}, {784, 316}},
@@ -128,6 +127,9 @@ local function isWindowSizeSupported(board, w, h)
     }
     local radioId = getRadioId(board)
     if not supported[radioId] then return false end
+    if w == nil and h == nil then
+        return supported[radioId][1]
+    end
     for _, def in pairs(supported[radioId]) do
         if w == def[1] and h == def[2] then
             return true
@@ -169,7 +171,8 @@ local function create()
         TextColor=defaultTextColor(),
         ControlsColor=defaultCtrlsColor(),
         --- others
-        layout=nil, -- to detect screen layout change
+        windowWidth =nil, -- to detect screen layout change
+        windowHeight =nil,
         curposx=0, -- cursor x position in simulator
         curposy=0,-- cursor y position in simulator
     }
@@ -186,16 +189,17 @@ end
 local function wakeup(widget)
     local w, h = lcd.getWindowSize()
     -- load once the radio definition
-    if not widget.radio and isWindowSizeSupported(sys.board, w, h) then
+    if widget.radio == nil and isWindowSizeSupported(sys.board, w, h) then
         widget.radio = loadRadioDefinition(sys.board, w, h)
         lcd.invalidate()
     end
     -- detects if layout has changed
     local layout = tostring(w).."x"..tostring(h)
-    if layout ~= widget.layout then
-        widget.layout = layout
-        widget.radio = nil
-        lcd.invalidate()
+    if w ~= widget.windowWidth or h ~= widget.windowHeight then
+        widget.windowWidth = w
+        widget.windowHeight = h
+        widget.radio = nil -- will invalidate next wakeup
+
     end
 end
 
@@ -209,7 +213,7 @@ local function paint(widget)
     local w, h = lcd.getWindowSize()
 
     -- show the focus through a border of 4px except on full screen
-    local border = isFullScreen(widget.layout) and 0 or 3
+    local border = isFullScreen(w, h) and 0 or 3
     lcd.color(lcd.themeColor(THEME_DEFAULT_BGCOLOR))
     lcd.drawFilledRectangle(border, border, w - (2 * border), h - (2 * border))
 
@@ -220,7 +224,7 @@ local function paint(widget)
     end
 
     -- show widget information on Full Screen, color based on lcd.hasFocus
-    if isFullScreen(widget.layout) then
+    if isFullScreen(w, h) then
         lcd.font(FONT_XS)
         lcd.color(lcd.hasFocus() and lcd.themeColor(THEME_FOCUS_COLOR) or lcd.themeColor(14)) -- 14 is the theme color for widget titles
         lcd.drawText(w - 4, h - select(2, lcd.getTextSize("")) - 4, STR("ScriptName")..' v'..version, TEXT_RIGHT)
@@ -309,7 +313,7 @@ end
 local function configure(widget)
     local function _checkIfEmpty()
         for _, k in pairs(radioSwitches) do
-            if widget[k] ~= "" and widget[k] ~= "" then
+            if widget[k] ~= "" then
                 return false
             end
         end
@@ -362,7 +366,21 @@ local function configure(widget)
         end
         return choices, indexes
     end
-    local line, slots, choice, panel, exampleButton
+    local radioDefinition
+    if widget.radio == nil then
+        -- handles the case when we call configure from the screens page without having display the widget
+        local defaultResolution = isWindowSizeSupported(sys.board)
+        if type(defaultResolution) ~= "table" then
+            -- unsupported radio (unimplemented as we always return a default radio)
+        else
+            -- get the first radio definition to use something for the switches
+            radioDefinition = loadRadioDefinition(sys.board, table.unpack(defaultResolution))
+        end
+    else
+        -- handles normal case
+        radioDefinition = widget.radio
+    end
+    local line, slots, choice, panel
     local configChoices, configIndexes = buildChoices()
     local count = #(configChoices)
 
@@ -381,7 +399,7 @@ local function configure(widget)
     panel = form.addExpansionPanel(STR("SwitchExpansionTitle"))
     local isFirst
     for _, k in pairs(radioSwitches) do
-        if widget.radio and widget.radio[k]["lines"] then -- no lines means no legend or disabled switch
+        if radioDefinition and radioDefinition[k] and radioDefinition[k]["lines"] then -- no lines means no legend or disabled switch
             line = panel:addLine(STR(k.."text"))
             local textField = form.addTextField(line, nil, function() return widget[k] or "" end, function(value) widget[k] = value end)
             if isFirst == nil then textField:focus() isFirst = false end
@@ -394,8 +412,8 @@ local function configure(widget)
             loadExample()
             model.dirty()
             form.clear()
-            return configure(widget)
-        end)
+            configure(widget)
+        end):focus()
     else
         line = form.addLine(count > 0 and STR("LoadPreset") or "")
         slots = form.getFieldSlots(line, {0, 100})
@@ -405,7 +423,7 @@ local function configure(widget)
                     loadTemplate(configIndexes[newValue])
                     model.dirty()
                     form.clear()
-                    return configure(widget)
+                    configure(widget)
                 end
             )
             choice:title(STR("TemplateChoiceTitle"))
@@ -416,7 +434,7 @@ local function configure(widget)
                 title=string.format(STR("ConfirmDialogTitle")),
                 message=STR("ResetConfirmMessage"),
                 buttons={
-                    {label=STR("ButtonYes"), action=function() loadTemplate() model.dirty() form.clear() return configure(widget) or true end},
+                    {label=STR("ButtonYes"), action=function() loadTemplate() model.dirty() form.clear() configure(widget) return true end},
                     {label=STR("ButtonNo"), action=function() return true end},
                 },
                 options=TEXT_LEFT
