@@ -85,6 +85,11 @@ local function readConfiguration(basename)
         config.DisplayAll = data.DisplayAll
         config.DisplaySwitchNames = data.DisplaySwitchNames
         config.TextColor=data.TextColor and data.TextColor or defaultTextColor()
+        config.DisplayVersion=data.DisplayVersion
+        config.DisplayModelName=data.DisplayModelName
+        config.Note1=data.Note1
+        config.Note2=data.Note2
+        config.NoteColor=data.NoteColor and data.NoteColor or defaultTextColor()
         for _, key in pairs(radioSwitches) do
             config[key] = data[key.."text"]
         end
@@ -306,6 +311,11 @@ local function create()
         DisplayAll=true,
         DisplaySwitchNames=true,
         TextColor=defaultTextColor(),
+        DisplayVersion=true,
+        DisplayModelName=true,
+        Note1="",
+        Note2="",
+        NoteColor=defaultTextColor(),
         --- others
         windowWidth =nil, -- to detect screen layout change
         windowHeight =nil,
@@ -355,15 +365,8 @@ local function paint(widget)
 
     if not widget.radio then
         lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
-        lcd.drawText( 0, 0, string.format("%sx%s : unsupported widget size for %s, Try Full Screen", w, h, sys.board))
+        lcd.drawText( 5, 30, string.format("%sx%s : unsupported widget size for %s, Try Full Screen", w, h, sys.board))
         return
-    end
-
-    if sys.simulation==true and debug_mode then
-        lcd.font(FONT_S)
-        lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
-        --lcd.drawText(1, widget.h-s_font_h,"Pos left:"..curposx.."    Pos high: "..curposh-s_font_h)
-        lcd.drawText(1, 10,widget.curposx..", "..widget.curposy)
     end
 
     lcd.font(FONT_S)
@@ -375,7 +378,7 @@ local function paint(widget)
             if not align and x < w/2 then align = TEXT_LEFT end
             if not align and x >= w/2 then align = TEXT_RIGHT end
             local labelOffsetX = 0
-            if widget.DisplaySwitchNames then
+            if widget.DisplaySwitchNames and prefix and prefix ~= "" then
                 lcd.font(FONT_S_BOLD)
                 local pw = lcd.getTextSize(prefix .." ")
                 if align == TEXT_RIGHT then
@@ -410,11 +413,41 @@ local function paint(widget)
         if specs["lines"] then addLegend(widget[id] or "", id, specs["lines"], specs["align"], specs["offset"]) end
     end
 
+    --
+    -- display some goodies
+    --
+    if sys.simulation==true and debug_mode then
+        lcd.font(FONT_S_BOLD)
+        lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
+        if isFullScreen(w, h) then
+            lcd.drawText(18, 5,widget.curposx..", "..widget.curposy)
+        else
+            lcd.color(lcd.GREY(5, 0.7))
+            lcd.drawFilledRectangle(0, 0, 70, 15)
+            lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
+            lcd.drawText(0, 0,widget.curposx..", "..widget.curposy)
+        end
+    end
     if isFullScreen(w, h) then
-         -- show widget information on Full Screen, color based on lcd.hasFocus
-        lcd.font(FONT_XS)
-        lcd.color(lcd.hasFocus() and lcd.themeColor(THEME_FOCUS_COLOR) or lcd.themeColor(14)) -- 14 is the theme color for widget titles
-        lcd.drawText(w - 4, h - select(2, lcd.getTextSize("")) - 4, STR("ScriptName")..' v'..version, TEXT_RIGHT)
+        if widget.DisplayModelName then
+            lcd.font(FONT_L_BOLD)
+            lcd.color(type(widget.TextColor) == "function" and widget.TextColor() or widget.TextColor)
+            lcd.drawText(18, 21, model.name())
+        end
+        if widget.DisplayVersion then
+            -- show widget information on Full Screen, color based on lcd.hasFocus
+            lcd.font(FONT_XS)
+            lcd.color(lcd.hasFocus() and lcd.themeColor(THEME_FOCUS_COLOR) or lcd.themeColor(14)) -- 14 is the theme color for widget titles
+            lcd.drawText(w - 10, 10, STR("ScriptName")..' v'..version, TEXT_RIGHT)
+        end
+        lcd.color(type(widget.NoteColor) == "function" and widget.NoteColor() or widget.NoteColor)
+        lcd.font(FONT_S)
+        if widget.Note1 then
+            addLegend(widget.Note1, "", {{5,450,select(1, lcd.getTextSize(widget.Note1)) + 5,450}})
+        end
+        if widget.Note1 then
+            addLegend(widget.Note2, "", {{5,470,select(1, lcd.getTextSize(widget.Note2)) + 5,470}})
+        end
     elseif lcd.hasFocus() then
         -- when not in full screen, displays simply FOCUS to give a hint
         lcd.font(FONT_BOLD)
@@ -584,8 +617,20 @@ local function configure(widget)
             end
         )
     end
+    local fullScreenPanel = form.addExpansionPanel(STR("FullScreenOptions"))
+    line = fullScreenPanel:addLine(STR("DisplayModelName"))
+    form.addBooleanField(line, nil, function() return widget.DisplayModelName end, function(value) widget.DisplayModelName = value end)
+    line = fullScreenPanel:addLine(STR("DisplayVersion"))
+    form.addBooleanField(line, nil, function() return widget.DisplayVersion end, function(value) widget.DisplayVersion = value end)
+    line = fullScreenPanel:addLine(STR("Note1"))
+    form.addTextField(line, nil, function() return widget.Note1 end, function(value) widget.Note1 = value end)
+    line = fullScreenPanel:addLine(STR("Note2"))
+    form.addTextField(line, nil, function() return widget.Note2 end, function(value) widget.Note2 = value end)
+    line = fullScreenPanel:addLine(STR("NoteColor"))
+    form.addColorField(line, nil, function() return widget.NoteColor end, function(value) widget.NoteColor = value end)
 
-    line = form.addLine(STR("WidgetInformation"))
+    local infoPanel = form.addExpansionPanel(STR("WidgetInformation"))
+    line = infoPanel:addLine(STR("WidgetVersion"))
     form.addStaticText(line, nil, STR("ScriptName") .. " v" .. version)
 
     if isEmpty then
@@ -605,6 +650,7 @@ local function read(widget)
     --if debug_mode and onStart then print("192 lothar: start reading widget config @" .. os.clock(),"   ***************************************   ") end
     ---@diagnostic disable-next-line: undefined-field
     local config = readConfiguration()
+    -- Note fields to read must be defined in readConfiguration (white list)
     if config then
         for k,v in pairs(config) do
             widget[k] =  v
@@ -643,6 +689,11 @@ local function write(widget)
     append("DisplayAll", widget.DisplayAll)
     append("DisplaySwitchNames", widget.DisplaySwitchNames)
     append("TextColor", color(widget.TextColor))
+    append("DisplayVersion", widget.DisplayVersion)
+    append("DisplayModelName", widget.DisplayModelName)
+    append("Note1", quote(widget.Note1))
+    append("Note2", quote(widget.Note2))
+    append("NoteColor", color(widget.NoteColor))
     for _, key in pairs(radioSwitches) do
         append(key.."text", quote(widget[key]))
     end

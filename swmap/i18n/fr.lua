@@ -44,5 +44,12 @@ return {
   ResetConfirmMessage="Effacer la config actuelle et retourner aux valeurs par défaut ?",
   ExampleLine="Démarrage rapide",
   ExampleButton="Charger un exemple",
-  Focus="FOCUS"
+  Focus="FOCUS",
+  WidgetVersion="Widget version",
+  NoteColor="Note Color",
+  Note1="Note1",
+  Note2="Note2",
+  DisplayVersion="Display script version?",
+  DisplayModelName="Display model's name?",
+  FullScreenOptions="Options for Full Screen only"
 }

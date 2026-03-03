@@ -44,5 +44,12 @@ return {
   ResetConfirmMessage="Erase the current configuration and reset to defaults ?",
   ExampleLine="Quick setup",
   ExampleButton="Load an example",
-  Focus="FOCUS"
+  Focus="FOCUS",
+  WidgetVersion="Widget version",
+  NoteColor="Note Color",
+  Note1="Note1",
+  Note2="Note2",
+  DisplayVersion="Display script version?",
+  DisplayModelName="Display model's name?",
+  FullScreenOptions="Options for Full Screen only"
 }
