@@ -74,9 +74,9 @@ end
 ---@return table<string, string|integer|boolean>|nil
 local function readConfiguration(basename)
     local config = {}
-    local chunk = loadfile(getConfigurationFilePath(basename))
+    local chunk = loadfile(getConfigurationFilePath(basename), "bt", {lcd=lcd})-- load the config file passing only the lcd global variable
     if chunk then
-        local data = chunk({lcd=lcd}) -- executes the config file passing the lcd global variable
+        local data = chunk()
         config.DisplayAll = data.DisplayAll
         config.DisplaySwitchNames = data.DisplaySwitchNames
         config.TextColor=data.TextColor and data.TextColor or defaultTextColor()
