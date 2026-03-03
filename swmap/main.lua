@@ -78,6 +78,7 @@ end
 ---@return table<string, string|integer|boolean>|nil
 local function readConfiguration(basename)
     local config = {}
+    if debug_mode then print("loading configuration "..getConfigurationFilePath(basename)) end
     local chunk = loadfile(getConfigurationFilePath(basename), "bt", {lcd=lcd})-- load the config file passing only the lcd global variable
     if chunk then
         local data = chunk()
