@@ -40,7 +40,6 @@ local sys = system.getVersion()
 local debug_mode=false -- sys.simulation or true or false only
 if debug_mode then print("SWMAP Debug MODE ON") end
 
-local defaultCtrlsColor = function() return lcd.themeColor(THEME_FOCUS_COLOR) end
 local defaultTextColor = function() return lcd.darkMode() and lcd.RGB(0, 0xFF, 0xFF) or lcd.RGB(0x58, 0x5C, 0x58) end
 
 -- Colors used to mimic Hardware Checks Page
@@ -85,7 +84,6 @@ local function readConfiguration(basename)
         config.DisplayAll = data.DisplayAll
         config.DisplaySwitchNames = data.DisplaySwitchNames
         config.TextColor=data.TextColor and data.TextColor or defaultTextColor()
-        config.ControlsColor=data.ControlsColor and data.ControlsColor or defaultCtrlsColor()
         for _, key in pairs(radioSwitches) do
             config[key] = data[key.."text"]
         end
@@ -307,7 +305,6 @@ local function create()
         DisplayAll=true,
         DisplaySwitchNames=true,
         TextColor=defaultTextColor(),
-        ControlsColor=defaultCtrlsColor(),
         --- others
         windowWidth =nil, -- to detect screen layout change
         windowHeight =nil,
@@ -405,7 +402,6 @@ local function paint(widget)
     end
     -- first draw controls
     for _, specs in pairs(widget.radio) do
-        lcd.color(type(widget.ControlsColor) == "function" and widget.ControlsColor() or widget.ControlsColor)
         if type(specs["draw"]) == "function" then specs["draw"]() end
     end
     -- next legends (on top)
@@ -542,9 +538,6 @@ local function configure(widget)
     line = form.addLine(STR("TextColor"))
     form.addColorField(line, nil, function() return widget.TextColor end, function(TextColor) widget.TextColor = TextColor end)
 
-    line = form.addLine(STR("ControlsColor"))
-    form.addColorField(line, nil, function() return widget.ControlsColor end, function(ControlsColor) widget.ControlsColor = ControlsColor end)
-
     panel = form.addExpansionPanel(STR("SwitchExpansionTitle"))
     local isFirst
     for _, k in pairs(radioSwitches) do
@@ -649,7 +642,6 @@ local function write(widget)
     append("DisplayAll", widget.DisplayAll)
     append("DisplaySwitchNames", widget.DisplaySwitchNames)
     append("TextColor", color(widget.TextColor))
-    append("ControlsColor", color(widget.ControlsColor))
     for _, key in pairs(radioSwitches) do
         append(key.."text", quote(widget[key]))
     end
