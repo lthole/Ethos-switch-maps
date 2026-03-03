@@ -41,7 +41,7 @@ local debug_mode=false -- sys.simulation or true or false only
 if debug_mode then print("SWMAP Debug MODE ON") end
 
 local defaultCtrlsColor = function() return lcd.themeColor(THEME_FOCUS_COLOR) end
-local defaultTextColor = function() return lcd.darkMode() and lcd.RGB(0, 0xFF, 0xFF) or lcd.color(0x58, 0x5C, 0x58) end
+local defaultTextColor = function() return lcd.darkMode() and lcd.RGB(0, 0xFF, 0xFF) or lcd.RGB(0x58, 0x5C, 0x58) end
 
 local configurationPath="SCRIPTS:/swmap/models/"
 
