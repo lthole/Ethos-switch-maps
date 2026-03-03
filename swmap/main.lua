@@ -254,8 +254,11 @@ end
 ---@param h integer the height of the window
 ---@return false|table<string, { lines: table|nil, draw: function|nil }>
 local function loadRadioDefinition(board, w, h)
-    local function load(basename)
-        local radioDefinitionFile = string.format("radios/%dx%d/%s.lua", w, h, basename)
+    local function load(radioIdOrFileName)
+        local radioDefinitionFile = radioIdOrFileName
+        if radioIdOrFileName:sub(-4) ~= ".lua" then
+            radioDefinitionFile = string.format("radios/%sx%s/%s.lua", w, h, radioIdOrFileName)
+        end
         local env = { -- add some method to parse the definition
             drawStick=drawStick,
             drawButton1Pos=drawButton1Pos,
@@ -267,6 +270,7 @@ local function loadRadioDefinition(board, w, h)
             drawCurvedSlider=drawCurvedSlider,
         }
         setmetatable(env, {__index = _G}) -- allow access to all globals
+        if debug_mode then print(string.format("loading definition from %s", radioDefinitionFile)) end
         local chunk, msg = loadfile(radioDefinitionFile,"bt", env)
         if chunk then
             return assert(chunk())
@@ -275,6 +279,9 @@ local function loadRadioDefinition(board, w, h)
         env = nil
         return false
     end
+    local customFile = string.format("radios/custom/%s-%sx%s.lua", board, w, h)
+---@diagnostic disable-next-line: undefined-field
+    if os.stat(customFile) then return load(customFile) end
     if isResolutionSupported(board, w, h) then
         return load(getRadioId(board))
     end
