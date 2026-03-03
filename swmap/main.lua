@@ -628,7 +628,7 @@ local function write(widget)
             ((rgba & 0x000007e0) >> 5) * 4,
             ((rgba & 0x0000001f) >> 0) * 8,
             ((rgba & 0x0f000000) >> 24) * 16
-        return string.format("lcd.RGB(0x%02x, 0x%02x, 0x%02x)", r, g, b)
+        return string.format("lcd.RGB(0x%02x, 0x%02x, 0x%02x), -- lcd.RGB(%s, %s, %s)", r, g, b, r, g, b)
     end
     local function quote(text)
         return '"' .. tostring(text):gsub('[\\"]', '\\%0') .. '"'
@@ -638,6 +638,7 @@ local function write(widget)
     local function append(key, value)
         f:write(string.format("\n   %s = %s,\n", key, value))
     end
+    f:write("-- configuration file for swmap v"..version.."\n")
     f:write("return {")
     append("DisplayAll", widget.DisplayAll)
     append("DisplaySwitchNames", widget.DisplaySwitchNames)
