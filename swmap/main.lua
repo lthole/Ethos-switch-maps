@@ -141,6 +141,109 @@ local function isResolutionSupported(board, w, h)
     return false
 end
 
+local function drawButton1Pos(cx, cy, r)
+    lcd.color(lcd.darkMode() and GRAY_LIGHT or GRAY_DARK)
+    lcd.drawFilledCircle(cx, cy, r)
+    lcd.color(getSwInactiveColor())
+    lcd.drawFilledCircle(cx, cy, math.floor(math.max(r-4, r/2)))
+end
+local function drawButton2Pos(cx, cy, r)
+    local r3 = math.ceil(r / 3)
+    local rcos15 = math.ceil(r * 0.97)
+    lcd.color(lcd.darkMode() and GRAY_LIGHT or GRAY_DARK)
+    lcd.drawFilledCircle(cx, cy, r)
+    lcd.color(getSwInactiveColor())
+    lcd.drawFilledTriangle(cx, cy + r3, cx + r3, cy + rcos15, cx - r3, cy + rcos15)
+    lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
+    lcd.drawFilledTriangle(cx - r3, cy - rcos15, cx + r3, cy - rcos15, cx, cy - r3)
+end
+local function drawButton3Pos(cx, cy, r)
+    drawButton2Pos(cx, cy, r)
+    lcd.color(getSwInactiveColor())
+    lcd.drawFilledCircle(cx, cy, math.floor(r/3))
+end
+local function drawPot(cx, cy, r)
+    local rcos30 = 0.866 * r
+    lcd.color(GRAY_LIGHT)
+    lcd.drawFilledCircle(cx, cy, r)
+    lcd.color(GRAY_DARK)
+    lcd.drawFilledCircle(cx, cy, rcos30)
+    lcd.color(GRAY_LIGHT)
+    lcd.drawFilledTriangle(cx, cy, cx - (r /2), cy + rcos30, cx + (r/2), cy + rcos30)
+    lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
+    lcd.drawFilledCircle(cx, cy - r + 2, 4)
+
+end
+local function drawTrim(x, y, w, h)
+    -- TODO computations are wrong but Ethos is drawing angle line badly
+    lcd.color(lcd.darkMode() and GRAY_LIGHT or GRAY_DARK)
+    lcd.drawFilledRectangle(x, y, w, h)
+    lcd.color(getSwInactiveColor())
+    if w > h then -- horizontal
+        local marginX = 4
+        local marginY = 2
+        lcd.drawLine(x + (w / 2), y, x + (w / 2), y + h)
+        lcd.drawFilledTriangle(
+            x + marginX, y + (h /2),
+            x + (w / 2) - marginX, y + marginY,
+            x + (w / 2) - marginX, y + h - marginY
+        )
+        lcd.drawFilledTriangle(
+            x + w - marginX + 1, y + (h /2),
+            x + (w / 2) + marginX - 1, y + marginY,
+            x + (w / 2) + marginX - 1, y + h - marginY
+        )
+    else -- vertical
+        local marginX = 2
+        local marginY = 4
+        lcd.drawLine(x, y + (h / 2), x + w, y + (h / 2))
+        lcd.drawFilledTriangle(
+            x + (w / 2), y + marginY,
+            x + marginX, y + (h / 2) - marginY,
+            x + w - marginX, y + (h / 2) - marginY
+        )
+        lcd.drawFilledTriangle(
+            x + (w / 2), y + h - marginY,
+            x + marginX, y + (h / 2) + marginY,
+            x + w - marginX, y + (h / 2) + marginY
+        )
+    end
+end
+local function drawSlider(x, y , w, h)
+    local rulerOffset = 5
+    local rulerHeight = 3
+    lcd.color(lcd.darkMode() and GRAY_LIGHT or GRAY_DARK)
+    lcd.drawFilledRectangle(x, y, w, h)
+    lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
+    lcd.drawFilledRectangle(x - rulerOffset, math.ceil(y + (h / 2)), w + (rulerOffset * 2), rulerHeight)
+end
+local function drawCurvedSlider(x, y, intR, extR, startAngle, endAngle)
+    lcd.color(lcd.darkMode() and GRAY_LIGHT or GRAY_DARK)
+    lcd.drawAnnulusSector(x, y, intR, extR, startAngle, endAngle)
+    lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
+    if (startAngle + endAngle) / 2 == 270 then --left slider
+        lcd.drawFilledRectangle(x - extR, y - 1, math.abs(extR - intR), 3)
+    elseif (startAngle + endAngle) / 2 == 90 then --right slider
+        lcd.drawFilledRectangle(x + extR, y - 1, -math.abs(extR - intR), 3)
+    elseif (startAngle + endAngle) == 360 then --top slider
+        lcd.drawFilledRectangle(x - 1, y - extR, math.abs(extR - intR), 3)
+    elseif (startAngle + endAngle) == 180 then --bottom slider
+        lcd.drawFilledRectangle(x - 1, y + extR, -math.abs(extR - intR), 3)
+    else
+        print("unknow type slider")
+    end
+end
+local function drawStick(cx, cy, r)
+    local margin = 8
+    local rcos30 = 0.866 * r
+    lcd.color(GRAY_LIGHT)
+    lcd.drawFilledCircle(cx, cy, r)
+    lcd.color(GRAY_DARK)
+    lcd.drawFilledRectangle(cx - rcos30 + margin, cy - (r / 2), (rcos30 - margin) * 2, r)
+    lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
+    lcd.drawFilledCircle(cx, cy, 6)
+end
+
 --- returns the radio definition file for a board and a window resolution
 ---@param board string the board returned by sys.board
 ---@param w integer the width of the window
@@ -149,11 +252,23 @@ end
 local function loadRadioDefinition(board, w, h)
     local function load(basename)
         local radioDefinitionFile = string.format("radios/%dx%d/%s.lua", w, h, basename)
-        local chunk, msg = loadfile(radioDefinitionFile)
+        local env = { -- add some method to parse the definition
+            drawStick=drawStick,
+            drawButton1Pos=drawButton1Pos,
+            drawButton2Pos=drawButton2Pos,
+            drawButton3Pos=drawButton3Pos,
+            drawPot=drawPot,
+            drawTrim=drawTrim,
+            drawSlider=drawSlider,
+            drawCurvedSlider=drawCurvedSlider,
+        }
+        setmetatable(env, {__index = _G}) -- allow access to all globals
+        local chunk, msg = loadfile(radioDefinitionFile,"bt", env)
         if chunk then
             return assert(chunk())
         end
         if msg then warn(msg) end
+        env = nil
         return false
     end
     if isResolutionSupported(board, w, h) then
