@@ -48,8 +48,8 @@ local configurationPath="SCRIPTS:/swmap/models/"
 -- supported switches in display order
 local radioSwitches = {
     "SA", "SB", "SC", "SD", "SE", "SF", "SG", "SH", "SI", "SJ", "SK", "SL",
-    "LS", "RS",
-    "S1", "S2", "S3",
+    "LS", "RS", "L1", "L2",
+    "S1", "S2", "S3", "S4",
     "T1", "T2", "T3", "T4", "T5", "T6",
     "FS1", "FS2", "FS3", "FS4", "FS5", "FS6"
 }
