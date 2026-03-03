@@ -43,6 +43,11 @@ if debug_mode then print("SWMAP Debug MODE ON") end
 local defaultCtrlsColor = function() return lcd.themeColor(THEME_FOCUS_COLOR) end
 local defaultTextColor = function() return lcd.darkMode() and lcd.RGB(0, 0xFF, 0xFF) or lcd.RGB(0x58, 0x5C, 0x58) end
 
+-- Colors used to mimic Hardware Checks Page
+local GRAY_DARK = lcd.RGB(0x31, 0x31, 0x31)
+local GRAY_LIGHT = lcd.RGB(0x52, 0x51, 0x52)
+local getSwInactiveColor = function() return lcd.darkMode() and lcd.RGB(0x21, 0x20, 0x21) or lcd.RGB(0xf7, 0xf3, 0xf7) end
+
 local configurationPath="SCRIPTS:/swmap/models/"
 
 -- supported switches in display order
@@ -233,7 +238,7 @@ local function paint(widget)
     local w, h = lcd.getWindowSize()
 
     -- hide focus color
-    lcd.color(lcd.themeColor(THEME_DEFAULT_BGCOLOR))
+    lcd.color(lcd.darkMode() and lcd.RGB(0x10, 0x10, 0x10) or lcd.RGB(0xd6, 0xd2, 0xd6)) -- mimics Hardware Checks Page
     lcd.drawFilledRectangle(0, 0, w, h)
 
     if not widget.radio then
