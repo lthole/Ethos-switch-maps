@@ -533,13 +533,6 @@ local function write(widget)
     f = nil -- TODO is it useful ?
 end
 
-local function build(widget)
-    print("Build Called")
-    local w, h = lcd.getWindowSize()
-    form.clear()
-    form.addStick(nil, {x=168, y=167}, 1, 2)
-    form.addTrim(nil, {x=451, y=299}, 1)
-end
 -- **************************************************************************************
 -- ***		     init widget		 	   		                                      ***
 -- This handler is called during the transmitter's boot process.                      ***
@@ -548,7 +541,7 @@ end
 -- **************************************************************************************
 --
 local function init()
-    system.registerWidget({key="swmap", name=name, create=create, wakeup=wakeup, build=build, paint=paint, configure=configure, read=read, write=write, event=event, title=false})
+    system.registerWidget({key="swmap", name=name, create=create, wakeup=wakeup, paint=paint, configure=configure, read=read, write=write, event=event, title=false})
 end
 
 
