@@ -345,7 +345,6 @@ end
 -- **************************************************************************************
 --
 local function paint(widget)
-    if not lcd.isVisible() then return end
     local timestamp = os.clock()
     local w, h = lcd.getWindowSize()
 
