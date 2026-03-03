@@ -288,10 +288,12 @@ local function paint(widget)
             end
         end
     end
-    for id, specs in pairs(widget.radio) do
+    -- first draw controls
+    for _, specs in pairs(widget.radio) do
         lcd.color(type(widget.ControlsColor) == "function" and widget.ControlsColor() or widget.ControlsColor)
         if type(specs["draw"]) == "function" then specs["draw"]() end
     end
+    -- next legends (on top)
     for id, specs in pairs(widget.radio) do
         lcd.color(type(widget.TextColor) == "function" and widget.TextColor() or widget.TextColor)
         if specs["lines"] then addLegend(widget[id] or "", id, specs["lines"], specs["align"], specs["offset"]) end
