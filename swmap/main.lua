@@ -232,22 +232,14 @@ local function paint(widget)
     local timestamp = os.clock()
     local w, h = lcd.getWindowSize()
 
-    -- show the focus through a border of 4px except on full screen
-    local border = isFullScreen(w, h) and 0 or 3
+    -- hide focus color
     lcd.color(lcd.themeColor(THEME_DEFAULT_BGCOLOR))
-    lcd.drawFilledRectangle(border, border, w - (2 * border), h - (2 * border))
+    lcd.drawFilledRectangle(0, 0, w, h)
 
     if not widget.radio then
         lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
         lcd.drawText( 0, 0, string.format("%sx%s : unsupported widget size for %s, Try Full Screen", w, h, sys.board))
         return
-    end
-
-    -- show widget information on Full Screen, color based on lcd.hasFocus
-    if isFullScreen(w, h) then
-        lcd.font(FONT_XS)
-        lcd.color(lcd.hasFocus() and lcd.themeColor(THEME_FOCUS_COLOR) or lcd.themeColor(14)) -- 14 is the theme color for widget titles
-        lcd.drawText(w - 4, h - select(2, lcd.getTextSize("")) - 4, STR("ScriptName")..' v'..version, TEXT_RIGHT)
     end
 
     if sys.simulation==true and debug_mode then
@@ -299,7 +291,19 @@ local function paint(widget)
         lcd.color(type(widget.TextColor) == "function" and widget.TextColor() or widget.TextColor)
         if specs["lines"] then addLegend(widget[id] or "", id, specs["lines"], specs["align"], specs["offset"]) end
     end
-    print(string.format("paint cpu time : %sms", (os.clock() -timestamp) * 1000))
+
+    if isFullScreen(w, h) then
+         -- show widget information on Full Screen, color based on lcd.hasFocus
+        lcd.font(FONT_XS)
+        lcd.color(lcd.hasFocus() and lcd.themeColor(THEME_FOCUS_COLOR) or lcd.themeColor(14)) -- 14 is the theme color for widget titles
+        lcd.drawText(w - 4, h - select(2, lcd.getTextSize("")) - 4, STR("ScriptName")..' v'..version, TEXT_RIGHT)
+    elseif lcd.hasFocus() then
+        -- when not in full screen, displays simply FOCUS to give a hint
+        lcd.font(FONT_BOLD)
+        lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
+        lcd.drawText(w/2, h - select(2, lcd.getTextSize("")) - 2, STR("Focus"), TEXT_CENTERED)
+    end
+    if debug_mode then print(string.format("paint time %sms", (os.clock() - timestamp) * 1000)) end
 end
 
 -- **************************************************************************************

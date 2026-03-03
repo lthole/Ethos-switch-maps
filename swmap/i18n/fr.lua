@@ -43,5 +43,6 @@ return {
   TemplateChoiceTitle="Ecraser avec :", -- no accentuated chars
   ResetConfirmMessage="Effacer la config actuelle et retourner aux valeurs par défaut ?",
   ExampleLine="Démarrage rapide",
-  ExampleButton="Charger un exemple"
+  ExampleButton="Charger un exemple",
+  Focus="FOCUS"
 }

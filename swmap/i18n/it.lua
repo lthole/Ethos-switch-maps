@@ -43,5 +43,6 @@ return {
   TemplateChoiceTitle="Overwrite with :", -- no accentuated chars
   ResetConfirmMessage="Erase the current configuration and reset to defaults ?",
   ExampleLine="Quick setup",
-  ExampleButton="Load an example"
+  ExampleButton="Load an example",
+  Focus="FOCUS"
 }
