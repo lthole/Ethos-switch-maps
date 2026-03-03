@@ -435,7 +435,7 @@ end
 -- will cause the cursor position to be returned to assist with working out line coordinates.
 local function event(widget, category, value, x, y)
     if sys.simulation==true and debug_mode then
-        if category == EVT_TOUCH then
+        if category == EVT_TOUCH and value ~= TOUCH_MOVE then
             if value == TOUCH_START then
                 widget.curposx=x
                 widget.curposy=y
