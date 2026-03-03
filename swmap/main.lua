@@ -205,6 +205,7 @@ end
 -- **************************************************************************************
 --
 local function wakeup(widget)
+    if not lcd.isVisible() then return end -- widget does nothing if in the background
     local w, h = lcd.getWindowSize()
     -- detects if layout has changed
     if w ~= widget.windowWidth or h ~= widget.windowHeight then
@@ -214,7 +215,6 @@ local function wakeup(widget)
     end
     -- load once the radio definition
     if widget.radio == nil then
-        widget.radio = false
         if debug_mode then print('wakeup : load radio definition') end
         widget.radio = loadRadioDefinition(sys.board, w, h) -- false|table
         lcd.invalidate()
