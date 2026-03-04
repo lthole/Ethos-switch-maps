@@ -617,9 +617,13 @@ local function configure(widget)
                 },
                 options=TEXT_LEFT
             })
-            end
-        )
+        end)
     end
+    if isEmpty then
+        panel:open(false)
+        if choice and count > 0 then choice:focus() end-- we need to give the focus to a field otherwise the Reset makes the form to loose the focus
+    end
+
     local fullScreenPanel = form.addExpansionPanel(STR("FullScreenOptions"))
     line = fullScreenPanel:addLine(STR("DisplayModelName"))
     form.addBooleanField(line, nil, function() return widget.DisplayModelName end, function(value) widget.DisplayModelName = value end)
@@ -635,11 +639,6 @@ local function configure(widget)
     local infoPanel = form.addExpansionPanel(STR("WidgetInformation"))
     line = infoPanel:addLine(STR("WidgetVersion"))
     form.addStaticText(line, nil, STR("ScriptName") .. " v" .. version)
-
-    if isEmpty then
-        panel:open(false)
-        if choice and count > 0 then choice:focus() end-- we need to give the focus to a field otherwise the Reset makes the form to loose the focus
-    end
 end
 
 -- **************************************************************************************
