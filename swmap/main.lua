@@ -339,22 +339,7 @@ end
 -- ***                               WakeUp handler                                   ***
 -- **************************************************************************************
 --
-local function wakeup(widget)
-    if not lcd.isVisible() then return end -- widget does nothing if in the background
-    local w, h = lcd.getWindowSize()
-    -- detects if layout has changed
-    if w ~= widget.windowWidth or h ~= widget.windowHeight then
-        widget.windowWidth = w
-        widget.windowHeight = h
-        widget.radio = nil
-    end
-    -- load once the radio definition
-    if widget.radio == nil then
-        if debug_mode then print('wakeup : load radio definition') end
-        widget.radio = loadRadioDefinition(sys.board, w, h) -- false|table
-        lcd.invalidate()
-    end
-end
+
 
 -- **************************************************************************************
 -- ***		     "display handler"					                                  ***
@@ -369,8 +354,19 @@ local function paint(widget)
     -- hide focus color
     lcd.color(lcd.darkMode() and lcd.RGB(0x10, 0x10, 0x10) or lcd.RGB(0xd6, 0xd2, 0xd6)) -- mimics Hardware Checks Page
     lcd.drawFilledRectangle(0, 0, w, h)
-
-    if not widget.radio then
+    -- detects if layout has changed
+    if w ~= widget.windowWidth or h ~= widget.windowHeight then
+        widget.windowWidth = w
+        widget.windowHeight = h
+        widget.radio = nil
+    end
+    -- load once the radio definition
+    if widget.radio == nil then
+        if debug_mode then print('wakeup : load radio definition') end
+        widget.radio = loadRadioDefinition(sys.board, w, h) -- false|table
+    end
+    -- alert if non supported definition
+    if widget.radio == false then
         lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
         lcd.drawText( 5, 30, string.format("%sx%s : unsupported widget size for %s, Try Full Screen", w, h, sys.board))
         return
@@ -718,7 +714,7 @@ end
 -- **************************************************************************************
 --
 local function init()
-    system.registerWidget({key="swmap", name=name, create=create, wakeup=wakeup, paint=paint, configure=configure, read=read, write=write, event=event, title=false})
+    system.registerWidget({key="swmap", name=name, create=create, paint=paint, configure=configure, read=read, write=write, event=event, title=false})
 end
 
 
