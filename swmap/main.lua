@@ -411,8 +411,23 @@ local function configure(widget)
             if isFirst == nil then textField:focus() isFirst = false end
         end
     end
+    local fullScreenPanel = form.addExpansionPanel(STR("FullScreenOptions"))
+    line = fullScreenPanel:addLine(STR("DisplayModelName"))
+    form.addBooleanField(line, nil, function() return widget.DisplayModelName end, function(value) widget.DisplayModelName = value end)
+    line = fullScreenPanel:addLine(STR("DisplayVersion"))
+    form.addBooleanField(line, nil, function() return widget.DisplayVersion end, function(value) widget.DisplayVersion = value end)
+    line = fullScreenPanel:addLine(STR("Note1"))
+    form.addTextField(line, nil, function() return widget.Note1 end, function(value) widget.Note1 = value end)
+    line = fullScreenPanel:addLine(STR("Note2"))
+    form.addTextField(line, nil, function() return widget.Note2 end, function(value) widget.Note2 = value end)
+    line = fullScreenPanel:addLine(STR("NoteColor"))
+    form.addColorField(line, nil,
+        function() return widget.NoteColor  or getDefaultTextColor() end,
+        function(value) widget.NoteColor = value ~= getDefaultTextColor() and value or nil end)
+
     if count == 0 and isEmpty then
         panel:open(false)
+        fullScreenPanel:open(false)
         line = form.addLine(STR("ExampleLine"))
         form.addButton(line, nil, {text=STR('ExampleButton'), press=function()
             loadExample()
@@ -449,22 +464,9 @@ local function configure(widget)
     end
     if isEmpty then
         panel:open(false)
+        fullScreenPanel:open(false)
         if choice and count > 0 then choice:focus() end-- we need to give the focus to a field otherwise the Reset makes the form to loose the focus
     end
-
-    local fullScreenPanel = form.addExpansionPanel(STR("FullScreenOptions"))
-    line = fullScreenPanel:addLine(STR("DisplayModelName"))
-    form.addBooleanField(line, nil, function() return widget.DisplayModelName end, function(value) widget.DisplayModelName = value end)
-    line = fullScreenPanel:addLine(STR("DisplayVersion"))
-    form.addBooleanField(line, nil, function() return widget.DisplayVersion end, function(value) widget.DisplayVersion = value end)
-    line = fullScreenPanel:addLine(STR("Note1"))
-    form.addTextField(line, nil, function() return widget.Note1 end, function(value) widget.Note1 = value end)
-    line = fullScreenPanel:addLine(STR("Note2"))
-    form.addTextField(line, nil, function() return widget.Note2 end, function(value) widget.Note2 = value end)
-    line = fullScreenPanel:addLine(STR("NoteColor"))
-    form.addColorField(line, nil,
-        function() return widget.NoteColor  or getDefaultTextColor() end,
-        function(value) widget.NoteColor = value ~= getDefaultTextColor() and value or nil end)
 
     local infoPanel = form.addExpansionPanel(STR("WidgetInformation"))
     line = infoPanel:addLine(STR("WidgetVersion"))
