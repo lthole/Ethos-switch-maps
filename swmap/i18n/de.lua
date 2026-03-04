@@ -49,7 +49,7 @@ return {
   ExampleButton="Beispiel laden",
   Focus="FOCUS",
   WidgetVersion="Widget-Version",
-  NoteColor="inweisfarbe",
+  NoteColor="Hinweisfarbe",
   Note1="Hinweis 1",
   Note2="Hinweis 2",
   DisplayVersion="Skriptversion anzeigen?",
