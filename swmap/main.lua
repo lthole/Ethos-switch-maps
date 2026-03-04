@@ -112,10 +112,12 @@ local function getRadioId(board)
     else return 'X20' end
 end
 
----gives the resolutions supported by a radio
+---checks if resolution is supported for the given board
 ---@param board string a board returned by sys.board
----@return table
-local function radioSupportedResolutions(board)
+---@param w integer the window with
+---@param h integer the window height
+---@return boolean
+local function isResolutionSupported(board, w, h)
     local supported = {
         ["X20PRO"]={{800,480}, {784, 316}},
         ["X20R"]={{800,480}, {784, 316}},
@@ -123,25 +125,14 @@ local function radioSupportedResolutions(board)
         ["X20"]={{800,480}, {784, 316}},
     }
     local radioId = getRadioId(board)
-    if debug_mode then print(string.format("Board: %s, RadioId: %s", board, radioId)) end
-    if not supported[radioId] then return {} end
-    return supported[radioId]
-end
-
----checks if resolution is supported for the given board
----@param board string a board returned by sys.board
----@param w integer the window with
----@param h integer the window height
----@return boolean
-local function isResolutionSupported(board, w, h)
-    local resolutions = radioSupportedResolutions(board)
+    local resolutions = supported[radioId] or {}
     for _, def in pairs(resolutions) do
         if w == def[1] and h == def[2] then
-            if debug_mode then print(string.format("Board: %s, resolution %sx%s is supported", board, w, h)) end
+            if debug_mode then print(string.format("Board: %s (RadioId: %s), resolution %sx%s is supported", board, radioId, w, h)) end
             return true
         end
     end
-    if debug_mode then print(string.format("Board: %s, resolution %sx%s not supported", board, w, h)) end
+    if debug_mode then print(string.format("Board: %s (RadioId: %s), resolution %sx%s not supported", board, radioId, w, h)) end
     return false
 end
 
@@ -324,7 +315,7 @@ local function create()
         Note2="",
         NoteColor=defaultTextColor(),
         --- others
-        windowWidth =nil, -- to detect screen layout change
+        windowWidth =nil, -- set by build method
         windowHeight =nil,
         curposx=0, -- cursor x position in simulator
         curposy=0,-- cursor y position in simulator
@@ -339,22 +330,7 @@ end
 -- ***                               WakeUp handler                                   ***
 -- **************************************************************************************
 --
-local function wakeup(widget)
-    if not lcd.isVisible() then return end -- widget does nothing if in the background
-    local w, h = lcd.getWindowSize()
-    -- detects if layout has changed
-    if w ~= widget.windowWidth or h ~= widget.windowHeight then
-        widget.windowWidth = w
-        widget.windowHeight = h
-        widget.radio = nil
-    end
-    -- load once the radio definition
-    if widget.radio == nil then
-        if debug_mode then print('wakeup : load radio definition') end
-        widget.radio = loadRadioDefinition(sys.board, w, h) -- false|table
-        lcd.invalidate()
-    end
-end
+
 
 -- **************************************************************************************
 -- ***		     "display handler"					                                  ***
@@ -364,13 +340,25 @@ end
 --
 local function paint(widget)
     local timestamp = os.clock()
-    local w, h = lcd.getWindowSize()
+    local w, h = widget.windowWidth, widget.windowHeight
 
     -- hide focus color
     lcd.color(lcd.darkMode() and lcd.RGB(0x10, 0x10, 0x10) or lcd.RGB(0xd6, 0xd2, 0xd6)) -- mimics Hardware Checks Page
     lcd.drawFilledRectangle(0, 0, w, h)
 
-    if not widget.radio then
+    -- if w ~= widget.windowWidth or h ~= widget.windowHeight then
+    --     if debug_mode then print('paint : layout change detected') end
+    --     widget.windowWidth = w
+    --     widget.windowHeight = h
+    --     widget.radio = nil
+    -- end
+    -- load once the radio definition
+    if widget.radio == nil then
+        if debug_mode then print('paint : load radio definition') end
+        widget.radio = loadRadioDefinition(sys.board, w, h) -- false|table
+    end
+    -- alert if non supported definition
+    if widget.radio == false then
         lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
         lcd.drawText( 5, 30, string.format("%sx%s : unsupported widget size for %s, Try Full Screen", w, h, sys.board))
         return
@@ -449,10 +437,10 @@ local function paint(widget)
         end
         lcd.color(type(widget.NoteColor) == "function" and widget.NoteColor() or widget.NoteColor)
         lcd.font(FONT_S)
-        if widget.Note1 then
+        if widget.Note1 and widget.Note1 ~= "" then
             addLegend(widget.Note1, "", {{5,450,select(1, lcd.getTextSize(widget.Note1)) + 5,450}})
         end
-        if widget.Note1 then
+        if widget.Note2 and widget.Note2 ~= "" then
             addLegend(widget.Note2, "", {{5,470,select(1, lcd.getTextSize(widget.Note2)) + 5,470}})
         end
     elseif lcd.hasFocus() then
@@ -549,21 +537,10 @@ local function configure(widget)
         end
         return choices, indexes
     end
-    local radioDefinition
     if widget.radio == nil then
         -- handles the case when we call configure from the screens page without having display the widget
-        if debug_mode then print("Configure : no radio definition found, loading a default") end
-        local resolutions = radioSupportedResolutions(sys.board)
-        if #resolutions < 1 then
-            -- unsupported radio (unimplemented as we always return a default radio)
-            if debug_mode then warn("Configure : unsupported radio is not implemented") end
-        else
-            -- get the first radio definition to use something for the switches
-            radioDefinition = loadRadioDefinition(sys.board, table.unpack(resolutions[1]))
-        end
-    else
-        -- handles normal case
-        radioDefinition = widget.radio
+        if debug_mode then print("Configure : no radio definition found") end
+        widget.radio = loadRadioDefinition(sys.board, widget.windowWidth, widget.windowHeight)
     end
     local line, slots, choice, panel
     local configChoices, configIndexes = buildChoices()
@@ -581,7 +558,7 @@ local function configure(widget)
     panel = form.addExpansionPanel(STR("SwitchExpansionTitle"))
     local isFirst
     for _, k in pairs(radioSwitches) do
-        if radioDefinition and radioDefinition[k] and radioDefinition[k]["lines"] then -- no lines means no legend or disabled switch
+        if widget.radio and widget.radio[k] and widget.radio[k]["lines"] then -- no lines means no legend or disabled switch
             line = panel:addLine(STR(k.."text"))
             local textField = form.addTextField(line, nil, function() return widget[k] or "" end, function(value) widget[k] = value end)
             if isFirst == nil then textField:focus() isFirst = false end
@@ -590,7 +567,7 @@ local function configure(widget)
     if count == 0 and isEmpty then
         panel:open(false)
         line = form.addLine(STR("ExampleLine"))
-        form.addTextButton(line, nil, STR('ExampleButton'), function()
+        form.addButton(line, nil, {text=STR('ExampleButton')}, function()
             loadExample()
             model.dirty()
             form.clear()
@@ -611,7 +588,7 @@ local function configure(widget)
             choice:title(STR("TemplateChoiceTitle"))
         end
 
-        form.addTextButton(line, slots[2], STR("Reset"), function()
+        form.addButton(line, slots[2], {text=STR("Reset")}, function()
             form.openDialog({
                 title=string.format(STR("ConfirmDialogTitle")),
                 message=STR("ResetConfirmMessage"),
@@ -621,9 +598,13 @@ local function configure(widget)
                 },
                 options=TEXT_LEFT
             })
-            end
-        )
+        end)
     end
+    if isEmpty then
+        panel:open(false)
+        if choice and count > 0 then choice:focus() end-- we need to give the focus to a field otherwise the Reset makes the form to loose the focus
+    end
+
     local fullScreenPanel = form.addExpansionPanel(STR("FullScreenOptions"))
     line = fullScreenPanel:addLine(STR("DisplayModelName"))
     form.addBooleanField(line, nil, function() return widget.DisplayModelName end, function(value) widget.DisplayModelName = value end)
@@ -639,11 +620,6 @@ local function configure(widget)
     local infoPanel = form.addExpansionPanel(STR("WidgetInformation"))
     line = infoPanel:addLine(STR("WidgetVersion"))
     form.addStaticText(line, nil, STR("ScriptName") .. " v" .. version)
-
-    if isEmpty then
-        panel:open(false)
-        if choice and count > 0 then choice:focus() end-- we need to give the focus to a field otherwise the Reset makes the form to loose the focus
-    end
 end
 
 -- **************************************************************************************
@@ -710,6 +686,17 @@ local function write(widget)
     f = nil -- TODO is it useful ?
 end
 
+-- build method is called once after create and on layout change
+local function build(widget)
+    -- here we set the widget width and height as we need them in configure
+    -- in the case we call configure from Screens without having display the widget yet
+    if debug_mode then print("Build called") end
+    local w, h = lcd.getWindowSize()
+    widget.windowWidth = w
+    widget.windowHeight = h
+    widget.radio = nil
+end
+
 -- **************************************************************************************
 -- ***		     init widget		 	   		                                      ***
 -- This handler is called during the transmitter's boot process.                      ***
@@ -718,7 +705,7 @@ end
 -- **************************************************************************************
 --
 local function init()
-    system.registerWidget({key="swmap", name=name, create=create, wakeup=wakeup, paint=paint, configure=configure, read=read, write=write, event=event, title=false})
+    system.registerWidget({key="swmap", name=name, build=build, create=create, paint=paint, configure=configure, read=read, write=write, event=event, title=false})
 end
 
 
