@@ -586,7 +586,7 @@ local function configure(widget)
     if count == 0 and isEmpty then
         panel:open(false)
         line = form.addLine(STR("ExampleLine"))
-        form.addTextButton(line, nil, STR('ExampleButton'), function()
+        form.addButton(line, nil, {text=STR('ExampleButton')}, function()
             loadExample()
             model.dirty()
             form.clear()
@@ -607,7 +607,7 @@ local function configure(widget)
             choice:title(STR("TemplateChoiceTitle"))
         end
 
-        form.addTextButton(line, slots[2], STR("Reset"), function()
+        form.addButton(line, slots[2], {text=STR("Reset")}, function()
             form.openDialog({
                 title=string.format(STR("ConfirmDialogTitle")),
                 message=STR("ResetConfirmMessage"),
