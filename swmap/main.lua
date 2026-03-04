@@ -356,13 +356,14 @@ local function paint(widget)
     lcd.drawFilledRectangle(0, 0, w, h)
     -- detects if layout has changed
     if w ~= widget.windowWidth or h ~= widget.windowHeight then
+        if debug_mode then print('paint : layout change detected') end
         widget.windowWidth = w
         widget.windowHeight = h
         widget.radio = nil
     end
     -- load once the radio definition
     if widget.radio == nil then
-        if debug_mode then print('wakeup : load radio definition') end
+        if debug_mode then print('paint : load radio definition') end
         widget.radio = loadRadioDefinition(sys.board, w, h) -- false|table
     end
     -- alert if non supported definition
