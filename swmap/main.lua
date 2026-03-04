@@ -370,9 +370,10 @@ local function paint(widget)
     lcd.color(lcd.darkMode() and lcd.RGB(0x10, 0x10, 0x10) or lcd.RGB(0xd6, 0xd2, 0xd6)) -- mimics Hardware Checks Page
     lcd.drawFilledRectangle(0, 0, w, h)
 
-    if not widget.radio then
+    if widget.radio == false then
         lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
-        lcd.drawText( 5, 30, string.format("%sx%s : unsupported widget size for %s, Try Full Screen", w, h, sys.board))
+        if debug_mode then print("paint: unsupported size %sx%s for %s", w, h, sys.board) end
+        lcd.drawText( 5, 30, string.format("%sx%s : unsupported size for %s, Try Full Screen", w, h, sys.board))
         return
     end
 
@@ -710,6 +711,13 @@ local function write(widget)
     f = nil -- TODO is it useful ?
 end
 
+local function build(widget)
+    local w,h = lcd.getWindowSize()
+    if widget and widget.radio == nil then
+        if debug_mode then print('build : load radio definition') end
+        widget.radio = loadRadioDefinition(sys.board, w, h) -- false|table
+    end
+end
 -- **************************************************************************************
 -- ***		     init widget		 	   		                                      ***
 -- This handler is called during the transmitter's boot process.                      ***
