@@ -445,10 +445,10 @@ local function paint(widget)
         end
         lcd.color(type(widget.NoteColor) == "function" and widget.NoteColor() or widget.NoteColor)
         lcd.font(FONT_S)
-        if widget.Note1 then
+        if widget.Note1 and widget.Note1 ~= "" then
             addLegend(widget.Note1, "", {{5,450,select(1, lcd.getTextSize(widget.Note1)) + 5,450}})
         end
-        if widget.Note1 then
+        if widget.Note2 and widget.Note2 ~= "" then
             addLegend(widget.Note2, "", {{5,470,select(1, lcd.getTextSize(widget.Note2)) + 5,470}})
         end
     elseif lcd.hasFocus() then
