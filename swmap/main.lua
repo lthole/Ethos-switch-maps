@@ -386,7 +386,7 @@ local function paint(widget)
             if not align and x >= w/2 then align = TEXT_RIGHT end
             local labelOffsetX = 0
             if widget.DisplaySwitchNames and prefix and prefix ~= "" then
-                lcd.font(FONT_S_BOLD)
+                lcd.font(FONT_S_BOLD and FONT_S_BOLD or FONT_S)
                 local pw = lcd.getTextSize(prefix .." ")
                 if align == TEXT_RIGHT then
                     lcd.drawText(x, y - (offset and offset or textOffsetY), prefix, align)
@@ -424,7 +424,7 @@ local function paint(widget)
     -- display some goodies
     --
     if sys.simulation==true and debug_mode then
-        lcd.font(FONT_S_BOLD)
+        lcd.font(FONT_S_BOLD and FONT_S_BOLD or FONT_S)
         lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
         if isFullScreen(w, h) then
             lcd.drawText(18, 5,widget.curposx..", "..widget.curposy)
@@ -437,7 +437,7 @@ local function paint(widget)
     end
     if isFullScreen(w, h) then
         if widget.DisplayModelName then
-            lcd.font(FONT_L_BOLD)
+            lcd.font(FONT_L_BOLD and FONT_L_BOLD or FONT_L)
             lcd.color(type(widget.TextColor) == "function" and widget.TextColor() or widget.TextColor)
             lcd.drawText(18, 21, model.name())
         end
