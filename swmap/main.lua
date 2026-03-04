@@ -341,12 +341,13 @@ local function configure(widget)
     local isEmpty = _checkIfEmpty() -- cache
 
     local function loadTemplate(basename)
-        if not basename then
-            local config = create()
-            for k,v in pairs(config) do
-                widget[k] = v
-            end
-        else
+        -- reset all to default
+        local config = create()
+        for k,v in pairs(config) do
+            widget[k] = v
+        end
+        -- then load
+        if basename then
             local config = readConfiguration(basename)
             if config then
                 for k, v in pairs(config) do
