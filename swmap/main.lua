@@ -414,12 +414,12 @@ local function configure(widget)
     if count == 0 and isEmpty then
         panel:open(false)
         line = form.addLine(STR("ExampleLine"))
-        form.addButton(line, nil, {text=STR('ExampleButton')}, function()
+        form.addButton(line, nil, {text=STR('ExampleButton'), press=function()
             loadExample()
             model.dirty()
             form.clear()
             configure(widget)
-        end):focus()
+        end}):focus()
     else
         line = form.addLine(count > 0 and STR("LoadPreset") or "")
         slots = form.getFieldSlots(line, {0, 100})
@@ -435,7 +435,7 @@ local function configure(widget)
             choice:title(STR("TemplateChoiceTitle"))
         end
 
-        form.addButton(line, slots[2], {text=STR("Reset")}, function()
+        form.addButton(line, slots[2], {text=STR("Reset"), press=function()
             form.openDialog({
                 title=string.format(STR("ConfirmDialogTitle")),
                 message=STR("ResetConfirmMessage"),
@@ -445,7 +445,7 @@ local function configure(widget)
                 },
                 options=TEXT_LEFT
             })
-        end)
+        end})
     end
     if isEmpty then
         panel:open(false)
