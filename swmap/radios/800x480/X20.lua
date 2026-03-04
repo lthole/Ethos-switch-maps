@@ -6,60 +6,66 @@
   in lines the first two points of the first line are the text coordinates
   you must draw the lines from the left if switch is on the left and vice versa
 ]]
+
+-- lines represents the lines of the legend, type nil|table
+-- draw represents the drawing of controls type nil|function
+
 return {
     ["S1"] = {
-        ["lines"]={{243,89,384,89}, {353,89,353,160}},
-        ["draw"]=function () lcd.drawCircle(353,181, 20) end,
+        ["lines"]={{384, 111, 264, 111}, {353,111,353,160}},
+        ["draw"]=function () drawPot(353,181, 20) end,
+        ["align"]=TEXT_RIGHT
     },
     ["S2"] = {
-        ["lines"]={{560, 89, 419, 89}, {449,89,449,160}},
-        ["draw"]=function () lcd.drawCircle(449,181, 20) end,
+        ["lines"]={{416, 111, 536, 111}, {447,111,447,160}},
+        ["draw"]=function () drawPot(447,181, 20) end,
+        ["align"]=TEXT_LEFT
     },
     ["S3"] = {
-        ["lines"]={{400, 428, 460,428},{400,387,400,428}, {340,428,440,428}},
-        ["draw"]=function () lcd.drawLine(400,290,400,387) lcd.drawLine(390,340,410,340) end,
+        ["lines"]={{400, 412, 460,412},{400,387,400,412}, {340,412,440,412}},
+        ["draw"]=function () drawSlider(395,290,10,97) end,
         ["offset"]= -2,
         ["align"]=TEXT_CENTERED
     },
     ["SA"] = {
-        ["lines"]={{5,185,94,185}, {94,185,118,161}},
-        ["draw"]=function() lcd.drawCircle(118,161,12) end,
+        ["lines"]={{5,185,177,185}, {177,185,195,163}},
+        ["draw"]=function() drawButton3Pos(195,150,12) end,
     },
     ["SB"] = {
-        ["lines"]={{5,137,144,137}, {144,137,168,161}},
-        ["draw"]=function () lcd.drawCircle(168,161, 12) end,
+        ["lines"]={{5,132,233,132}, {233,132,240,145}},
+        ["draw"]=function () drawButton3Pos(252, 150, 12) end,
     },
     ["SC"] = {
-        ["lines"]={{795,137,656,137}, {656,137,632,161}},
-        ["draw"]=function () lcd.drawCircle(632,161, 12) end,
+        ["lines"]={{795,132,567,132}, {567,132,560,145}},
+        ["draw"]=function () drawButton3Pos(548,150, 12) end,
     },
     ["SD"] = {
-        ["lines"]={{795,185,706,185}, {706,185,682,161}},
-        ["draw"]=function () lcd.drawCircle(683,161, 12) end,
+        ["lines"]={{795,185,623,185}, {623,185,605,163}},
+        ["draw"]=function () drawButton3Pos(605,150, 12) end,
     },
     ["SE"] = {
-        ["lines"]={{5,113,145,113}},
-        ["draw"]=function () lcd.drawCircle(145,113, 12) end,
+        ["lines"]={{5,111,209,111}},
+        ["draw"]=function () drawButton3Pos(220,116, 12) end,
     },
     ["SF"] = {
-        ["lines"]={{5,89,196,89}},
-        ["draw"]=function () lcd.drawCircle(196,89, 12) end,
+        ["lines"]={{5,89,236,89}},
+        ["draw"]=function () drawButton2Pos(248, 89, 12) end,
     },
     ["SG"] = {
-        ["lines"]={{795,113,656,113}},
-        ["draw"]=function () lcd.drawCircle(656,113, 12) end,
+        ["lines"]={{795,111,591,111}},
+        ["draw"]=function () drawButton3Pos(580, 116, 12) end,
     },
     ["SH"] = {
-        ["lines"]={{795,89,602,89}},
-        ["draw"]=function () lcd.drawCircle(602,89, 12) end,
+        ["lines"]={{795,89,564,89}},
+        ["draw"]=function () drawButton2Pos(552, 89, 12) end,
     },
     ["SI"] = {
-        ["lines"]={{5,240,100,240}},
-        ["draw"]=function () lcd.drawCircle(100,240, 8) end,
+        ["lines"]={{5,240,111,240}},
+        ["draw"]=function () drawButton1Pos(111,240, 8) end,
     },
     ["SJ"] = {
-        ["lines"]={{795,240,700,240}},
-        ["draw"]=function () lcd.drawCircle(700,240, 8) end,
+        ["lines"]={{795,240,689,240}},
+        ["draw"]=function () drawButton1Pos(689,240, 8) end,
     },
     ["SK"] = {
         ["lines"]=nil,
@@ -71,51 +77,51 @@ return {
     },
     ["FS1"] = {
         ["lines"]={{5,356,315,356}},
-        ["draw"]=function() lcd.drawCircle(316,356, 10) end
+        ["draw"]=function() drawButton1Pos(316,356, 10) end
     },
     ["FS2"] = {
         ["lines"]={{5,380,333,380}},
-        ["draw"]=function() lcd.drawCircle(333,380, 10) end
+        ["draw"]=function() drawButton1Pos(333,380, 10) end
     },
     ["FS3"] = {
         ["lines"]={{5,404,315,404}},
-        ["draw"]=function() lcd.drawCircle(316,404, 10) end
+        ["draw"]=function() drawButton1Pos(316,404, 10) end
     },
     ["FS4"] = {
         ["lines"]={{795,356,485,356}},
-        ["draw"]=function() lcd.drawCircle(485,356, 10) end
+        ["draw"]=function() drawButton1Pos(485,356, 10) end
     },
     ["FS5"] = {
         ["lines"]={{795,380,467,380}},
-        ["draw"]=function() lcd.drawCircle(467,380, 10) end
+        ["draw"]=function() drawButton1Pos(467,380, 10) end
     },
     ["FS6"] = {
         ["lines"]={{795,404,485,404}},
-        ["draw"]=function() lcd.drawCircle(485,404, 10) end
+        ["draw"]=function() drawButton1Pos(485,404, 10) end
     },
     ["LS"] = {
         ["lines"]={{5,216,114,216}, {114,216,138,240}},
-        ["draw"]=function() lcd.drawAnnulusSector(180, 240, 43, 44, 230, 310) lcd.drawLine(130,240,146,240) end
+        ["draw"]=function() drawCurvedSlider(180, 240, 34, 44, 230, 310) end
     },
     ["RS"] = {
         ["lines"]={{795,216,686,216}, {686,216,662,240}},
-        ["draw"]=function() lcd.drawAnnulusSector(618, 240, 43, 44, 50, 130) lcd.drawLine(652,240,668,240) end
+        ["draw"]=function() drawCurvedSlider(618, 240, 34, 44, 50, 130) end
     },
     ["T1"] = {
         ["lines"]={{795,307,488,307}},
-        ["draw"]=function() lcd.drawRectangle(451,299, 40, 16) lcd.drawLine(471,299,471,314) end
+        ["draw"]=function() drawTrim(451,299, 40, 16) end
     },
     ["T2"] = {
         ["lines"]={{795,283,479,283}, {479,283,460,264}},
-        ["draw"]=function() lcd.drawRectangle(451,227, 16, 40) lcd.drawLine(451,247,466,247) end
+        ["draw"]=function() drawTrim(451,227, 16, 40) end
     },
     ["T3"] = {
         ["lines"]={{5,283,319,283}, {319,283,338,264}},
-        ["draw"]=function() lcd.drawRectangle(331,227, 16, 40) lcd.drawLine(331,247,346,247) end
+        ["draw"]=function() drawTrim(331,227, 16, 40) end
     },
     ["T4"] = {
         ["lines"]={{5,307,312,307}},
-        ["draw"]=function() lcd.drawRectangle(306,299, 40, 16) lcd.drawLine(326,299,326,314) end
+        ["draw"]=function() drawTrim(306,299, 40, 16) end
     },
     ["T5"] = {
         ["lines"]=nil,
@@ -125,10 +131,10 @@ return {
         ["lines"]=nil,
         ["draw"]=function() end
     },
-    ["_LH STICK"]={
-        ["draw"]=function() lcd.drawCircle(242,241, 74) lcd.drawCircle(242,241, 10) end
+    ["LH STICK"]={
+        ["draw"]=function() drawStick(242,241, 74) end
     },
-    ["_RH STICK"]={
-        ["draw"]=function() lcd.drawCircle(559,241, 74) lcd.drawCircle(559,241, 10) end
+    ["RH STICK"]={
+        ["draw"]=function() drawStick(559, 241, 74) end
     },
 }
