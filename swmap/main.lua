@@ -40,12 +40,14 @@ local sys = system.getVersion()
 local debug_mode=false -- sys.simulation or true or false only
 if debug_mode then print("SWMAP Debug MODE ON") end
 
-local defaultTextColor = function() return lcd.darkMode() and lcd.RGB(0, 0xFF, 0xFF) or lcd.RGB(0x58, 0x5C, 0x58) end
+local defaultTextColorDark = lcd.RGB(0, 0xFF, 0xFF)
+local defaultTextColorLight = lcd.RGB(0x58, 0x5C, 0x58)
+local getDefaultTextColor = function() return lcd.darkMode() and defaultTextColorDark or defaultTextColorLight end
 
 -- Colors used to mimic Hardware Checks Page
 local GRAY_DARK = lcd.RGB(0x31, 0x31, 0x31)
 local GRAY_LIGHT = lcd.RGB(0x52, 0x51, 0x52)
-local getSwInactiveColor = function() return lcd.darkMode() and lcd.RGB(0x21, 0x20, 0x21) or lcd.RGB(0xf7, 0xf3, 0xf7) end
+local inactiveSwitchColor -- depends on theme (light/dark) set in build
 
 local configurationPath="SCRIPTS:/swmap/models/"
 
@@ -82,16 +84,16 @@ local function readConfiguration(basename)
     local chunk = loadfile(getConfigurationFilePath(basename), "bt", {lcd=lcd})-- load the config file passing only the lcd global variable
     if chunk then
         local data = chunk()
-        config.DisplayAll = data.DisplayAll
-        config.DisplaySwitchNames = data.DisplaySwitchNames
-        config.TextColor=data.TextColor and data.TextColor or defaultTextColor()
-        config.DisplayVersion=data.DisplayVersion
-        config.DisplayModelName=data.DisplayModelName
-        config.Note1=data.Note1
-        config.Note2=data.Note2
-        config.NoteColor=data.NoteColor and data.NoteColor or defaultTextColor()
+        if data.DisplayAll ~= nil then config.DisplayAll = data.DisplayAll end
+        if data.DisplaySwitchNames ~= nil then config.DisplaySwitchNames = data.DisplaySwitchNames end
+        if data.TextColor ~= nil then config.TextColor = data.TextColor end
+        if data.DisplayVersion ~= nil then config.DisplayVersion = data.DisplayVersion end
+        if data.DisplayModelName ~= nil then config.DisplayModelName = data.DisplayModelName end
+        if data.Note1 ~= nil then config.Note1 = data.Note1 end
+        if data.Note2 ~= nil then config.Note2 = data.Note2 end
+        if data.NoteColor ~= nil then config.NoteColor = data.NoteColor end
         for _, key in pairs(radioSwitches) do
-            config[key] = data[key.."text"]
+            if data[key.."text"] ~= nil then config[key] = data[key.."text"] end
         end
         return config
     else
@@ -112,10 +114,12 @@ local function getRadioId(board)
     else return 'X20' end
 end
 
----gives the resolutions supported by a radio
+---checks if resolution is supported for the given board
 ---@param board string a board returned by sys.board
----@return table
-local function radioSupportedResolutions(board)
+---@param w integer the window with
+---@param h integer the window height
+---@return boolean
+local function isResolutionSupported(board, w, h)
     local supported = {
         ["X20PRO"]={{800,480}, {784, 316}},
         ["X20R"]={{800,480}, {784, 316}},
@@ -123,32 +127,430 @@ local function radioSupportedResolutions(board)
         ["X20"]={{800,480}, {784, 316}},
     }
     local radioId = getRadioId(board)
-    if debug_mode then print(string.format("Board: %s, RadioId: %s", board, radioId)) end
-    if not supported[radioId] then return {} end
-    return supported[radioId]
-end
-
----checks if resolution is supported for the given board
----@param board string a board returned by sys.board
----@param w integer the window with
----@param h integer the window height
----@return boolean
-local function isResolutionSupported(board, w, h)
-    local resolutions = radioSupportedResolutions(board)
+    local resolutions = supported[radioId] or {}
     for _, def in pairs(resolutions) do
         if w == def[1] and h == def[2] then
-            if debug_mode then print(string.format("Board: %s, resolution %sx%s is supported", board, w, h)) end
+            if debug_mode then print(string.format("Board: %s (RadioId: %s), resolution %sx%s is supported", board, radioId, w, h)) end
             return true
         end
     end
-    if debug_mode then print(string.format("Board: %s, resolution %sx%s not supported", board, w, h)) end
+    if debug_mode then print(string.format("Board: %s (RadioId: %s), resolution %sx%s not supported", board, radioId, w, h)) end
     return false
 end
 
+--define function for retrieving translations from translation files
+local STR = assert(loadfile("i18n/i18n.lua"))().translate
+
+-- **************************************************************************************
+-- ***		     name widget					                                      ***
+-- **************************************************************************************
+
+local function name()		-- name script, appears in widget selection list
+  return STR("ScriptName")
+end
+
+
+
+-- **************************************************************************************
+-- ***		    startup (onetime) handler		                                      ***
+-- ***	         returns widget vars			                                      ***
+-- *** The create handler is executed the first time the script is called, for        ***
+-- *** example, when the screen of a widget is activated for the first time.          ***
+-- *** time. In the create handler, the "central data structure" or an array is       ***
+-- *** typically defined, which can be passed to other handlers.                      ***
+-- *** This data structure must be defined as the return value of the handler.        ***
+-- ***                                                                                ***
+-- *** NON STANDARD: create is also called when we reset template in configure method ***
+-- **************************************************************************************
+--
+local function create()
+    if debug_mode then print("create called") end
+    local widget = {
+        DisplayAll=true,
+        DisplaySwitchNames=true,
+        TextColor=nil,
+        DisplayVersion=true,
+        DisplayModelName=true,
+        Note1="",
+        Note2="",
+        NoteColor=nil,
+    }
+    for _, k in pairs(radioSwitches) do
+        widget[k] = ""
+    end
+    if sys.simulation then
+        widget.curposx = 0
+        widget.curposy = 0
+    end
+    return widget
+end
+
+-- **************************************************************************************
+-- ***                               WakeUp handler                                   ***
+-- **************************************************************************************
+--
+
+
+-- **************************************************************************************
+-- ***		     "display handler"					                                  ***
+-- *** The paint handler is responsible for graphical representations in a script,    ***
+-- *** therefore only necessary in scripts that display something on the screen.      ***
+-- **************************************************************************************
+--
+local function paint(widget)
+    local timestamp = os.clock()
+    local w, h = lcd.getWindowSize()
+
+    -- hide focus color
+    lcd.color(lcd.darkMode() and lcd.RGB(0x10, 0x10, 0x10) or lcd.RGB(0xd6, 0xd2, 0xd6)) -- mimics Hardware Checks Page
+    lcd.drawFilledRectangle(0, 0, w, h)
+
+    -- alert if non supported definition
+    if widget.radio == false then
+        lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
+        lcd.drawText( 5, 30, string.format("%sx%s : unsupported widget size for %s, Try Full Screen", w, h, sys.board))
+        return
+    end
+
+    lcd.font(FONT_S)
+    local _, textOffsetY = lcd.getTextSize("") -- the legend is by default textOffset above the line
+    local function addLegend(label, prefix, lines, align, offset)
+        if widget.DisplayAll or label ~= "" then
+            local x = lines[1][1]
+            local y = lines[1][2]
+            if not align and x < w/2 then align = TEXT_LEFT end
+            if not align and x >= w/2 then align = TEXT_RIGHT end
+            local labelOffsetX = 0
+            if widget.DisplaySwitchNames and prefix and prefix ~= "" then
+                lcd.font(FONT_S_BOLD and FONT_S_BOLD or FONT_S)
+                local pw = lcd.getTextSize(prefix .." ")
+                if align == TEXT_RIGHT then
+                    lcd.drawText(x, y - (offset and offset or textOffsetY), prefix, align)
+                    labelOffsetX =  pw
+                elseif align == TEXT_CENTERED then
+                    local lw = lcd.getTextSize(label) -- not UTF8 compatible on ethos < 1.7 but acceptable for one or two accentuated chars (slight misplacement)
+                    lcd.drawText(x - pw/4 -lw/2, y - (offset and offset or textOffsetY), prefix, align)
+                    labelOffsetX = -pw/2
+                else
+                    lcd.drawText(x, y - (offset and offset or textOffsetY), prefix, align)
+                    labelOffsetX = -pw
+                end
+            end
+            lcd.font(FONT_S)
+            lcd.drawText(x - labelOffsetX, y - (offset and offset or textOffsetY), label, align)
+
+            for _,rect in pairs(lines) do
+                lcd.pen(PEN_DASHED)
+                lcd.drawLine(rect[1], rect[2], rect[3], rect[4])
+                lcd.pen(PEN_SOLID)
+            end
+        end
+    end
+    -- first draw controls
+    for _, specs in pairs(widget.radio) do
+        if type(specs["draw"]) == "function" then specs["draw"]() end
+    end
+    -- next legends (on top)
+    for id, specs in pairs(widget.radio) do
+        lcd.color(widget.TextColor or getDefaultTextColor())
+        if specs["lines"] then addLegend(widget[id] or "", id, specs["lines"], specs["align"], specs["offset"]) end
+    end
+
+    --
+    -- display some goodies
+    --
+    if sys.simulation==true and debug_mode then
+        lcd.font(FONT_S_BOLD and FONT_S_BOLD or FONT_S)
+        lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
+        if isFullScreen(w, h) then
+            lcd.drawText(18, 5,widget.curposx..", "..widget.curposy)
+        else
+            lcd.color(lcd.GREY(5, 0.7))
+            lcd.drawFilledRectangle(0, 0, 70, 15)
+            lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
+            lcd.drawText(0, 0,widget.curposx..", "..widget.curposy)
+        end
+    end
+    if isFullScreen(w, h) then
+        if widget.DisplayModelName then
+            lcd.font(FONT_L_BOLD and FONT_L_BOLD or FONT_BOLD)
+            lcd.color(widget.TextColor or getDefaultTextColor())
+            lcd.drawText(18, 21, model.name())
+        end
+        if widget.DisplayVersion then
+            -- show widget information on Full Screen, color based on lcd.hasFocus
+            lcd.font(FONT_XS)
+            lcd.color(lcd.hasFocus() and lcd.themeColor(THEME_FOCUS_COLOR) or lcd.themeColor(14)) -- 14 is the theme color for widget titles
+            lcd.drawText(w - 10, 10, STR("ScriptName")..' v'..version, TEXT_RIGHT)
+        end
+        lcd.color(widget.NoteColor or getDefaultTextColor())
+        lcd.font(FONT_S)
+        if widget.Note1 and widget.Note1 ~= "" then
+            addLegend(widget.Note1, "", {{5,450,select(1, lcd.getTextSize(widget.Note1)) + 5,450}})
+        end
+        if widget.Note2 and widget.Note2 ~= "" then
+            addLegend(widget.Note2, "", {{5,470,select(1, lcd.getTextSize(widget.Note2)) + 5,470}})
+        end
+    elseif lcd.hasFocus() then
+        -- when not in full screen, displays simply FOCUS to give a hint
+        lcd.font(FONT_BOLD)
+        lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
+        lcd.drawText(w/2, h - select(2, lcd.getTextSize("")) - 2, STR("Focus"), TEXT_CENTERED)
+    end
+    if debug_mode then print(string.format("paint time %sms", (os.clock() - timestamp) * 1000)) end
+end
+
+-- **************************************************************************************
+-- ***		     monitor events		 	   		                                      ***
+-- *** This handler is used to process "external events," usually user interventions. ***
+-- *** For example, touching a screen, pressing control buttons (Page Up/Down),       ***
+-- *** scroll wheel, etc.                                                             ***
+-- **************************************************************************************
+--
+-- If using the simulator with debug mode on, clicking the mouse pointer on the screen
+-- will cause the cursor position to be returned to assist with working out line coordinates.
+local function event(widget, category, value, x, y)
+    if sys.simulation==true and debug_mode then
+        if category == EVT_TOUCH and value ~= TOUCH_MOVE then
+            if value == TOUCH_START then
+                widget.curposx=x
+                widget.curposy=y
+                lcd.invalidate()
+            end
+            return true
+        end
+        return false
+    end
+end
+
+
+-- **************************************************************************************
+-- ***		     configure widget	 	   		                                      ***
+-- *** Clicking the widget configure option triggers this handler.                    ***
+-- **************************************************************************************
+--
+local function configure(widget)
+    local function _checkIfEmpty()
+        for _, k in pairs(radioSwitches) do
+            if widget[k] ~= "" then
+                return false
+            end
+        end
+        return true
+    end
+    local isEmpty = _checkIfEmpty() -- cache
+
+    local function loadTemplate(basename)
+        -- reset all to default
+        local config = create()
+        for k,v in pairs(config) do
+            widget[k] = v
+        end
+        -- then load
+        if basename then
+            local config = readConfiguration(basename)
+            if config then
+                for k, v in pairs(config) do
+                    widget[k] = v
+                end
+            end
+        end
+    end
+    local function loadExample()
+        local config = create()
+        config["SA"] = "Stab"
+        config["SB"] = "Call telem"
+        config["SE"] = "FMode"
+        config["SG"] = "Thr arm"
+        config["SH"] = "Thr cancel + SGdn"
+        config["T2"] = "Flap comp/Motor comp"
+        config["T4"] = "Ail diff"
+        config["LS"] = "Thermal camber"
+        config["RS"] = "Throttle"
+        config["S1"] = "Stab gain"
+        config["S2"] = "SL gain"
+        config["S3"] = "Volume"
+        for k,v in pairs(config) do
+            widget[k] = v
+        end
+    end
+    local function buildChoices() -- build a choice list for the form
+        local choices = {} -- choices for the form
+        local indexes = {} -- index to retrieve the basename of the selected file
+        local modelFileName = getConfigurationFilePath():match("[^/]*.lua$") -- current model configuration basename
+        for i,f in pairs(system.listFiles(configurationPath)) do
+            if f:sub(-4) == ".lua" and f ~= modelFileName then
+                table.insert(choices, {f:sub(1, -5), i})
+                indexes[i] = f
+            end
+        end
+        return choices, indexes
+    end
+
+    local line, slots, choice, panel
+    local configChoices, configIndexes = buildChoices()
+    local count = #(configChoices)
+
+    line = form.addLine(STR("DisplayAll"))
+    form.addBooleanField(line, nil, function() return widget.DisplayAll end, function(value) widget.DisplayAll = value end)
+
+    line = form.addLine(STR("DisplaySwitchNames"))
+    form.addBooleanField(line, nil, function() return widget.DisplaySwitchNames end, function(value) widget.DisplaySwitchNames = value end)
+
+    line = form.addLine(STR("TextColor"))
+    form.addColorField(line, nil,
+        function() return widget.TextColor or getDefaultTextColor() end,
+        function(value) widget.TextColor = value ~= getDefaultTextColor() and value or nil end)
+
+    panel = form.addExpansionPanel(STR("SwitchExpansionTitle"))
+    local isFirst
+    for _, k in pairs(radioSwitches) do
+        if widget.radio and widget.radio[k] and widget.radio[k]["lines"] then -- no lines means no legend or disabled switch
+            line = panel:addLine(STR(k.."text"))
+            local textField = form.addTextField(line, nil, function() return widget[k] or "" end, function(value) widget[k] = value end)
+            if isFirst == nil then textField:focus() isFirst = false end
+        end
+    end
+    local fullScreenPanel = form.addExpansionPanel(STR("FullScreenOptions"))
+    line = fullScreenPanel:addLine(STR("DisplayModelName"))
+    form.addBooleanField(line, nil, function() return widget.DisplayModelName end, function(value) widget.DisplayModelName = value end)
+    line = fullScreenPanel:addLine(STR("DisplayVersion"))
+    form.addBooleanField(line, nil, function() return widget.DisplayVersion end, function(value) widget.DisplayVersion = value end)
+    line = fullScreenPanel:addLine(STR("Note1"))
+    form.addTextField(line, nil, function() return widget.Note1 end, function(value) widget.Note1 = value end)
+    line = fullScreenPanel:addLine(STR("Note2"))
+    form.addTextField(line, nil, function() return widget.Note2 end, function(value) widget.Note2 = value end)
+    line = fullScreenPanel:addLine(STR("NoteColor"))
+    form.addColorField(line, nil,
+        function() return widget.NoteColor  or getDefaultTextColor() end,
+        function(value) widget.NoteColor = value ~= getDefaultTextColor() and value or nil end)
+
+    if count == 0 and isEmpty then
+        panel:open(false)
+        fullScreenPanel:open(false)
+        line = form.addLine(STR("ExampleLine"))
+        form.addButton(line, nil, {text=STR('ExampleButton'), press=function()
+            loadExample()
+            model.dirty()
+            form.clear()
+            configure(widget)
+        end}):focus()
+    else
+        line = form.addLine(count > 0 and STR("LoadPreset") or "")
+        slots = form.getFieldSlots(line, {0, 100})
+        if count > 0 then
+            choice = form.addChoiceField(line, slots[1], configChoices, function() return 0 end,
+                function(newValue)
+                    loadTemplate(configIndexes[newValue])
+                    model.dirty()
+                    form.clear()
+                    configure(widget)
+                end
+            )
+            choice:title(STR("TemplateChoiceTitle"))
+        end
+
+        form.addButton(line, slots[2], {text=STR("Reset"), press=function()
+            form.openDialog({
+                title=string.format(STR("ConfirmDialogTitle")),
+                message=STR("ResetConfirmMessage"),
+                buttons={
+                    {label=STR("ButtonYes"), action=function() loadTemplate() model.dirty() form.clear() configure(widget) return true end},
+                    {label=STR("ButtonNo"), action=function() return true end},
+                },
+                options=TEXT_LEFT
+            })
+        end})
+    end
+    if isEmpty then
+        panel:open(false)
+        fullScreenPanel:open(false)
+        if choice and count > 0 then choice:focus() end-- we need to give the focus to a field otherwise the Reset makes the form to loose the focus
+    end
+
+    local infoPanel = form.addExpansionPanel(STR("WidgetInformation"))
+    line = infoPanel:addLine(STR("WidgetVersion"))
+    form.addStaticText(line, nil, STR("ScriptName") .. " v" .. version)
+end
+
+-- **************************************************************************************
+-- ***		     read widget	 	   		                                          ***
+-- *** The parameters written by the write handler should, of course, also be loaded  ***
+-- *** when the model is loaded (or otherwise). This is done by the read handler.     ***
+-- **************************************************************************************
+
+local function read(widget)
+    if debug_mode then print("Reading config from file io storage") end
+    --if debug_mode and onStart then print("192 lothar: start reading widget config @" .. os.clock(),"   ***************************************   ") end
+    ---@diagnostic disable-next-line: undefined-field
+    local config = readConfiguration()
+    -- Note fields to read must be defined in readConfiguration (white list)
+    if config then
+        for k,v in pairs(config) do
+            widget[k] =  v
+        end
+    end
+end
+
+-- **************************************************************************************
+-- ***		     write widget	 	   		                                          ***
+-- *** The write handler saves model-specific parameters to the model file.           ***
+-- *** Typically, changes in values in the config handler trigger this write action.  ***
+-- *** Of course, the handler must have already been defined by the init handler.     ***
+-- **************************************************************************************
+--
+local function write(widget)
+  if debug_mode then print("Writing config to file "..getConfigurationFilePath()) end
+    local function color(rgba)
+        -- BEWARE, this might be hardware specific
+        local r, g, b, a =
+            ((rgba & 0x0000f800) >> 11) * 8,
+            ((rgba & 0x000007e0) >> 5) * 4,
+            ((rgba & 0x0000001f) >> 0) * 8,
+            ((rgba & 0x0f000000) >> 24) * 16
+        return string.format("lcd.RGB(0x%02x, 0x%02x, 0x%02x), -- lcd.RGB(%s, %s, %s)", r, g, b, r, g, b)
+    end
+    local function quote(text)
+        return '"' .. tostring(text):gsub('[\\"]', '\\%0') .. '"'
+    end
+    -- write storage to sdcard
+    local f = assert(io.open(getConfigurationFilePath(), "w"))
+    local function append(key, value)
+        f:write(string.format("\n   %s = %s,\n", key, value))
+    end
+    f:write("-- configuration file for swmap v"..version.."\n")
+    f:write("return {")
+    append("DisplayAll", widget.DisplayAll)
+    append("DisplaySwitchNames", widget.DisplaySwitchNames)
+    -- extra check to remove color when it is the default for old config
+    if lcd.darkMode() then
+        if widget.TextColor and widget.TextColor ~= defaultTextColorDark then append("TextColor", color(widget.TextColor)) end
+        if widget.NoteColor and widget.NoteColor ~= defaultTextColorDark then append("NoteColor", color(widget.NoteColor)) end
+    else
+        if widget.TextColor and widget.TextColor ~= defaultTextColorLight then append("TextColor", color(widget.TextColor)) end
+        if widget.NoteColor and widget.NoteColor ~= defaultTextColorLight then append("NoteColor", color(widget.NoteColor)) end
+    end
+    append("DisplayVersion", widget.DisplayVersion)
+    append("DisplayModelName", widget.DisplayModelName)
+    append("Note1", quote(widget.Note1))
+    append("Note2", quote(widget.Note2))
+    for _, key in pairs(radioSwitches) do
+        append(key.."text", quote(widget[key]))
+    end
+    f:write("}")
+    f:close()
+    ---@diagnostic disable-next-line: cast-local-type
+    f = nil -- TODO is it useful ?
+end
+
+-- **************************************************************************************
+-- ***		     Drawing Methods		 	   		                                  ***
+-- They are available in the radio definitions files                   .              ***
+-- **************************************************************************************
 local function drawButton1Pos(cx, cy, r)
     lcd.color(lcd.darkMode() and GRAY_LIGHT or GRAY_DARK)
     lcd.drawFilledCircle(cx, cy, r)
-    lcd.color(getSwInactiveColor())
+    lcd.color(inactiveSwitchColor)
     lcd.drawFilledCircle(cx, cy, math.floor(math.max(r-4, r/2)))
 end
 local function drawButton2Pos(cx, cy, r)
@@ -156,14 +558,14 @@ local function drawButton2Pos(cx, cy, r)
     local rcos15 = math.ceil(r * 0.97)
     lcd.color(lcd.darkMode() and GRAY_LIGHT or GRAY_DARK)
     lcd.drawFilledCircle(cx, cy, r)
-    lcd.color(getSwInactiveColor())
+    lcd.color(inactiveSwitchColor)
     lcd.drawFilledTriangle(cx, cy + r3, cx + r3, cy + rcos15, cx - r3, cy + rcos15)
     lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
     lcd.drawFilledTriangle(cx - r3, cy - rcos15, cx + r3, cy - rcos15, cx, cy - r3)
 end
 local function drawButton3Pos(cx, cy, r)
     drawButton2Pos(cx, cy, r)
-    lcd.color(getSwInactiveColor())
+    lcd.color(inactiveSwitchColor)
     lcd.drawFilledCircle(cx, cy, math.floor(r/3))
 end
 local function drawPot(cx, cy, r)
@@ -182,7 +584,7 @@ local function drawTrim(x, y, w, h)
     -- TODO computations are wrong but Ethos is drawing angle line badly
     lcd.color(lcd.darkMode() and GRAY_LIGHT or GRAY_DARK)
     lcd.drawFilledRectangle(x, y, w, h)
-    lcd.color(getSwInactiveColor())
+    lcd.color(inactiveSwitchColor)
     if w > h then -- horizontal
         local marginX = 4
         local marginY = 2
@@ -248,17 +650,14 @@ local function drawStick(cx, cy, r)
     lcd.drawFilledCircle(cx, cy, 6)
 end
 
---- returns the radio definition file for a board and a window resolution
----@param board string the board returned by sys.board
----@param w integer the width of the window
----@param h integer the height of the window
----@return false|table<string, { lines: table|nil, draw: function|nil }>
-local function loadRadioDefinition(board, w, h)
-    local function load(radioIdOrFileName)
-        local radioDefinitionFile = radioIdOrFileName
-        if radioIdOrFileName:sub(-4) ~= ".lua" then
-            radioDefinitionFile = string.format("radios/%sx%s/%s.lua", w, h, radioIdOrFileName)
-        end
+-- **************************************************************************************
+-- ***		     build widget		 	   		                                      ***
+-- This handler is called after widget.create and on each layout change.              ***
+-- **************************************************************************************
+local function build(widget)
+    -- here we set widget.radio
+    if debug_mode then print("Build called") end
+    local function load(filename)
         local env = { -- add some method to parse the definition
             drawStick=drawStick,
             drawButton1Pos=drawButton1Pos,
@@ -270,8 +669,8 @@ local function loadRadioDefinition(board, w, h)
             drawCurvedSlider=drawCurvedSlider,
         }
         setmetatable(env, {__index = _G}) -- allow access to all globals
-        if debug_mode then print(string.format("loading definition from %s", radioDefinitionFile)) end
-        local chunk, msg = loadfile(radioDefinitionFile,"bt", env)
+        if debug_mode then print(string.format("loading definition from %s", filename)) end
+        local chunk, msg = loadfile(filename,"bt", env)
         if chunk then
             return assert(chunk())
         end
@@ -279,435 +678,21 @@ local function loadRadioDefinition(board, w, h)
         env = nil
         return false
     end
+    local w, h = lcd.getWindowSize()
+    local board = sys.board
+    local radioId = getRadioId(board)
+
     local customFile = string.format("radios/custom/%s-%sx%s.lua", board, w, h)
 ---@diagnostic disable-next-line: undefined-field
-    if os.stat(customFile) then return load(customFile) end
-    if isResolutionSupported(board, w, h) then
-        return load(getRadioId(board))
-    end
-    return false
-end
---define function for retrieving translations from translation files
-local STR = assert(loadfile("i18n/i18n.lua"))().translate
-
--- **************************************************************************************
--- ***		     name widget					                                      ***
--- **************************************************************************************
-
-local function name()		-- name script, appears in widget selection list
-  return STR("ScriptName")
-end
-
-
-
--- **************************************************************************************
--- ***		    startup (onetime) handler		                                      ***
--- ***	         returns widget vars			                                      ***
--- *** The create handler is executed the first time the script is called, for        ***
--- *** example, when the screen of a widget is activated for the first time.          ***
--- *** time. In the create handler, the "central data structure" or an array is       ***
--- *** typically defined, which can be passed to other handlers.                      ***
--- *** This data structure must be defined as the return value of the handler.        ***
--- ***                                                                                ***
--- *** NON STANDARD: create is also called when we reset template in configure method ***
--- **************************************************************************************
---
-local function create()
-    local widget = {
-        --- saved
-        DisplayAll=true,
-        DisplaySwitchNames=true,
-        TextColor=defaultTextColor(),
-        DisplayVersion=true,
-        DisplayModelName=true,
-        Note1="",
-        Note2="",
-        NoteColor=defaultTextColor(),
-        --- others
-        windowWidth =nil, -- to detect screen layout change
-        windowHeight =nil,
-        curposx=0, -- cursor x position in simulator
-        curposy=0,-- cursor y position in simulator
-    }
-    for _, k in pairs(radioSwitches) do
-        widget[k] = ""
-    end
-    return widget
-end
-
--- **************************************************************************************
--- ***                               WakeUp handler                                   ***
--- **************************************************************************************
---
-local function wakeup(widget)
-    if not lcd.isVisible() then return end -- widget does nothing if in the background
-    local w, h = lcd.getWindowSize()
-    -- detects if layout has changed
-    if w ~= widget.windowWidth or h ~= widget.windowHeight then
-        widget.windowWidth = w
-        widget.windowHeight = h
-        widget.radio = nil
-    end
-    -- load once the radio definition
-    if widget.radio == nil then
-        if debug_mode then print('wakeup : load radio definition') end
-        widget.radio = loadRadioDefinition(sys.board, w, h) -- false|table
-        lcd.invalidate()
-    end
-end
-
--- **************************************************************************************
--- ***		     "display handler"					                                  ***
--- *** The paint handler is responsible for graphical representations in a script,    ***
--- *** therefore only necessary in scripts that display something on the screen.      ***
--- **************************************************************************************
---
-local function paint(widget)
-    local timestamp = os.clock()
-    local w, h = lcd.getWindowSize()
-
-    -- hide focus color
-    lcd.color(lcd.darkMode() and lcd.RGB(0x10, 0x10, 0x10) or lcd.RGB(0xd6, 0xd2, 0xd6)) -- mimics Hardware Checks Page
-    lcd.drawFilledRectangle(0, 0, w, h)
-
-    if not widget.radio then
-        lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
-        lcd.drawText( 5, 30, string.format("%sx%s : unsupported widget size for %s, Try Full Screen", w, h, sys.board))
-        return
-    end
-
-    lcd.font(FONT_S)
-    local _, textOffsetY = lcd.getTextSize("") -- the legend is by default textOffset above the line
-    local function addLegend(label, prefix, lines, align, offset)
-        if widget.DisplayAll or label ~= "" then
-            local x = lines[1][1]
-            local y = lines[1][2]
-            if not align and x < w/2 then align = TEXT_LEFT end
-            if not align and x >= w/2 then align = TEXT_RIGHT end
-            local labelOffsetX = 0
-            if widget.DisplaySwitchNames and prefix and prefix ~= "" then
-                lcd.font(FONT_S_BOLD and FONT_S_BOLD or FONT_S)
-                local pw = lcd.getTextSize(prefix .." ")
-                if align == TEXT_RIGHT then
-                    lcd.drawText(x, y - (offset and offset or textOffsetY), prefix, align)
-                    labelOffsetX =  pw
-                elseif align == TEXT_CENTERED then
-                    local lw = lcd.getTextSize(label) -- not UTF8 compatible on ethos < 1.7 but acceptable for one or two accentuated chars (slight misplacement)
-                    lcd.drawText(x - pw/4 -lw/2, y - (offset and offset or textOffsetY), prefix, align)
-                    labelOffsetX = -pw/2
-                else
-                    lcd.drawText(x, y - (offset and offset or textOffsetY), prefix, align)
-                    labelOffsetX = -pw
-                end
-            end
-            lcd.font(FONT_S)
-            lcd.drawText(x - labelOffsetX, y - (offset and offset or textOffsetY), label, align)
-
-            for _,rect in pairs(lines) do
-                lcd.pen(PEN_DASHED)
-                lcd.drawLine(rect[1], rect[2], rect[3], rect[4])
-                lcd.pen(PEN_SOLID)
-            end
-        end
-    end
-    -- first draw controls
-    for _, specs in pairs(widget.radio) do
-        if type(specs["draw"]) == "function" then specs["draw"]() end
-    end
-    -- next legends (on top)
-    for id, specs in pairs(widget.radio) do
-        lcd.color(type(widget.TextColor) == "function" and widget.TextColor() or widget.TextColor)
-        if specs["lines"] then addLegend(widget[id] or "", id, specs["lines"], specs["align"], specs["offset"]) end
-    end
-
-    --
-    -- display some goodies
-    --
-    if sys.simulation==true and debug_mode then
-        lcd.font(FONT_S_BOLD and FONT_S_BOLD or FONT_S)
-        lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
-        if isFullScreen(w, h) then
-            lcd.drawText(18, 5,widget.curposx..", "..widget.curposy)
-        else
-            lcd.color(lcd.GREY(5, 0.7))
-            lcd.drawFilledRectangle(0, 0, 70, 15)
-            lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
-            lcd.drawText(0, 0,widget.curposx..", "..widget.curposy)
-        end
-    end
-    if isFullScreen(w, h) then
-        if widget.DisplayModelName then
-            lcd.font(FONT_L_BOLD and FONT_L_BOLD or FONT_L)
-            lcd.color(type(widget.TextColor) == "function" and widget.TextColor() or widget.TextColor)
-            lcd.drawText(18, 21, model.name())
-        end
-        if widget.DisplayVersion then
-            -- show widget information on Full Screen, color based on lcd.hasFocus
-            lcd.font(FONT_XS)
-            lcd.color(lcd.hasFocus() and lcd.themeColor(THEME_FOCUS_COLOR) or lcd.themeColor(14)) -- 14 is the theme color for widget titles
-            lcd.drawText(w - 10, 10, STR("ScriptName")..' v'..version, TEXT_RIGHT)
-        end
-        lcd.color(type(widget.NoteColor) == "function" and widget.NoteColor() or widget.NoteColor)
-        lcd.font(FONT_S)
-        if widget.Note1 then
-            addLegend(widget.Note1, "", {{5,450,select(1, lcd.getTextSize(widget.Note1)) + 5,450}})
-        end
-        if widget.Note1 then
-            addLegend(widget.Note2, "", {{5,470,select(1, lcd.getTextSize(widget.Note2)) + 5,470}})
-        end
-    elseif lcd.hasFocus() then
-        -- when not in full screen, displays simply FOCUS to give a hint
-        lcd.font(FONT_BOLD)
-        lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
-        lcd.drawText(w/2, h - select(2, lcd.getTextSize("")) - 2, STR("Focus"), TEXT_CENTERED)
-    end
-    if debug_mode then print(string.format("paint time %sms", (os.clock() - timestamp) * 1000)) end
-end
-
--- **************************************************************************************
--- ***		     monitor events		 	   		                                      ***
--- *** This handler is used to process "external events," usually user interventions. ***
--- *** For example, touching a screen, pressing control buttons (Page Up/Down),       ***
--- *** scroll wheel, etc.                                                             ***
--- **************************************************************************************
---
--- If using the simulator with debug mode on, clicking the mouse pointer on the screen
--- will cause the cursor position to be returned to assist with working out line coordinates.
-local function event(widget, category, value, x, y)
-    if sys.simulation==true and debug_mode then
-        if category == EVT_TOUCH and value ~= TOUCH_MOVE then
-            if value == TOUCH_START then
-                widget.curposx=x
-                widget.curposy=y
-                lcd.invalidate()
-            end
-            return true
-        end
-        return false
-    end
-end
-
-
--- **************************************************************************************
--- ***		     configure widget	 	   		                                      ***
--- *** Clicking the widget configure option triggers this handler.                    ***
--- **************************************************************************************
---
-local function configure(widget)
-    local function _checkIfEmpty()
-        for _, k in pairs(radioSwitches) do
-            if widget[k] ~= "" then
-                return false
-            end
-        end
-        return true
-    end
-    local isEmpty = _checkIfEmpty() -- cache
-
-    local function loadTemplate(basename)
-        if not basename then
-            local config = create()
-            for k,v in pairs(config) do
-                widget[k] = v
-            end
-        else
-            local config = readConfiguration(basename)
-            if config then
-                for k, v in pairs(config) do
-                    widget[k] = v
-                end
-            end
-        end
-    end
-    local function loadExample()
-        local config = create()
-        config["SA"] = "Stab"
-        config["SB"] = "Call telem"
-        config["SE"] = "FMode"
-        config["SG"] = "Thr arm"
-        config["SH"] = "Thr cancel + SGdn"
-        config["T2"] = "Flap comp/Motor comp"
-        config["T4"] = "Ail diff"
-        config["LS"] = "Thermal camber"
-        config["RS"] = "Throttle"
-        config["S1"] = "Stab gain"
-        config["S2"] = "SL gain"
-        config["S3"] = "Volume"
-        for k,v in pairs(config) do
-            widget[k] = v
-        end
-    end
-    local function buildChoices() -- build a choice list for the form
-        local choices = {} -- choices for the form
-        local indexes = {} -- index to retrieve the basename of the selected file
-        local modelFileName = getConfigurationFilePath():match("[^/]*.lua$") -- current model configuration basename
-        for i,f in pairs(system.listFiles(configurationPath)) do
-            if f:sub(-4) == ".lua" and f ~= modelFileName then
-                table.insert(choices, {f:sub(1, -5), i})
-                indexes[i] = f
-            end
-        end
-        return choices, indexes
-    end
-    local radioDefinition
-    if widget.radio == nil then
-        -- handles the case when we call configure from the screens page without having display the widget
-        if debug_mode then print("Configure : no radio definition found, loading a default") end
-        local resolutions = radioSupportedResolutions(sys.board)
-        if #resolutions < 1 then
-            -- unsupported radio (unimplemented as we always return a default radio)
-            if debug_mode then warn("Configure : unsupported radio is not implemented") end
-        else
-            -- get the first radio definition to use something for the switches
-            radioDefinition = loadRadioDefinition(sys.board, table.unpack(resolutions[1]))
-        end
+    if os.stat(customFile) then
+        widget.radio = load(customFile)
+    elseif isResolutionSupported(board, w, h) then
+        local file = string.format("radios/%sx%s/%s.lua", w, h, radioId)
+        widget.radio = load(file)
     else
-        -- handles normal case
-        radioDefinition = widget.radio
+        widget.radio = false
     end
-    local line, slots, choice, panel
-    local configChoices, configIndexes = buildChoices()
-    local count = #(configChoices)
-
-    line = form.addLine(STR("DisplayAll"))
-    form.addBooleanField(line, nil, function() return widget.DisplayAll end, function(value) widget.DisplayAll = value end)
-
-    line = form.addLine(STR("DisplaySwitchNames"))
-    form.addBooleanField(line, nil, function() return widget.DisplaySwitchNames end, function(value) widget.DisplaySwitchNames = value end)
-
-    line = form.addLine(STR("TextColor"))
-    form.addColorField(line, nil, function() return widget.TextColor end, function(TextColor) widget.TextColor = TextColor end)
-
-    panel = form.addExpansionPanel(STR("SwitchExpansionTitle"))
-    local isFirst
-    for _, k in pairs(radioSwitches) do
-        if radioDefinition and radioDefinition[k] and radioDefinition[k]["lines"] then -- no lines means no legend or disabled switch
-            line = panel:addLine(STR(k.."text"))
-            local textField = form.addTextField(line, nil, function() return widget[k] or "" end, function(value) widget[k] = value end)
-            if isFirst == nil then textField:focus() isFirst = false end
-        end
-    end
-    if count == 0 and isEmpty then
-        panel:open(false)
-        line = form.addLine(STR("ExampleLine"))
-        form.addTextButton(line, nil, STR('ExampleButton'), function()
-            loadExample()
-            model.dirty()
-            form.clear()
-            configure(widget)
-        end):focus()
-    else
-        line = form.addLine(count > 0 and STR("LoadPreset") or "")
-        slots = form.getFieldSlots(line, {0, 100})
-        if count > 0 then
-            choice = form.addChoiceField(line, slots[1], configChoices, function() return 0 end,
-                function(newValue)
-                    loadTemplate(configIndexes[newValue])
-                    model.dirty()
-                    form.clear()
-                    configure(widget)
-                end
-            )
-            choice:title(STR("TemplateChoiceTitle"))
-        end
-
-        form.addTextButton(line, slots[2], STR("Reset"), function()
-            form.openDialog({
-                title=string.format(STR("ConfirmDialogTitle")),
-                message=STR("ResetConfirmMessage"),
-                buttons={
-                    {label=STR("ButtonYes"), action=function() loadTemplate() model.dirty() form.clear() configure(widget) return true end},
-                    {label=STR("ButtonNo"), action=function() return true end},
-                },
-                options=TEXT_LEFT
-            })
-            end
-        )
-    end
-    local fullScreenPanel = form.addExpansionPanel(STR("FullScreenOptions"))
-    line = fullScreenPanel:addLine(STR("DisplayModelName"))
-    form.addBooleanField(line, nil, function() return widget.DisplayModelName end, function(value) widget.DisplayModelName = value end)
-    line = fullScreenPanel:addLine(STR("DisplayVersion"))
-    form.addBooleanField(line, nil, function() return widget.DisplayVersion end, function(value) widget.DisplayVersion = value end)
-    line = fullScreenPanel:addLine(STR("Note1"))
-    form.addTextField(line, nil, function() return widget.Note1 end, function(value) widget.Note1 = value end)
-    line = fullScreenPanel:addLine(STR("Note2"))
-    form.addTextField(line, nil, function() return widget.Note2 end, function(value) widget.Note2 = value end)
-    line = fullScreenPanel:addLine(STR("NoteColor"))
-    form.addColorField(line, nil, function() return widget.NoteColor end, function(value) widget.NoteColor = value end)
-
-    local infoPanel = form.addExpansionPanel(STR("WidgetInformation"))
-    line = infoPanel:addLine(STR("WidgetVersion"))
-    form.addStaticText(line, nil, STR("ScriptName") .. " v" .. version)
-
-    if isEmpty then
-        panel:open(false)
-        if choice and count > 0 then choice:focus() end-- we need to give the focus to a field otherwise the Reset makes the form to loose the focus
-    end
-end
-
--- **************************************************************************************
--- ***		     read widget	 	   		                                          ***
--- *** The parameters written by the write handler should, of course, also be loaded  ***
--- *** when the model is loaded (or otherwise). This is done by the read handler.     ***
--- **************************************************************************************
-
-local function read(widget)
-    if debug_mode then print("Reading config from file io storage") end
-    --if debug_mode and onStart then print("192 lothar: start reading widget config @" .. os.clock(),"   ***************************************   ") end
-    ---@diagnostic disable-next-line: undefined-field
-    local config = readConfiguration()
-    -- Note fields to read must be defined in readConfiguration (white list)
-    if config then
-        for k,v in pairs(config) do
-            widget[k] =  v
-        end
-    end
-end
-
--- **************************************************************************************
--- ***		     write widget	 	   		                                          ***
--- *** The write handler saves model-specific parameters to the model file.           ***
--- *** Typically, changes in values in the config handler trigger this write action.  ***
--- *** Of course, the handler must have already been defined by the init handler.     ***
--- **************************************************************************************
---
-local function write(widget)
-  if debug_mode then print("Writing config to file "..getConfigurationFilePath()) end
-    local function color(rgba)
-        -- BEWARE, this might be hardware specific
-        local r, g, b, a =
-            ((rgba & 0x0000f800) >> 11) * 8,
-            ((rgba & 0x000007e0) >> 5) * 4,
-            ((rgba & 0x0000001f) >> 0) * 8,
-            ((rgba & 0x0f000000) >> 24) * 16
-        return string.format("lcd.RGB(0x%02x, 0x%02x, 0x%02x), -- lcd.RGB(%s, %s, %s)", r, g, b, r, g, b)
-    end
-    local function quote(text)
-        return '"' .. tostring(text):gsub('[\\"]', '\\%0') .. '"'
-    end
-    -- write storage to sdcard
-    local f = assert(io.open(getConfigurationFilePath(), "w"))
-    local function append(key, value)
-        f:write(string.format("\n   %s = %s,\n", key, value))
-    end
-    f:write("-- configuration file for swmap v"..version.."\n")
-    f:write("return {")
-    append("DisplayAll", widget.DisplayAll)
-    append("DisplaySwitchNames", widget.DisplaySwitchNames)
-    append("TextColor", color(widget.TextColor))
-    append("DisplayVersion", widget.DisplayVersion)
-    append("DisplayModelName", widget.DisplayModelName)
-    append("Note1", quote(widget.Note1))
-    append("Note2", quote(widget.Note2))
-    append("NoteColor", color(widget.NoteColor))
-    for _, key in pairs(radioSwitches) do
-        append(key.."text", quote(widget[key]))
-    end
-    f:write("}")
-    f:close()
-    ---@diagnostic disable-next-line: cast-local-type
-    f = nil -- TODO is it useful ?
+    inactiveSwitchColor = lcd.darkMode() and lcd.RGB(0x21, 0x20, 0x21) or lcd.RGB(0xf7, 0xf3, 0xf7)
 end
 
 -- **************************************************************************************
@@ -718,7 +703,7 @@ end
 -- **************************************************************************************
 --
 local function init()
-    system.registerWidget({key="swmap", name=name, create=create, wakeup=wakeup, paint=paint, configure=configure, read=read, write=write, event=event, title=false})
+    system.registerWidget({key="swmap", name=name, build=build, create=create, paint=paint, configure=configure, read=read, write=write, event=event, title=false})
 end
 
 
