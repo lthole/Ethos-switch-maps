@@ -40,12 +40,14 @@ local sys = system.getVersion()
 local debug_mode=false -- sys.simulation or true or false only
 if debug_mode then print("SWMAP Debug MODE ON") end
 
-local defaultTextColor = function() return lcd.darkMode() and lcd.RGB(0, 0xFF, 0xFF) or lcd.RGB(0x58, 0x5C, 0x58) end
+local defaultTextColorDark = lcd.RGB(0, 0xFF, 0xFF)
+local defaultTextColorLight = lcd.RGB(0x58, 0x5C, 0x58)
+local getDefaultTextColor = function() return lcd.darkMode() and defaultTextColorDark or defaultTextColorLight end
 
 -- Colors used to mimic Hardware Checks Page
 local GRAY_DARK = lcd.RGB(0x31, 0x31, 0x31)
 local GRAY_LIGHT = lcd.RGB(0x52, 0x51, 0x52)
-local getSwInactiveColor = function() return lcd.darkMode() and lcd.RGB(0x21, 0x20, 0x21) or lcd.RGB(0xf7, 0xf3, 0xf7) end
+local inactiveSwitchColor -- depends on theme (light/dark) set in build
 
 local configurationPath="SCRIPTS:/swmap/models/"
 
@@ -162,15 +164,16 @@ end
 -- **************************************************************************************
 --
 local function create()
+    if debug_mode then print("create called") end
     local widget = {
         DisplayAll=true,
         DisplaySwitchNames=true,
-        TextColor=defaultTextColor(),
+        TextColor=nil,
         DisplayVersion=true,
         DisplayModelName=true,
         Note1="",
         Note2="",
-        NoteColor=defaultTextColor(),
+        NoteColor=nil,
     }
     for _, k in pairs(radioSwitches) do
         widget[k] = ""
@@ -249,7 +252,7 @@ local function paint(widget)
     end
     -- next legends (on top)
     for id, specs in pairs(widget.radio) do
-        lcd.color(type(widget.TextColor) == "function" and widget.TextColor() or widget.TextColor)
+        lcd.color(widget.TextColor or getDefaultTextColor())
         if specs["lines"] then addLegend(widget[id] or "", id, specs["lines"], specs["align"], specs["offset"]) end
     end
 
@@ -271,7 +274,7 @@ local function paint(widget)
     if isFullScreen(w, h) then
         if widget.DisplayModelName then
             lcd.font(FONT_L_BOLD and FONT_L_BOLD or FONT_BOLD)
-            lcd.color(type(widget.TextColor) == "function" and widget.TextColor() or widget.TextColor)
+            lcd.color(widget.TextColor or getDefaultTextColor())
             lcd.drawText(18, 21, model.name())
         end
         if widget.DisplayVersion then
@@ -280,7 +283,7 @@ local function paint(widget)
             lcd.color(lcd.hasFocus() and lcd.themeColor(THEME_FOCUS_COLOR) or lcd.themeColor(14)) -- 14 is the theme color for widget titles
             lcd.drawText(w - 10, 10, STR("ScriptName")..' v'..version, TEXT_RIGHT)
         end
-        lcd.color(type(widget.NoteColor) == "function" and widget.NoteColor() or widget.NoteColor)
+        lcd.color(widget.NoteColor or getDefaultTextColor())
         lcd.font(FONT_S)
         if widget.Note1 and widget.Note1 ~= "" then
             addLegend(widget.Note1, "", {{5,450,select(1, lcd.getTextSize(widget.Note1)) + 5,450}})
@@ -394,7 +397,9 @@ local function configure(widget)
     form.addBooleanField(line, nil, function() return widget.DisplaySwitchNames end, function(value) widget.DisplaySwitchNames = value end)
 
     line = form.addLine(STR("TextColor"))
-    form.addColorField(line, nil, function() return widget.TextColor end, function(TextColor) widget.TextColor = TextColor end)
+    form.addColorField(line, nil,
+        function() return widget.TextColor or getDefaultTextColor() end,
+        function(value) widget.TextColor = value ~= getDefaultTextColor() and value or nil end)
 
     panel = form.addExpansionPanel(STR("SwitchExpansionTitle"))
     local isFirst
@@ -456,7 +461,9 @@ local function configure(widget)
     line = fullScreenPanel:addLine(STR("Note2"))
     form.addTextField(line, nil, function() return widget.Note2 end, function(value) widget.Note2 = value end)
     line = fullScreenPanel:addLine(STR("NoteColor"))
-    form.addColorField(line, nil, function() return widget.NoteColor end, function(value) widget.NoteColor = value end)
+    form.addColorField(line, nil,
+        function() return widget.NoteColor  or getDefaultTextColor() end,
+        function(value) widget.NoteColor = value ~= getDefaultTextColor() and value or nil end)
 
     local infoPanel = form.addExpansionPanel(STR("WidgetInformation"))
     line = infoPanel:addLine(STR("WidgetVersion"))
@@ -512,12 +519,18 @@ local function write(widget)
     f:write("return {")
     append("DisplayAll", widget.DisplayAll)
     append("DisplaySwitchNames", widget.DisplaySwitchNames)
-    append("TextColor", color(widget.TextColor))
+    -- extra check to remove color when it is the default for old config
+    if lcd.darkMode() then
+        if widget.TextColor and widget.TextColor ~= defaultTextColorDark then append("TextColor", color(widget.TextColor)) end
+        if widget.NoteColor and widget.NoteColor ~= defaultTextColorDark then append("NoteColor", color(widget.NoteColor)) end
+    else
+        if widget.TextColor and widget.TextColor ~= defaultTextColorLight then append("TextColor", color(widget.TextColor)) end
+        if widget.NoteColor and widget.NoteColor ~= defaultTextColorLight then append("NoteColor", color(widget.NoteColor)) end
+    end
     append("DisplayVersion", widget.DisplayVersion)
     append("DisplayModelName", widget.DisplayModelName)
     append("Note1", quote(widget.Note1))
     append("Note2", quote(widget.Note2))
-    append("NoteColor", color(widget.NoteColor))
     for _, key in pairs(radioSwitches) do
         append(key.."text", quote(widget[key]))
     end
@@ -534,7 +547,7 @@ end
 local function drawButton1Pos(cx, cy, r)
     lcd.color(lcd.darkMode() and GRAY_LIGHT or GRAY_DARK)
     lcd.drawFilledCircle(cx, cy, r)
-    lcd.color(getSwInactiveColor())
+    lcd.color(inactiveSwitchColor)
     lcd.drawFilledCircle(cx, cy, math.floor(math.max(r-4, r/2)))
 end
 local function drawButton2Pos(cx, cy, r)
@@ -542,14 +555,14 @@ local function drawButton2Pos(cx, cy, r)
     local rcos15 = math.ceil(r * 0.97)
     lcd.color(lcd.darkMode() and GRAY_LIGHT or GRAY_DARK)
     lcd.drawFilledCircle(cx, cy, r)
-    lcd.color(getSwInactiveColor())
+    lcd.color(inactiveSwitchColor)
     lcd.drawFilledTriangle(cx, cy + r3, cx + r3, cy + rcos15, cx - r3, cy + rcos15)
     lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
     lcd.drawFilledTriangle(cx - r3, cy - rcos15, cx + r3, cy - rcos15, cx, cy - r3)
 end
 local function drawButton3Pos(cx, cy, r)
     drawButton2Pos(cx, cy, r)
-    lcd.color(getSwInactiveColor())
+    lcd.color(inactiveSwitchColor)
     lcd.drawFilledCircle(cx, cy, math.floor(r/3))
 end
 local function drawPot(cx, cy, r)
@@ -568,7 +581,7 @@ local function drawTrim(x, y, w, h)
     -- TODO computations are wrong but Ethos is drawing angle line badly
     lcd.color(lcd.darkMode() and GRAY_LIGHT or GRAY_DARK)
     lcd.drawFilledRectangle(x, y, w, h)
-    lcd.color(getSwInactiveColor())
+    lcd.color(inactiveSwitchColor)
     if w > h then -- horizontal
         local marginX = 4
         local marginY = 2
@@ -676,6 +689,7 @@ local function build(widget)
     else
         widget.radio = false
     end
+    inactiveSwitchColor = lcd.darkMode() and lcd.RGB(0x21, 0x20, 0x21) or lcd.RGB(0xf7, 0xf3, 0xf7)
 end
 
 -- **************************************************************************************
