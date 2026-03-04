@@ -82,16 +82,16 @@ local function readConfiguration(basename)
     local chunk = loadfile(getConfigurationFilePath(basename), "bt", {lcd=lcd})-- load the config file passing only the lcd global variable
     if chunk then
         local data = chunk()
-        config.DisplayAll = data.DisplayAll
-        config.DisplaySwitchNames = data.DisplaySwitchNames
-        config.TextColor=data.TextColor and data.TextColor or defaultTextColor()
-        config.DisplayVersion=data.DisplayVersion
-        config.DisplayModelName=data.DisplayModelName
-        config.Note1=data.Note1
-        config.Note2=data.Note2
-        config.NoteColor=data.NoteColor and data.NoteColor or defaultTextColor()
+        if data.DisplayAll ~= nil then config.DisplayAll = data.DisplayAll end
+        if data.DisplaySwitchNames ~= nil then config.DisplaySwitchNames = data.DisplaySwitchNames end
+        if data.TextColor ~= nil then config.TextColor = data.TextColor end
+        if data.DisplayVersion ~= nil then config.DisplayVersion = data.DisplayVersion end
+        if data.DisplayModelName ~= nil then config.DisplayModelName = data.DisplayModelName end
+        if data.Note1 ~= nil then config.Note1 = data.Note1 end
+        if data.Note2 ~= nil then config.Note2 = data.Note2 end
+        if data.NoteColor ~= nil then config.NoteColor = data.NoteColor end
         for _, key in pairs(radioSwitches) do
-            config[key] = data[key.."text"]
+            if data[key.."text"] ~= nil then config[key] = data[key.."text"] end
         end
         return config
     else
