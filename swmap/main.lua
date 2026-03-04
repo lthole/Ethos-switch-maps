@@ -315,7 +315,7 @@ local function create()
         Note2="",
         NoteColor=defaultTextColor(),
         --- others
-        windowWidth =nil, -- to detect screen layout change, initialized by build method
+        windowWidth =nil, -- set by build method
         windowHeight =nil,
         curposx=0, -- cursor x position in simulator
         curposy=0,-- cursor y position in simulator
@@ -340,18 +340,18 @@ end
 --
 local function paint(widget)
     local timestamp = os.clock()
-    local w, h = lcd.getWindowSize()
+    local w, h = widget.windowWidth, widget.windowHeight
 
     -- hide focus color
     lcd.color(lcd.darkMode() and lcd.RGB(0x10, 0x10, 0x10) or lcd.RGB(0xd6, 0xd2, 0xd6)) -- mimics Hardware Checks Page
     lcd.drawFilledRectangle(0, 0, w, h)
-    -- detects if layout has changed
-    if w ~= widget.windowWidth or h ~= widget.windowHeight then
-        if debug_mode then print('paint : layout change detected') end
-        widget.windowWidth = w
-        widget.windowHeight = h
-        widget.radio = nil
-    end
+
+    -- if w ~= widget.windowWidth or h ~= widget.windowHeight then
+    --     if debug_mode then print('paint : layout change detected') end
+    --     widget.windowWidth = w
+    --     widget.windowHeight = h
+    --     widget.radio = nil
+    -- end
     -- load once the radio definition
     if widget.radio == nil then
         if debug_mode then print('paint : load radio definition') end
@@ -686,13 +686,15 @@ local function write(widget)
     f = nil -- TODO is it useful ?
 end
 
--- build method is called once after create
+-- build method is called once after create and on layout change
 local function build(widget)
     -- here we set the widget width and height as we need them in configure
     -- in the case we call configure from Screens without having display the widget yet
+    if debug_mode then print("Build called") end
     local w, h = lcd.getWindowSize()
     widget.windowWidth = w
     widget.windowHeight = h
+    widget.radio = nil
 end
 
 -- **************************************************************************************
