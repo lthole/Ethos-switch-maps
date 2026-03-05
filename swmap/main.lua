@@ -155,12 +155,10 @@ end
 -- *** time. In the create handler, the "central data structure" or an array is       ***
 -- *** typically defined, which can be passed to other handlers.                      ***
 -- *** This data structure must be defined as the return value of the handler.        ***
--- ***                                                                                ***
--- *** NON STANDARD: create is also called when we reset template in configure method ***
 -- **************************************************************************************
---
-local function create()
-    if debug_mode then print("create called") end
+
+-- also used in configure to load example/template
+local function defaultConfig()
     local widget = {
         DisplayAll=true,
         DisplaySwitchNames=true,
@@ -178,6 +176,12 @@ local function create()
         widget.curposx = 0
         widget.curposy = 0
     end
+    return widget
+end
+
+local function create()
+    if debug_mode then print("create called") end
+    local widget = defaultConfig()
 
     -- Bug: if you create a widget on Screen2, add an example, return to Screen2
     -- then delete page Screen2, create a new Screen2 page and add swmap widget again
@@ -351,7 +355,7 @@ local function configure(widget)
 
     local function loadTemplate(basename)
         -- reset all to default
-        local config = create()
+        local config = defaultConfig()
         for k,v in pairs(config) do
             widget[k] = v
         end
@@ -366,7 +370,7 @@ local function configure(widget)
         end
     end
     local function loadExample()
-        local config = create()
+        local config = defaultConfig()
         config["SA"] = "Stab"
         config["SB"] = "Call telem"
         config["SE"] = "FMode"
