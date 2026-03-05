@@ -64,6 +64,15 @@ local function isFullScreen(w, h)
     return w == sys.lcdWidth and h == sys.lcdHeight
 end
 
+--- copy a config into a widget
+--- @param widget table
+--- @param config table
+local function applyConfig(widget, config)
+    for k,v in pairs(config) do
+        widget[k] =  v
+    end
+end
+
 --- returns the configuration pathname
 ---@param basename nil|(string) the filename without path or nil
 ---@return string the pathname to the model's configuration or the pathname for basename
@@ -133,9 +142,7 @@ local function read(widget)
     local config = readConfiguration()
     -- Note fields to read must be defined in readConfiguration (white list)
     if config then
-        for k,v in pairs(config) do
-            widget[k] =  v
-        end
+        applyConfig(widget, config)
     end
 end
 
@@ -361,16 +368,12 @@ local function configure(widget)
     local function loadTemplate(basename)
         -- reset all to default
         local config = defaultConfig()
-        for k,v in pairs(config) do
-            widget[k] = v
-        end
+        applyConfig(widget, config)
         -- then load
         if basename then
             local config = readConfiguration(basename)
             if config then
-                for k, v in pairs(config) do
-                    widget[k] = v
-                end
+                applyConfig(widget, config)
             end
         end
     end
@@ -388,9 +391,7 @@ local function configure(widget)
         config["S1"] = "Stab gain"
         config["S2"] = "SL gain"
         config["S3"] = "Volume"
-        for k,v in pairs(config) do
-            widget[k] = v
-        end
+        applyConfig(widget, config)
     end
     local function buildChoices() -- build a choice list for the form
         local choices = {} -- choices for the form
