@@ -38,7 +38,16 @@ local version="1.0.2"
 local sys = system.getVersion()
 
 local debug_mode=false -- sys.simulation or true or false only
-if debug_mode then print("SWMAP Debug MODE ON") end
+local ANSI_BLACK = "\27[1;30m"
+local ANSI_RED = "\27[1;31m"
+local ANSI_GREEN = "\27[1;32m"
+local ANSI_YELLOW = "\27[1;33m"
+local function log(text, ansiColor)
+    if not ansiColor then ansiColor = ANSI_BLACK end
+    local ANSI_RESET = "\27[0m"
+    print(ansiColor..text..ANSI_RESET)
+end
+if debug_mode then log("SWMAP Debug MODE ON") end
 
 local defaultTextColorDark = lcd.RGB(0, 0xFF, 0xFF)
 local defaultTextColorLight = lcd.RGB(0x58, 0x5C, 0x58)
@@ -113,7 +122,7 @@ local STR = i18n.translate
 ---@return table<string, string|integer|boolean>|nil
 local function readConfiguration(basename)
     local config = {}
-    if debug_mode then print("loading configuration "..getConfigurationFilePath(basename)) end
+    if debug_mode then log("Reading configuration from file: "..getConfigurationFilePath(basename)) end
     local chunk = loadfile(getConfigurationFilePath(basename), "bt", {lcd=lcd})-- load the config file passing only the lcd global variable
     if chunk then
         local data = chunk()
@@ -130,7 +139,8 @@ local function readConfiguration(basename)
         end
         return config
     else
-        warn(string.format("could not load %s", getConfigurationFilePath(basename)))
+        -- might be normal for a new model
+        log(string.format("could not load %s", getConfigurationFilePath(basename)), ANSI_YELLOW)
     end
     return nil
 end
@@ -188,7 +198,7 @@ local function defaultConfig()
 end
 
 local function create()
-    if debug_mode then print("create called") end
+    if debug_mode then log("create called") end
     local widget = defaultConfig()
 
     -- Bug: if you create a widget on Screen2, add an example, return to Screen2
@@ -322,7 +332,7 @@ local function paint(widget)
         lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
         lcd.drawText(w/2, h - select(2, lcd.getTextSize("")) - 2, STR("Focus"), TEXT_CENTERED)
     end
-    if debug_mode then print(string.format("paint time %sms", (os.clock() - timestamp) * 1000)) end
+    if debug_mode then log(string.format("paint time %sms", (os.clock() - timestamp) * 1000)) end
 end
 
 -- **************************************************************************************
@@ -501,7 +511,7 @@ end
 -- **************************************************************************************
 --
 local function write(widget)
-  if debug_mode then print("Writing config to file "..getConfigurationFilePath()) end
+  if debug_mode then log("Writing config to file: "..getConfigurationFilePath()) end
     local function color(rgba)
         -- BEWARE, this might be hardware specific
         local r, g, b, a =
@@ -637,7 +647,7 @@ local function drawCurvedSlider(x, y, intR, extR, startAngle, endAngle)
     elseif (startAngle + endAngle) == 180 then --bottom slider
         lcd.drawFilledRectangle(x - 1, y + extR, -math.abs(extR - intR), 3)
     else
-        print("unknow type slider")
+        log("unknow type slider", ANSI_RED)
     end
 end
 local function drawStick(cx, cy, r)
@@ -657,7 +667,7 @@ end
 -- **************************************************************************************
 local function build(widget)
     -- here we set widget.radio
-    if debug_mode then print("Build called") end
+    if debug_mode then log("Build called") end
     local function load(filename)
         local env = { -- add some method to parse the definition
             drawStick=drawStick,
@@ -670,12 +680,12 @@ local function build(widget)
             drawCurvedSlider=drawCurvedSlider,
         }
         setmetatable(env, {__index = _G}) -- allow access to all globals
-        if debug_mode then print(string.format("loading definition from %s", filename)) end
+        if debug_mode then log(string.format("Reading definition from %s", filename)) end
         local chunk, msg = loadfile(filename,"bt", env)
         if chunk then
             return assert(chunk())
         end
-        if msg then warn(msg) end
+        if msg then log(msg, ANSI_RED) end
         env = nil
         return false
     end
@@ -691,13 +701,15 @@ local function build(widget)
         widget.radio = load(swmapFile)
     else
         widget.radio = false
+        log(string.format("%s not found", customFile), ANSI_YELLOW)
+        log(string.format("%s not found", swmapFile), ANSI_YELLOW)
     end
     -- he we set colors in case darkmode was changed
     inactiveSwitchColor = lcd.darkMode() and lcd.RGB(0x21, 0x20, 0x21) or lcd.RGB(0xf7, 0xf3, 0xf7)
     -- update translation file if needed
     if i18n.getLocale() ~= system.getLocale() then
         local locale = system.getLocale()
-        if debug_mode then print("new locale "..locale) end
+        if debug_mode then log("new locale "..locale) end
         i18n.changeLocale(locale)
     end
 end
