@@ -221,7 +221,11 @@ local function paint(widget)
     -- alert if non supported definition
     if widget.radio == false then
         lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
-        lcd.drawText( 5, 30, string.format("%sx%s : unsupported widget size for %s, Try Full Screen", w, h, sys.board))
+        lcd.drawText( 5, 30, string.format("%sx%s : unsupported widget size for %s", w, h, sys.board))
+        if not isFullScreen(w, h) then
+            local _, lineHeight = lcd.getTextSize("")
+            lcd.drawText(5, 30 + lineHeight, "Try Full Screen")
+        end
         return
     end
 
