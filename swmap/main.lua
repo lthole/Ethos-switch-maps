@@ -114,30 +114,6 @@ local function getRadioId(board)
     else return 'X20' end
 end
 
----checks if resolution is supported for the given board
----@param board string a board returned by sys.board
----@param w integer the window with
----@param h integer the window height
----@return boolean
-local function isResolutionSupported(board, w, h)
-    local supported = {
-        ["X20PRO"]={{800,480}, {784, 316}},
-        ["X20R"]={{800,480}, {784, 316}},
-        ["X18RS"]={{800,480}, {784, 316}},
-        ["X20"]={{800,480}, {784, 316}},
-    }
-    local radioId = getRadioId(board)
-    local resolutions = supported[radioId] or {}
-    for _, def in pairs(resolutions) do
-        if w == def[1] and h == def[2] then
-            if debug_mode then print(string.format("Board: %s (RadioId: %s), resolution %sx%s is supported", board, radioId, w, h)) end
-            return true
-        end
-    end
-    if debug_mode then print(string.format("Board: %s (RadioId: %s), resolution %sx%s not supported", board, radioId, w, h)) end
-    return false
-end
-
 --define function for retrieving translations from translation files
 local STR = assert(loadfile("i18n/i18n.lua"))().translate
 
@@ -683,15 +659,15 @@ local function build(widget)
     local radioId = getRadioId(board)
 
     local customFile = string.format("radios/custom/%s-%sx%s.lua", board, w, h)
----@diagnostic disable-next-line: undefined-field
+    local swmapFile = string.format("radios/%sx%s/%s.lua", w, h, radioId)
     if os.stat(customFile) then
         widget.radio = load(customFile)
-    elseif isResolutionSupported(board, w, h) then
-        local file = string.format("radios/%sx%s/%s.lua", w, h, radioId)
-        widget.radio = load(file)
+    elseif os.stat(swmapFile) then
+        widget.radio = load(swmapFile)
     else
         widget.radio = false
     end
+    -- he we set colors in case darkmode was changed
     inactiveSwitchColor = lcd.darkMode() and lcd.RGB(0x21, 0x20, 0x21) or lcd.RGB(0xf7, 0xf3, 0xf7)
 end
 

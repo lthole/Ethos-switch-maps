@@ -54,3 +54,8 @@ function drawSlider(x, y, w, h) end
 ---@param startAngle integer in degrees
 ---@param endAngle integer in degrees
 function drawCurvedSlider(x, y, intR, extR, startAngle, endAngle) end
+
+---Check if file exist
+---@param filename string relative or full path filename
+---@return nil\table
+function os.stat(filename) end
