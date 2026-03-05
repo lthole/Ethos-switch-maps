@@ -116,6 +116,11 @@ local STR = i18n.translate
 -- *** The parameters written by the write handler should, of course, also be loaded  ***
 -- *** when the model is loaded (or otherwise). This is done by the read handler.     ***
 -- **************************************************************************************
+-- we do not use the read method, the reason is that the standard workflow in Ethos is:
+-- existing widget -> create -> read -> build -> paint
+-- new widget -> create -> write -> build -> paint
+-- as we use a permanent storage we need to call the read equivalent from create
+
 
 ---read a configuration file
 ---@param basename string|nil filename of the file without path if nil, reads the model's configuration
@@ -143,17 +148,6 @@ local function readConfiguration(basename)
         log(string.format("could not load %s", getConfigurationFilePath(basename)), ANSI_YELLOW)
     end
     return nil
-end
-
-local function read(widget)
-    if debug_mode then print("Reading config from file io storage") end
-    --if debug_mode and onStart then print("192 lothar: start reading widget config @" .. os.clock(),"   ***************************************   ") end
-    ---@diagnostic disable-next-line: undefined-field
-    local config = readConfiguration()
-    -- Note fields to read must be defined in readConfiguration (white list)
-    if config then
-        applyConfig(widget, config)
-    end
 end
 
 -- **************************************************************************************
@@ -200,26 +194,19 @@ end
 local function create()
     if debug_mode then log("create called") end
     local widget = defaultConfig()
-
-    -- Bug: if you create a widget on Screen2, add an example, return to Screen2
-    -- then delete page Screen2, create a new Screen2 page and add swmap widget again
-    -- the bug appears: read widget is not called and so current config is lost.
-    --
-    -- This not an Ethos Bug, since in Ethos, config are deleted as soon as widget is deleted
-    -- so the Ethos logic is not to call read for new widget
-    --
-    -- However, in our implementation storage is permanent so we have to do something...
-    --
-    -- By forcing a read widget here, we ensure it will be called at least once but
-    -- unfortunatly in most case it will be twice.
-    read(widget)
+    -- see in the code under the read method why we do not use it and instead readConfiguration here
+    local config = readConfiguration()
+    -- Note fields to read must be defined in readConfiguration (white list)
+    if config then
+        applyConfig(widget, config)
+    end
     return widget
 end
 
 -- **************************************************************************************
 -- ***                               WakeUp handler                                   ***
 -- **************************************************************************************
---
+-- not used, we prefer build
 
 
 -- **************************************************************************************
@@ -722,7 +709,7 @@ end
 -- **************************************************************************************
 --
 local function init()
-    system.registerWidget({key="swmap", name=name, build=build, create=create, paint=paint, configure=configure, read=read, write=write, event=event, title=false})
+    system.registerWidget({key="swmap", name=name, build=build, create=create, paint=paint, configure=configure, write=write, event=event, title=false})
 end
 
 
