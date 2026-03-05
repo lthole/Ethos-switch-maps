@@ -89,7 +89,8 @@ local function getRadioId(board)
 end
 
 --define function for retrieving translations from translation files
-local STR = assert(loadfile("i18n/i18n.lua"))().translate
+local i18n = assert(loadfile("i18n/i18n.lua"))()
+local STR = i18n.translate
 
 
 -- **************************************************************************************
@@ -692,6 +693,12 @@ local function build(widget)
     end
     -- he we set colors in case darkmode was changed
     inactiveSwitchColor = lcd.darkMode() and lcd.RGB(0x21, 0x20, 0x21) or lcd.RGB(0xf7, 0xf3, 0xf7)
+    -- update translation file if needed
+    if i18n.getLocale() ~= system.getLocale() then
+        local locale = system.getLocale()
+        if debug_mode then print("new locale "..locale) end
+        i18n.changeLocale(locale)
+    end
 end
 
 -- **************************************************************************************
