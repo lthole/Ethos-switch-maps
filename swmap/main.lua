@@ -75,6 +75,29 @@ local function getConfigurationFilePath(basename)
     return configurationPath .. string.gsub(model.name(),'[^%w_-]', '-') .. ".lua"
 end
 
+
+---returns our own radio identification string
+---@param board (string) a board returned by sys.board
+---@return string our identification used to find the radio definitions
+local function getRadioId(board)
+    -- do return 'X18RS' end
+    if board:sub(1,6)=="X20PRO" or board:sub(1,2)=="XE" then return 'X20PRO'
+    elseif board:sub(1,5)=="X20RS" then return 'X20R' -- explicitly show X20RS support
+    elseif board:sub(1,4)=="X20R" then return 'X20R'
+    elseif board:sub(1,5)=="X18RS" then return 'X18RS'
+    else return 'X20' end
+end
+
+--define function for retrieving translations from translation files
+local STR = assert(loadfile("i18n/i18n.lua"))().translate
+
+
+-- **************************************************************************************
+-- ***		     read widget	 	   		                                          ***
+-- *** The parameters written by the write handler should, of course, also be loaded  ***
+-- *** when the model is loaded (or otherwise). This is done by the read handler.     ***
+-- **************************************************************************************
+
 ---read a configuration file
 ---@param basename string|nil filename of the file without path if nil, reads the model's configuration
 ---@return table<string, string|integer|boolean>|nil
@@ -102,20 +125,18 @@ local function readConfiguration(basename)
     return nil
 end
 
----returns our own radio identification string
----@param board (string) a board returned by sys.board
----@return string our identification used to find the radio definitions
-local function getRadioId(board)
-    -- do return 'X18RS' end
-    if board:sub(1,6)=="X20PRO" or board:sub(1,2)=="XE" then return 'X20PRO'
-    elseif board:sub(1,5)=="X20RS" then return 'X20R' -- explicitly show X20RS support
-    elseif board:sub(1,4)=="X20R" then return 'X20R'
-    elseif board:sub(1,5)=="X18RS" then return 'X18RS'
-    else return 'X20' end
+local function read(widget)
+    if debug_mode then print("Reading config from file io storage") end
+    --if debug_mode and onStart then print("192 lothar: start reading widget config @" .. os.clock(),"   ***************************************   ") end
+    ---@diagnostic disable-next-line: undefined-field
+    local config = readConfiguration()
+    -- Note fields to read must be defined in readConfiguration (white list)
+    if config then
+        for k,v in pairs(config) do
+            widget[k] =  v
+        end
+    end
 end
-
---define function for retrieving translations from translation files
-local STR = assert(loadfile("i18n/i18n.lua"))().translate
 
 -- **************************************************************************************
 -- ***		     name widget					                                      ***
@@ -449,24 +470,6 @@ local function configure(widget)
     form.addStaticText(line, nil, STR("ScriptName") .. " v" .. version)
 end
 
--- **************************************************************************************
--- ***		     read widget	 	   		                                          ***
--- *** The parameters written by the write handler should, of course, also be loaded  ***
--- *** when the model is loaded (or otherwise). This is done by the read handler.     ***
--- **************************************************************************************
-
-local function read(widget)
-    if debug_mode then print("Reading config from file io storage") end
-    --if debug_mode and onStart then print("192 lothar: start reading widget config @" .. os.clock(),"   ***************************************   ") end
-    ---@diagnostic disable-next-line: undefined-field
-    local config = readConfiguration()
-    -- Note fields to read must be defined in readConfiguration (white list)
-    if config then
-        for k,v in pairs(config) do
-            widget[k] =  v
-        end
-    end
-end
 
 -- **************************************************************************************
 -- ***		     write widget	 	   		                                          ***
