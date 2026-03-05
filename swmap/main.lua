@@ -147,7 +147,6 @@ local function name()		-- name script, appears in widget selection list
 end
 
 
-
 -- **************************************************************************************
 -- ***		    startup (onetime) handler		                                      ***
 -- ***	         returns widget vars			                                      ***
@@ -179,6 +178,19 @@ local function create()
         widget.curposx = 0
         widget.curposy = 0
     end
+
+    -- Bug: if you create a widget on Screen2, add an example, return to Screen2
+    -- then delete page Screen2, create a new Screen2 page and add swmap widget again
+    -- the bug appears: read widget is not called and so current config is lost.
+    --
+    -- This not an Ethos Bug, since in Ethos, config are deleted as soon as widget is deleted
+    -- so the Ethos logic is not to call read for new widget
+    --
+    -- However, in our implementation storage is permanent so we have to do something...
+    --
+    -- By forcing a read widget here, we ensure it will be called at least once but
+    -- unfortunatly in most case it will be twice.
+    read(widget)
     return widget
 end
 
