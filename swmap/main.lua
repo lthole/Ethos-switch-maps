@@ -34,6 +34,7 @@
 -- **************************************************************************************
 
 local version="1.0.2"
+local build -- defined here as configure needs it
 -- Get information for Transmitter
 local sys = system.getVersion()
 
@@ -353,6 +354,10 @@ end
 -- **************************************************************************************
 --
 local function configure(widget)
+    if widget.radio == nil then
+        -- happens when configuring widget from screen without having displayed it first
+        build(widget)
+    end
     local function _checkIfEmpty()
         for _, k in pairs(radioSwitches) do
             if widget[k] ~= "" then
@@ -653,9 +658,14 @@ end
 -- ***		     build widget		 	   		                                      ***
 -- This handler is called after widget.create and on each layout change.              ***
 -- **************************************************************************************
-local function build(widget)
+build = function(widget)
     -- here we set widget.radio
     if debug_mode then log("Build called") end
+    local function guessHeightFromWidth(w)
+        if debug_mode then log(string.format("We have to guess the height from the witdh: %s", w), ANSI_YELLOW) end
+        local knownSizes = {[800]=480, [784]=316, [480]=320}
+        return knownSizes[w]
+    end
     local function load(filename)
         local env = { -- add some method to parse the definition
             drawStick=drawStick,
@@ -678,6 +688,10 @@ local function build(widget)
         return false
     end
     local w, h = lcd.getWindowSize()
+    if h == 0 then
+        -- case where build is called from configure
+        h = guessHeightFromWidth(w) or 0
+    end
     local board = sys.board
     local radioId = getRadioId(board)
 
