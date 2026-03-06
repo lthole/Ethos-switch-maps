@@ -1,16 +1,21 @@
-local locale = system.getLocale()
---print("Get system language flag: ", locale)
+local locale
 
 local i18nMap = {
   en = assert(loadfile("i18n/en.lua"))(),
 }
 
 local i18nFiles = system.listFiles("i18n")
-for _, value in ipairs(i18nFiles) do
-  if value == (locale .. ".lua") then
-    i18nMap[locale] = assert(loadfile("i18n/" .. locale .. ".lua"))()
-  end
+local function changeLocale(newLocale)
+    if newLocale == locale then return end
+    if locale and locale ~= "en" then i18nMap[locale] = nil end
+    for _, value in ipairs(i18nFiles) do
+        if value == (newLocale .. ".lua") then
+            i18nMap[newLocale] = assert(loadfile("i18n/" .. newLocale .. ".lua"))()
+        end
+    end
+    locale = newLocale
 end
+changeLocale(system.getLocale())
 
 local function translate(key, paramTable)
   local ANSI_BOLD_YELLOW = "\27[1;33m"
@@ -29,4 +34,4 @@ local function translate(key, paramTable)
   return translation
 end
 
-return { translate = translate }
+return { translate=translate, changeLocale=changeLocale, getLocale=function() return locale end }

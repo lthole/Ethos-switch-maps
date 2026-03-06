@@ -34,11 +34,22 @@
 -- **************************************************************************************
 
 local version="1.0.2"
+local build -- defined here as configure needs it
 -- Get information for Transmitter
 local sys = system.getVersion()
 
 local debug_mode=false -- sys.simulation or true or false only
-if debug_mode then print("SWMAP Debug MODE ON") end
+local ANSI_BLACK = "\27[1;30m"
+local ANSI_RED = "\27[1;31m"
+local ANSI_GREEN = "\27[1;32m"
+local ANSI_YELLOW = "\27[1;33m"
+local ANSI_CYAN = "\27[0;36m"
+local function log(text, ansiColor)
+    if not ansiColor then ansiColor = ANSI_CYAN end -- black is unreadable on ethos.studio1247.com
+    local ANSI_RESET = "\27[0m"
+    print(ansiColor..tostring(text)..ANSI_RESET)
+end
+if debug_mode then log("SWMAP Debug MODE ON") end
 
 local defaultTextColorDark = lcd.RGB(0, 0xFF, 0xFF)
 local defaultTextColorLight = lcd.RGB(0x58, 0x5C, 0x58)
@@ -64,6 +75,15 @@ local function isFullScreen(w, h)
     return w == sys.lcdWidth and h == sys.lcdHeight
 end
 
+--- copy a config into a widget
+--- @param widget table
+--- @param config table
+local function applyConfig(widget, config)
+    for k,v in pairs(config) do
+        widget[k] =  v
+    end
+end
+
 --- returns the configuration pathname
 ---@param basename nil|(string) the filename without path or nil
 ---@return string the pathname to the model's configuration or the pathname for basename
@@ -75,12 +95,41 @@ local function getConfigurationFilePath(basename)
     return configurationPath .. string.gsub(model.name(),'[^%w_-]', '-') .. ".lua"
 end
 
+
+---returns our own radio identification string
+---@param board (string) a board returned by sys.board
+---@return string our identification used to find the radio definitions
+local function getRadioId(board)
+    -- do return 'X18RS' end
+    if board:sub(1,6)=="X20PRO" or board:sub(1,2)=="XE" then return 'X20PRO'
+    elseif board:sub(1,5)=="X20RS" then return 'X20R' -- explicitly show X20RS support
+    elseif board:sub(1,4)=="X20R" then return 'X20R'
+    elseif board:sub(1,5)=="X18RS" then return 'X18RS'
+    else return 'X20' end
+end
+
+--define function for retrieving translations from translation files
+local i18n = assert(loadfile("i18n/i18n.lua"))()
+local STR = i18n.translate
+
+
+-- **************************************************************************************
+-- ***		     read widget	 	   		                                          ***
+-- *** The parameters written by the write handler should, of course, also be loaded  ***
+-- *** when the model is loaded (or otherwise). This is done by the read handler.     ***
+-- **************************************************************************************
+-- we do not use the read method, the reason is that the standard workflow in Ethos is:
+-- existing widget -> create -> read -> build -> paint
+-- new widget -> create -> write -> build -> paint
+-- as we use a permanent storage we need to call the read equivalent from create
+
+
 ---read a configuration file
 ---@param basename string|nil filename of the file without path if nil, reads the model's configuration
 ---@return table<string, string|integer|boolean>|nil
 local function readConfiguration(basename)
     local config = {}
-    if debug_mode then print("loading configuration "..getConfigurationFilePath(basename)) end
+    if debug_mode then log("Reading configuration from file: "..getConfigurationFilePath(basename)) end
     local chunk = loadfile(getConfigurationFilePath(basename), "bt", {lcd=lcd})-- load the config file passing only the lcd global variable
     if chunk then
         local data = chunk()
@@ -97,49 +146,11 @@ local function readConfiguration(basename)
         end
         return config
     else
-        warn(string.format("could not load %s", getConfigurationFilePath(basename)))
+        -- might be normal for a new model
+        log(string.format("could not load %s", getConfigurationFilePath(basename)), ANSI_YELLOW)
     end
     return nil
 end
-
----returns our own radio identification string
----@param board (string) a board returned by sys.board
----@return string our identification used to find the radio definitions
-local function getRadioId(board)
-    -- do return 'X18RS' end
-    if board:sub(1,6)=="X20PRO" or board:sub(1,2)=="XE" then return 'X20PRO'
-    elseif board:sub(1,5)=="X20RS" then return 'X20R' -- explicitly show X20RS support
-    elseif board:sub(1,4)=="X20R" then return 'X20R'
-    elseif board:sub(1,5)=="X18RS" then return 'X18RS'
-    else return 'X20' end
-end
-
----checks if resolution is supported for the given board
----@param board string a board returned by sys.board
----@param w integer the window with
----@param h integer the window height
----@return boolean
-local function isResolutionSupported(board, w, h)
-    local supported = {
-        ["X20PRO"]={{800,480}, {784, 316}},
-        ["X20R"]={{800,480}, {784, 316}},
-        ["X18RS"]={{800,480}, {784, 316}},
-        ["X20"]={{800,480}, {784, 316}},
-    }
-    local radioId = getRadioId(board)
-    local resolutions = supported[radioId] or {}
-    for _, def in pairs(resolutions) do
-        if w == def[1] and h == def[2] then
-            if debug_mode then print(string.format("Board: %s (RadioId: %s), resolution %sx%s is supported", board, radioId, w, h)) end
-            return true
-        end
-    end
-    if debug_mode then print(string.format("Board: %s (RadioId: %s), resolution %sx%s not supported", board, radioId, w, h)) end
-    return false
-end
-
---define function for retrieving translations from translation files
-local STR = assert(loadfile("i18n/i18n.lua"))().translate
 
 -- **************************************************************************************
 -- ***		     name widget					                                      ***
@@ -150,7 +161,6 @@ local function name()		-- name script, appears in widget selection list
 end
 
 
-
 -- **************************************************************************************
 -- ***		    startup (onetime) handler		                                      ***
 -- ***	         returns widget vars			                                      ***
@@ -159,12 +169,10 @@ end
 -- *** time. In the create handler, the "central data structure" or an array is       ***
 -- *** typically defined, which can be passed to other handlers.                      ***
 -- *** This data structure must be defined as the return value of the handler.        ***
--- ***                                                                                ***
--- *** NON STANDARD: create is also called when we reset template in configure method ***
 -- **************************************************************************************
---
-local function create()
-    if debug_mode then print("create called") end
+
+-- also used in configure to load example/template
+local function defaultConfig()
     local widget = {
         DisplayAll=true,
         DisplaySwitchNames=true,
@@ -185,10 +193,22 @@ local function create()
     return widget
 end
 
+local function create()
+    if debug_mode then log("create called") end
+    local widget = defaultConfig()
+    -- see in the code under the read method why we do not use it and instead readConfiguration here
+    local config = readConfiguration()
+    -- Note fields to read must be defined in readConfiguration (white list)
+    if config then
+        applyConfig(widget, config)
+    end
+    return widget
+end
+
 -- **************************************************************************************
 -- ***                               WakeUp handler                                   ***
 -- **************************************************************************************
---
+-- not used, we prefer build
 
 
 -- **************************************************************************************
@@ -208,7 +228,11 @@ local function paint(widget)
     -- alert if non supported definition
     if widget.radio == false then
         lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
-        lcd.drawText( 5, 30, string.format("%sx%s : unsupported widget size for %s, Try Full Screen", w, h, sys.board))
+        lcd.drawText( 5, 30, string.format("%sx%s : unsupported widget size for %s", w, h, sys.board))
+        if not isFullScreen(w, h) then
+            local _, lineHeight = lcd.getTextSize("")
+            lcd.drawText(5, 30 + lineHeight, "Try Full Screen")
+        end
         return
     end
 
@@ -297,7 +321,7 @@ local function paint(widget)
         lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
         lcd.drawText(w/2, h - select(2, lcd.getTextSize("")) - 2, STR("Focus"), TEXT_CENTERED)
     end
-    if debug_mode then print(string.format("paint time %sms", (os.clock() - timestamp) * 1000)) end
+    if debug_mode then log(string.format("paint time %sms", (os.clock() - timestamp) * 1000)) end
 end
 
 -- **************************************************************************************
@@ -330,6 +354,10 @@ end
 -- **************************************************************************************
 --
 local function configure(widget)
+    if widget.radio == nil then
+        -- happens when configuring widget from screen without having displayed it first
+        build(widget)
+    end
     local function _checkIfEmpty()
         for _, k in pairs(radioSwitches) do
             if widget[k] ~= "" then
@@ -342,22 +370,18 @@ local function configure(widget)
 
     local function loadTemplate(basename)
         -- reset all to default
-        local config = create()
-        for k,v in pairs(config) do
-            widget[k] = v
-        end
+        local config = defaultConfig()
+        applyConfig(widget, config)
         -- then load
         if basename then
             local config = readConfiguration(basename)
             if config then
-                for k, v in pairs(config) do
-                    widget[k] = v
-                end
+                applyConfig(widget, config)
             end
         end
     end
     local function loadExample()
-        local config = create()
+        local config = defaultConfig()
         config["SA"] = "Stab"
         config["SB"] = "Call telem"
         config["SE"] = "FMode"
@@ -370,9 +394,7 @@ local function configure(widget)
         config["S1"] = "Stab gain"
         config["S2"] = "SL gain"
         config["S3"] = "Volume"
-        for k,v in pairs(config) do
-            widget[k] = v
-        end
+        applyConfig(widget, config)
     end
     local function buildChoices() -- build a choice list for the form
         local choices = {} -- choices for the form
@@ -473,24 +495,6 @@ local function configure(widget)
     form.addStaticText(line, nil, STR("ScriptName") .. " v" .. version)
 end
 
--- **************************************************************************************
--- ***		     read widget	 	   		                                          ***
--- *** The parameters written by the write handler should, of course, also be loaded  ***
--- *** when the model is loaded (or otherwise). This is done by the read handler.     ***
--- **************************************************************************************
-
-local function read(widget)
-    if debug_mode then print("Reading config from file io storage") end
-    --if debug_mode and onStart then print("192 lothar: start reading widget config @" .. os.clock(),"   ***************************************   ") end
-    ---@diagnostic disable-next-line: undefined-field
-    local config = readConfiguration()
-    -- Note fields to read must be defined in readConfiguration (white list)
-    if config then
-        for k,v in pairs(config) do
-            widget[k] =  v
-        end
-    end
-end
 
 -- **************************************************************************************
 -- ***		     write widget	 	   		                                          ***
@@ -500,7 +504,7 @@ end
 -- **************************************************************************************
 --
 local function write(widget)
-  if debug_mode then print("Writing config to file "..getConfigurationFilePath()) end
+  if debug_mode then log("Writing config to file: "..getConfigurationFilePath()) end
     local function color(rgba)
         -- BEWARE, this might be hardware specific
         local r, g, b, a =
@@ -636,7 +640,7 @@ local function drawCurvedSlider(x, y, intR, extR, startAngle, endAngle)
     elseif (startAngle + endAngle) == 180 then --bottom slider
         lcd.drawFilledRectangle(x - 1, y + extR, -math.abs(extR - intR), 3)
     else
-        print("unknow type slider")
+        log("unknow type slider", ANSI_RED)
     end
 end
 local function drawStick(cx, cy, r)
@@ -654,9 +658,14 @@ end
 -- ***		     build widget		 	   		                                      ***
 -- This handler is called after widget.create and on each layout change.              ***
 -- **************************************************************************************
-local function build(widget)
+build = function(widget)
     -- here we set widget.radio
-    if debug_mode then print("Build called") end
+    if debug_mode then log("Build called") end
+    local function guessHeightFromWidth(w)
+        if debug_mode then log(string.format("We have to guess the height from the witdh: %s", w), ANSI_YELLOW) end
+        local knownSizes = {[800]=480, [784]=316, [480]=320}
+        return knownSizes[w]
+    end
     local function load(filename)
         local env = { -- add some method to parse the definition
             drawStick=drawStick,
@@ -669,30 +678,42 @@ local function build(widget)
             drawCurvedSlider=drawCurvedSlider,
         }
         setmetatable(env, {__index = _G}) -- allow access to all globals
-        if debug_mode then print(string.format("loading definition from %s", filename)) end
+        if debug_mode then log(string.format("Reading definition from %s", filename)) end
         local chunk, msg = loadfile(filename,"bt", env)
         if chunk then
             return assert(chunk())
         end
-        if msg then warn(msg) end
+        if msg then log(msg, ANSI_RED) end
         env = nil
         return false
     end
     local w, h = lcd.getWindowSize()
+    if h == 0 then
+        -- case where build is called from configure
+        h = guessHeightFromWidth(w) or 0
+    end
     local board = sys.board
     local radioId = getRadioId(board)
 
     local customFile = string.format("radios/custom/%s-%sx%s.lua", board, w, h)
----@diagnostic disable-next-line: undefined-field
+    local swmapFile = string.format("radios/%sx%s/%s.lua", w, h, radioId)
     if os.stat(customFile) then
         widget.radio = load(customFile)
-    elseif isResolutionSupported(board, w, h) then
-        local file = string.format("radios/%sx%s/%s.lua", w, h, radioId)
-        widget.radio = load(file)
+    elseif os.stat(swmapFile) then
+        widget.radio = load(swmapFile)
     else
         widget.radio = false
+        log(string.format("%s not found", customFile), ANSI_YELLOW)
+        log(string.format("%s not found", swmapFile), ANSI_YELLOW)
     end
+    -- he we set colors in case darkmode was changed
     inactiveSwitchColor = lcd.darkMode() and lcd.RGB(0x21, 0x20, 0x21) or lcd.RGB(0xf7, 0xf3, 0xf7)
+    -- update translation file if needed
+    if i18n.getLocale() ~= system.getLocale() then
+        local locale = system.getLocale()
+        if debug_mode then log("new locale "..locale) end
+        i18n.changeLocale(locale)
+    end
 end
 
 -- **************************************************************************************
@@ -703,7 +724,7 @@ end
 -- **************************************************************************************
 --
 local function init()
-    system.registerWidget({key="swmap", name=name, build=build, create=create, paint=paint, configure=configure, read=read, write=write, event=event, title=false})
+    system.registerWidget({key="swmap", name=name, build=build, create=create, paint=paint, configure=configure, write=write, event=event, title=false})
 end
 
 
