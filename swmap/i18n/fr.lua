@@ -36,7 +36,7 @@ return {
   T6text = "Trim T6",
   TextColor = "Couleur texte",
   ControlsColor = "Couleur contrôles",
-  SwitchExpansionTitle="Label des inters",
+  SwitchExpansionTitle="Etiquette des inters",
   ConfirmDialogTitle="Confirmation",
   WidgetInformation="Information Widget",
   ButtonNo="Non",
@@ -48,11 +48,11 @@ return {
   ExampleLine="Démarrage rapide",
   ExampleButton="Charger un exemple",
   Focus="FOCUS",
-  WidgetVersion="Widget version",
-  NoteColor="Note Color",
+  WidgetVersion="Version du Widget",
+  NoteColor="Couleur des notes",
   Note1="Note1",
   Note2="Note2",
-  DisplayVersion="Display script version?",
-  DisplayModelName="Display model's name?",
-  FullScreenOptions="Options for Full Screen only"
+  DisplayVersion="Afficher la version du script ?",
+  DisplayModelName="Afficher le nom du modèle ?",
+  FullScreenOptions="Options du Plein Ecran uniquement"
 }
