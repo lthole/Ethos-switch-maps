@@ -47,7 +47,7 @@ local ANSI_CYAN = "\27[0;36m"
 local function log(text, ansiColor)
     if not ansiColor then ansiColor = ANSI_CYAN end -- black is unreadable on ethos.studio1247.com
     local ANSI_RESET = "\27[0m"
-    print(ansiColor..tostring(text)..ANSI_RESET)
+    print(ansiColor.."[swmap] "..tostring(text)..ANSI_RESET)
 end
 if debug_mode then log("SWMAP Debug MODE ON") end
 
