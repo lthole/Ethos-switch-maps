@@ -47,7 +47,7 @@ local ANSI_CYAN = "\27[0;36m"
 local function log(text, ansiColor)
     if not ansiColor then ansiColor = ANSI_CYAN end -- black is unreadable on ethos.studio1247.com
     local ANSI_RESET = "\27[0m"
-    print(ansiColor..tostring(text)..ANSI_RESET)
+    print(ansiColor.."[swmap] "..tostring(text)..ANSI_RESET)
 end
 if debug_mode then log("SWMAP Debug MODE ON") end
 
@@ -661,11 +661,6 @@ end
 build = function(widget)
     -- here we set widget.radio
     if debug_mode then log("Build called") end
-    local function guessHeightFromWidth(w)
-        if debug_mode then log(string.format("We have to guess the height from the witdh: %s", w), ANSI_YELLOW) end
-        local knownSizes = {[800]=480, [784]=316, [480]=320}
-        return knownSizes[w]
-    end
     local function load(filename)
         local env = { -- add some method to parse the definition
             drawStick=drawStick,
@@ -690,7 +685,10 @@ build = function(widget)
     local w, h = lcd.getWindowSize()
     if h == 0 then
         -- case where build is called from configure
-        h = guessHeightFromWidth(w) or 0
+        -- we assume that if a radio definition always exists for full screen
+        log("assuming a full screen definition file exists")
+        w = sys.lcdWidth
+        h = sys.lcdHeight
     end
     local board = sys.board
     local radioId = getRadioId(board)

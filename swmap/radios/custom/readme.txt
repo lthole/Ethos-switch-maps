@@ -20,5 +20,5 @@ rename it, place it in this directory. Now you can edit it.
 Please once again, pay attention to the naming. Provided definition files do not use
 the board name but an internal RadioId. Do use your board name.
 
-Implementation note: If you need a size which is different from 800x480, 784x316
-or 480x320, please advise the developer as the build function must be modified.
+For the time being, it is mandatory to have a custom radio definition in full screen,
+but you can provide other resolutions as well.
