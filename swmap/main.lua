@@ -8,23 +8,33 @@
 -- 2025-07-09 v0.4 add file io for config storage due to widget.write memory limitations
 -- 2025-07-10 v0.5 ehancements per @Alex00101: move model.filename(); use 'SCRIPTS:/swmap/...' in paths; add localization; make STR local.
 -- 2026-02-25 v1.0 enhancements from @flyingeek:
---     decoupled the code from radio definition files
---     added X18RS
---     changed trim on X20R and X20RS (horizontal)
---     added focus border
---     fix Pot S2 placement
---     added bold switch names and dashed lines
---     added multiple resolutions compatibility per radio to allow full screen and non full screen
---     in simulator, only handles evt_touch category to still allow the use of other controls
---     revised template loading implemented
---     write routine is now quote safe (if case you tape a quote in the switch description)
---     write routine now write colors like this: "lcd.RGB(0xf8, 0xc0, 0x00)", config file using the old syntax are still valid.
---     moved switches inside a panel on the configure page
---     added widget version in configure page
---     no more focus border on full screen, instead the widget information (bottom right) is shown in the focus color
---     light mode theme support
+--   decoupled the code from radio definition files
+--   added X18RS
+--   changed trim on X20R and X20RS (horizontal)
+--   added focus border
+--   fix Pot S2 placement
+--   added bold switch names and dashed lines
+--   added multiple resolutions compatibility per radio to allow full screen and non full screen
+--   in simulator, only handles evt_touch category to still allow the use of other controls
+--   revised template loading implemented
+--   write routine is now quote safe (if case you tape a quote in the switch description)
+--   write routine now write colors like this: "lcd.RGB(0xf8, 0xc0, 0x00)", config file using the old syntax are still valid.
+--   moved switches inside a panel on the configure page
+--   added widget version in configure page
+--   no more focus border on full screen, instead the widget information (bottom right) is shown in the focus color
+--   light mode theme support
 -- 2026-02-26 v1.0.1 Some radios not working (Discussion #6)
 -- 2026-02-28 v1.0.2 fix the configuration form when first launched from Screens page
+-- 2026-03-10 v1.1.0 enha
+--   fix: wakeup only run when widget is visible
+--   fix: added XE radio switches to the list of supported switches
+--   fix: text color on light theme
+--   feature: changed focus hint
+--   feature: enhanced graphic representation (still using draw)
+--   feature: configuration file includes script version, colors shown as hex and decimals
+--   feature: improved debug_mode
+--   feature: possibility to create custom radio definition file to override buttons or whatever (see radios/custom/readme.txt)
+--   feature: in full screen mode you can add up to two notes, and display the model name
 --
 --
 -- **************************************************************************************
@@ -33,7 +43,7 @@
 -- *** load (radio start).                                                            ***
 -- **************************************************************************************
 
-local version="1.0.2"
+local version="1.1.0"
 local build -- defined here as configure needs it
 -- Get information for Transmitter
 local sys = system.getVersion()
