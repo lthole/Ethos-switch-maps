@@ -20,6 +20,8 @@ Make sure you are in the correct model, then go into ‘Configure Screens’ and
 
 Note: Since version 0.5 swmap now uses file i/o for storage in your eMMC or SD drive, due to insufficient storage in the widget read/write area. The template folder in v0.5 is no longer used.
 
+Please note that this switch maps widget cannot co-reside with Benno's version.
+
 ### Upload option:
 After creating the new widget, the contents of the template.txt file should already be pre-loaded. You can then add new entries or edit the pre-loaded ones.
 Any Saved Model configurations can be used as a template, they are in swmap/models/
