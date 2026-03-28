@@ -111,7 +111,8 @@ end
 ---@return string our identification used to find the radio definitions
 local function getRadioId(board)
     -- do return 'X18RS' end
-    if board:sub(1,6)=="X20PRO" or board:sub(1,2)=="XE" then return 'X20PRO'
+    if board:sub(1,6)=="X20PRO" then return 'X20PRO'
+    elseif board:sub(1,2)=="XE" then return 'XE'
     elseif board:sub(1,5)=="X20RS" then return 'X20R' -- explicitly show X20RS support
     elseif board:sub(1,4)=="X20R" then return 'X20R'
     elseif board:sub(1,5)=="X18RS" then return 'X18RS'
