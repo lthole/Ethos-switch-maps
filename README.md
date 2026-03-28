@@ -13,6 +13,8 @@ Custom radio definition files may be created to add unsupported radios (see radi
 
 My widget draws on earlier versions by ronron, Static and Benno. I have also benefited from strgaltdel’s help and Lua Tutorial in GitHub. Bertrand very kindly reviewed it and made some valuable suggestions. Thanks to @flyingeek for the improvements to the later versions.
 
+<img width="800" height="480" alt="image" src="https://github.com/user-attachments/assets/b88a2661-ae9a-45e1-86f7-0d0e5d5fd84a" />
+
 ### Installation:
 Download and unzip the file. Copy the ’swmap’ folder and all its contents to the scripts folder on your radio’s SD card or eMMC.
 
