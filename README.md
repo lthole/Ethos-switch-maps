@@ -27,7 +27,7 @@ Note: Since version 0.5 swmap now uses file i/o for storage in your eMMC or SD d
 Please note that this switch maps widget cannot co-reside with Benno's version.
 
 ### Upload option:
-After creating the new widget, the contents of the template.txt file should already be pre-loaded. You can then add new entries or edit the pre-loaded ones.
+After creating the new widget, there is an option to load an example configuration. You can then add new entries or edit the pre-loaded ones.
 Any Saved Model configurations can be used as a template, they are in swmap/models/
 If no previous configurations are found in swmap/models/, a glider example map will be loaded.
 Once the example is loaded, a Reset button appears. Pressing reset at this stage loads the example again.
