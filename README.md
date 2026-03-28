@@ -15,6 +15,8 @@ My widget draws on earlier versions by ronron, Static and Benno. I have also ben
 
 <img width="800" height="480" alt="image" src="https://github.com/user-attachments/assets/b88a2661-ae9a-45e1-86f7-0d0e5d5fd84a" />
 
+<img width="800" height="480" alt="image" src="https://github.com/user-attachments/assets/74020b05-0126-476b-8201-20ba22ded4b9" />
+
 ### Installation:
 Download and unzip the file. Copy the ’swmap’ folder and all its contents to the scripts folder on your radio’s SD card or eMMC.
 
