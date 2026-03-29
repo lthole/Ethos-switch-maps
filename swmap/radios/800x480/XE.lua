@@ -1,5 +1,6 @@
 -- swmap XE(S) definition for 800x480
 -- T5/T6 vertical
+-- 2026-03-29 reverse text direction for the switches to avoid early overlaps
 
 
 --[[ important:
@@ -36,28 +37,28 @@ return {
         ["draw"]=function () drawSlider(425,203,10,77) end,
     },
     ["SA"] = {
-        ["lines"]={{130,68,210,68}, {190,68,190,78}},
+        ["lines"]={{210,68,130,68}, {190,68,190,78}},
         ["draw"]=function() drawButton3Pos(190,90,12) end,
+        ["align"]=TEXT_RIGHT
     },
     ["SB"] = {
-        ["lines"]={{298,68,218,68}, {238,68,238,78}},
+        ["lines"]={{218,68,298,68}, {238,68,238,78}},
         ["draw"]=function () drawButton2Pos(238, 90, 12) end,
-        ["align"]=TEXT_RIGHT
     },
     ["SC"] = {
         ["draw"]=function () lcd.color(ORANGE) lcd.drawCircle(286,90, 12) end,
     },
     ["SD"] = {
-        ["lines"]={{130,145,210,145}, {190,137,190,145}},
+        ["lines"]={{210,145,130,145}, {190,137,190,145}},
         ["draw"]=function () drawButton3Pos(190,125, 12) end,
         ["offset"]= -2,
-        ["align"]=TEXT_LEFT
+        ["align"]=TEXT_RIGHT
    },
     ["SE"] = {
-        ["lines"]={{298,145,218,145}, {238,137,238,145}},
+        ["lines"]={{218,145,298,145}, {238,137,238,145}},
         ["draw"]=function () drawButton3Pos(238,125, 12) end,
         ["offset"]= -2,
-        ["align"]=TEXT_RIGHT
+        ["align"]=TEXT_LEFT
     },
     ["SF"] = {
         ["draw"]=function () lcd.color(ORANGE) lcd.drawCircle(286, 125, 12) end,
@@ -66,29 +67,29 @@ return {
         ["draw"]=function () lcd.color(ORANGE) lcd.drawCircle(514, 90, 12) end,
     },
     ["SH"] = {
-        ["lines"]={{502,68,582,68}, {562,68,562,78}},
+        ["lines"]={{582,68,502,68}, {562,68,562,78}},
         ["draw"]=function () drawButton1Pos(562, 90, 12) end,
-        ["align"]=TEXT_LEFT
+        ["align"]=TEXT_RIGHT
     },
     ["SI"] = {
-        ["lines"]={{670,68,590,68}, {610,68,610,78}},
+        ["lines"]={{590,68,670,68}, {610,68,610,78}},
         ["draw"]=function () drawButton3Pos(610,90, 12) end,
-        ["align"]=TEXT_RIGHT
+        ["align"]=TEXT_LEFT
     },
     ["SJ"] = {
         ["draw"]=function () lcd.color(ORANGE) lcd.drawCircle(514,125, 12) end,
     },
     ["SK"] = {
-        ["lines"]={{502,145,582,145}, {562,137,562,145}},
+        ["lines"]={{582,145,502,145}, {562,137,562,145}},
         ["draw"]=function () drawButton3Pos(562,125, 12) end,
         ["offset"]= -2,
-        ["align"]=TEXT_LEFT
+        ["align"]=TEXT_RIGHT
     },
     ["SL"] = {
-        ["lines"]={{670,145,590,145}, {610,137,610,145}},
+        ["lines"]={{590,145,670,145}, {610,137,610,145}},
         ["draw"]=function () drawButton3Pos(610,125, 12) end,
         ["offset"]= -2,
-        ["align"]=TEXT_RIGHT
+        ["align"]=TEXT_LEFT
     },
     ["FS1"] = {
         ["lines"]={{5,356,269,356}},
