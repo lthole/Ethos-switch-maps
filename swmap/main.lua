@@ -116,9 +116,9 @@ local function getRadioId(board)
     elseif board:sub(1,2)=="XE" then return 'XE'
     elseif board:sub(1,5)=="X20RS" then return 'X20R' -- explicitly show X20RS support
     elseif board:sub(1,4)=="X20R" then return 'X20R'
-    elseif board:sub(1,5)=="X18RS" then return 'X18RS'
+    elseif board:sub(1,4)=="X18R" then return 'X18RS'
     elseif board == "TWXLITERII" then return 'TWXLITERII'
-    elseif board == "X14RS" then return 'X14RS'
+    elseif board:sub(1,3) == "X14" then return 'X14RS'
     else return 'X20' end
 end
 
