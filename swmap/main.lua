@@ -117,6 +117,8 @@ local function getRadioId(board)
     elseif board:sub(1,5)=="X20RS" then return 'X20R' -- explicitly show X20RS support
     elseif board:sub(1,4)=="X20R" then return 'X20R'
     elseif board:sub(1,5)=="X18RS" then return 'X18RS'
+    elseif board == "TWXLITERII" then return 'TWXLITERII'
+    elseif board == "X14RS" then return 'X14RS'
     else return 'X20' end
 end
 
@@ -322,10 +324,10 @@ local function paint(widget)
         lcd.color(widget.NoteColor or getDefaultTextColor())
         lcd.font(FONT_S)
         if widget.Note1 and widget.Note1 ~= "" then
-            addLegend(widget.Note1, "", {{5,450,select(1, lcd.getTextSize(widget.Note1)) + 5,450}})
+            addLegend(widget.Note1, "", {{5,h-30,select(1, lcd.getTextSize(widget.Note1)) + 5,h-30}})
         end
         if widget.Note2 and widget.Note2 ~= "" then
-            addLegend(widget.Note2, "", {{5,470,select(1, lcd.getTextSize(widget.Note2)) + 5,470}})
+            addLegend(widget.Note2, "", {{5,h-10,select(1, lcd.getTextSize(widget.Note2)) + 5,h-10}})
         end
     elseif lcd.hasFocus() then
         -- when not in full screen, displays simply FOCUS to give a hint
@@ -648,9 +650,9 @@ local function drawCurvedSlider(x, y, intR, extR, startAngle, endAngle)
     elseif (startAngle + endAngle) / 2 == 90 then --right slider
         lcd.drawFilledRectangle(x + extR, y - 1, -math.abs(extR - intR), 3)
     elseif (startAngle + endAngle) == 360 then --top slider
-        lcd.drawFilledRectangle(x - 1, y - extR, math.abs(extR - intR), 3)
+        lcd.drawFilledRectangle(x - 1, y - extR, 3, math.abs(extR - intR))
     elseif (startAngle + endAngle) == 180 then --bottom slider
-        lcd.drawFilledRectangle(x - 1, y + extR, -math.abs(extR - intR), 3)
+        lcd.drawFilledRectangle(x - 1, y + extR, 3, -math.abs(extR - intR))
     else
         log("unknow type slider", ANSI_RED)
     end
