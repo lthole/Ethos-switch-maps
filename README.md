@@ -1,5 +1,12 @@
 # Ethos widget for switch mapping
-Here is my revised Switch Mapping widget for the X20/S, X20R/RS, X20 Pro/AW, XE and X18RS (radios with an 800x400 lcd). My version does not require loading a bitmap background for the switches, because large bitmaps use a large amount of valuable ram. Instead I just draw them.
+Here is my revised Switch Mapping widget for the 
+- X20/S, X20R/RS, X20 Pro/AW
+- XE, XE-S, XE RS, XE RS HD
+- X18R, X18RS
+- Twin XLite RII
+- X14/X14S/X14RS but only full screen 640x360
+
+My version does not require loading a bitmap background for the switches, because large bitmaps use a large amount of valuable ram. Instead I just draw them.
 
 To make it easier to configure widgets for similar models, there is an upload mechanism.
 
