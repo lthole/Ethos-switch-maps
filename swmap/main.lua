@@ -37,6 +37,7 @@
 --   feature: in full screen mode you can add up to two notes, and display the model name
 -- 2026-03-28 added a custom switch map for XE radios (Thanks to @Helischorsch).
 -- 2026-03-29 in xe.lua reverse text direction for the switches to avoid early overlaps
+-- 2026-03-31 add support for Twin XLite RII, X18R, X18RS, also X14/X14S/X14RS but only full screen 640x360 (thanks to @flyingeek)
 --
 -- **************************************************************************************
 -- ***         widget startup code                                                    ***
@@ -44,7 +45,7 @@
 -- *** load (radio start).                                                            ***
 -- **************************************************************************************
 
-local version="1.1.2"
+local version="1.1.3"
 local build -- defined here as configure needs it
 -- Get information for Transmitter
 local sys = system.getVersion()
