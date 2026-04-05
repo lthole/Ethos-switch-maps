@@ -242,11 +242,21 @@ local function paint(widget)
 
     -- alert if non supported definition
     if widget.radio == false then
-        lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
-        lcd.drawText( 5, 30, string.format("%sx%s : unsupported widget size for %s", w, h, sys.board))
-        if not isFullScreen(w, h) then
-            local _, lineHeight = lcd.getTextSize("")
-            lcd.drawText(5, 30 + lineHeight, "Try Full Screen")
+        if lcd.isConfiguring and lcd.isConfiguring() then
+            lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
+            lcd.font(FONT_XL)
+            local text = "Switch Maps"
+            local tw, th = lcd.getTextSize(text)
+            lcd.drawText( w/2, h/2 - th/2, text, TEXT_CENTERED)
+            lcd.font(FONT_S)
+            lcd.drawText( w/2, h/2 + th/2, "lthole edition", TEXT_CENTERED)
+        elseif  (lcd.isConfiguring and not lcd.isConfiguring()) or not lcd.isConfiguring then
+            lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
+            lcd.drawText( 5, 30, string.format("%sx%s : unsupported widget size for %s", w, h, sys.board))
+            if not isFullScreen(w, h) then
+                local _, lineHeight = lcd.getTextSize("")
+                lcd.drawText(5, 30 + lineHeight, "Try Full Screen")
+            end
         end
         return
     end
