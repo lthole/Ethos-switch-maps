@@ -1,7 +1,7 @@
 # Ethos widget for switch mapping
 Here is my revised Switch Mapping widget for the 
 - X20/S, X20R/RS, X20 Pro/AW
-- XE, XE-S, XE RS, XE RS HD
+- XE, XE-S, XE RS, XE RS HD (full screen only)
 - X18R, X18RS
 - Twin XLite RII
 - X14/X14S/X14RS but only full screen 640x360
