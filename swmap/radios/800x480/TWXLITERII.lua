@@ -6,129 +6,194 @@
 ]]
 
 -- lines represents the lines of the legend, type nil|table
+-- when lines is commented out the draw function is still called but no line/legend is drawn, this is useful for slots
 -- draw represents the drawing of controls type nil|function
+-- align if defined overrides the alignment of the text TEXT_LEFT|TEXT_RIGHT|TEXT_CENTERED
+-- offset if defined is added to the y coordinate of the text
+-- name is the name of the switch, name as you wish, it appears as legend prefix
+-- the order of the switches defines the order on the configure panel
 
 return {
-    ["S1"] = {
-        ["lines"]=nil,
-        ["draw"]=nil,
+    {
+        ["name"] = "LH STICK",
+        ["draw"] = function() drawStick(242, 241, 54) end,
     },
-    ["S2"] = {
-        ["lines"]=nil,
-        ["draw"]=nil,
+    {
+        ["name"] = "RH STICK",
+        ["draw"] = function() drawStick(559, 241, 54) end,
     },
-    ["S3"] = {
-        ["lines"]=nil,
-        ["draw"]=nil,
+    {
+        ["name"] = "SA",
+        ["type"] = TYPE_SWITCH,
+        ["lines"] = { { 5, 149, 230, 149 } },
+        ["draw"] = function() drawButton3Pos(242, 149, 12) end,
     },
-    ["SA"] = {
-        ["lines"]={{5,149,230,149}},
-        ["draw"]=function() drawButton3Pos(242,149,12) end,
+    {
+        ["name"] = "SB",
+        ["type"] = TYPE_SWITCH,
+        ["lines"] = { { 795, 149, 570, 149 } },
+        ["draw"] = function() drawButton3Pos(558, 149, 12) end,
     },
-    ["SB"] = {
-        ["lines"]={{795,149,570,149}},
-        ["draw"]=function () drawButton3Pos(558,149, 12) end,
+    {
+        ["name"] = "SC",
+        ["type"] = TYPE_SWITCH,
+        ["lines"] = { { 5, 89, 206, 89 } },
+        ["draw"] = function() drawButton2Pos(218, 89, 12) end,
     },
-    ["SC"] = {
-        ["lines"]={{5,89,206,89}},
-        ["draw"]=function () drawButton2Pos(218, 89, 12) end,
+    {
+        ["name"] = "SD",
+        ["type"] = TYPE_SWITCH,
+        ["lines"] = { { 795, 89, 594, 89 } },
+        ["draw"] = function() drawButton2Pos(582, 89, 12) end,
     },
-    ["SD"] = {
-        ["lines"]={{795,89,594,89}},
-        ["draw"]=function () drawButton2Pos(582, 89, 12) end,
+    {
+        ["name"] = "SE",
+        ["type"] = TYPE_SWITCH,
+        ["lines"] = { { 5, 119, 225, 119 } },
+        ["draw"] = function() drawButton1Pos(235, 119, 10) end,
     },
-    ["SE"] = {
-        ["lines"]={{5,119,225,119}},
-        ["draw"]=function () drawButton1Pos(235,119, 10) end,
+    {
+        ["name"] = "SF",
+        ["type"] = TYPE_SWITCH,
+        ["lines"] = { { 795, 119, 575, 119 } },
+        ["draw"] = function() drawButton1Pos(565, 119, 10) end,
     },
-    ["SF"] = {
-        ["lines"]={{795,119,575,119}},
-        ["draw"]=function () drawButton1Pos(565, 119, 10) end,
+    {
+        ["name"] = "SG",
+        ["type"] = TYPE_SWITCH,
+        ["lines"] = nil,
+        ["draw"] = nil,
     },
-    ["SG"] = {
-        ["lines"]=nil,
-        ["draw"]=nil,
+    {
+        ["name"] = "SH",
+        ["type"] = TYPE_SWITCH,
+        ["lines"] = nil,
+        ["draw"] = nil,
     },
-    ["SH"] = {
-        ["lines"]=nil,
-        ["draw"]=nil,
+    {
+        ["name"] = "SI",
+        ["type"] = TYPE_SWITCH,
+        ["lines"] = nil,
+        ["draw"] = nil,
     },
-    ["SI"] = {
-        ["lines"]=nil,
-        ["draw"]=nil,
+    {
+        ["name"] = "SJ",
+        ["type"] = TYPE_SWITCH,
+        ["lines"] = nil,
+        ["draw"] = nil,
     },
-    ["SJ"] = {
-        ["lines"]=nil,
-        ["draw"]=nil,
+    {
+        ["name"] = "SK",
+        ["type"] = TYPE_SWITCH,
+        ["lines"] = nil,
+        ["draw"] = nil,
     },
-    ["SK"] = {
-        ["lines"]=nil,
-        ["draw"]=nil,
+    {
+        ["name"] = "SL",
+        ["type"] = TYPE_SWITCH,
+        ["lines"] = nil,
+        ["draw"] = nil,
     },
-    ["SL"] = {
-        ["lines"]=nil,
-        ["draw"]=nil,
+    {
+        ["name"] = "LS",
+        ["type"] = TYPE_SLIDER,
+        ["lines"] = { { 5, 179, 255, 179 }, { 255, 179, 316, 118 } },
+        ["draw"] = function() drawCurvedSlider(327, 146, 34, 44, 320, 40) end,
     },
-    ["FS1"] = {
-        ["lines"]={{5,356,342,356}},
-        ["draw"]=function() drawButton1Pos(352,356, 10) end
+    {
+        ["name"] = "RS",
+        ["type"] = TYPE_SLIDER,
+        ["lines"] = { { 795, 179, 545, 179 }, { 545, 179, 484, 118 } },
+        ["draw"] = function() drawCurvedSlider(473, 146, 34, 44, 320, 40) end,
     },
-    ["FS2"] = {
-        ["lines"]={{5,380,370,380},{370,380,384,367}},
-        ["draw"]=function() drawButton1Pos(384,356, 10) end
+    {
+        ["name"] = "S1",
+        ["type"] = TYPE_POT,
+        ["lines"] = nil,
+        ["draw"] = nil,
     },
-    ["FS3"] = {
-        ["lines"]={{795,380,430,380}, {430,380,416,367}},
-        ["draw"]=function() drawButton1Pos(416,356, 10) end
+    {
+        ["name"] = "S2",
+        ["type"] = TYPE_POT,
+        ["lines"] = nil,
+        ["draw"] = nil,
     },
-    ["FS4"] = {
-        ["lines"]={{795,356,458,356}},
-        ["draw"]=function() drawButton1Pos(448,356, 10) end
+    {
+        ["name"] = "S3",
+        ["type"] = TYPE_SLIDER_MIDDLE,
+        ["lines"] = nil,
+        ["draw"] = nil,
     },
-    ["FS5"] = {
-        ["lines"]=nil,
-        ["draw"]=nil,
+    {
+        ["name"] = "T1",
+        ["type"] = TYPE_TRIM,
+        ["lines"] = { { 795, 256, 481, 256 } },
+        ["draw"] = function() drawTrim(451, 250, 30, 12) end,
     },
-    ["FS6"] = {
-        ["lines"]=nil,
-        ["draw"]=nil,
+    {
+        ["name"] = "T2",
+        ["type"] = TYPE_TRIM,
+        ["lines"] = { { 795, 283, 448, 283 }, { 448, 283, 432, 270 } },
+        ["draw"] = function() drawTrim(420, 239, 12, 30) end,
     },
-    ["LS"] = {
-        ["lines"]={{5,179,255,179}, {255,179,316,118}},
-        ["draw"]=function() drawCurvedSlider(327, 146, 34, 44, 320, 40) end
+    {
+        ["name"] = "T3",
+        ["type"] = TYPE_TRIM,
+        ["lines"] = { { 5, 283, 352, 283 }, { 352, 283, 368, 270 } },
+        ["draw"] = function() drawTrim(368, 239, 12, 30) end,
     },
-    ["RS"] = {
-        ["lines"]={{795,179,545,179}, {545,179,484,118}},
-        ["draw"]=function() drawCurvedSlider(473, 146, 34, 44, 320, 40) end
+    {
+        ["name"] = "T4",
+        ["type"] = TYPE_TRIM,
+        ["lines"] = { { 5, 256, 319, 256 } },
+        ["draw"] = function() drawTrim(319, 250, 30, 12) end,
     },
-    ["T1"] = {
-        ["lines"]={{795,256,481,256}},
-        ["draw"]=function() drawTrim(451,250, 30, 12) end
+    {
+        ["name"] = "T5",
+        ["type"] = TYPE_TRIM,
+        ["lines"] = { { 5, 310, 320, 310 } },
+        ["draw"] = function() drawTrim(320, 300, 40, 16) end,
     },
-    ["T2"] = {
-        ["lines"]={{795,283,448,283}, {448,283,432,270}},
-        ["draw"]=function() drawTrim(420,239, 12, 30) end
+    {
+        ["name"] = "T6",
+        ["type"] = TYPE_TRIM,
+        ["lines"] = { { 795, 310, 480, 310 } },
+        ["draw"] = function() drawTrim(440, 300, 40, 16) end,
     },
-    ["T3"] = {
-        ["lines"]={{5,283,352,283}, {352,283,368,270}},
-        ["draw"]=function() drawTrim(368,239, 12, 30) end
+    {
+        ["name"] = "FS1",
+        ["type"] = TYPE_FUNCTION_SWITCH,
+        ["lines"] = { { 5, 356, 342, 356 } },
+        ["draw"] = function() drawButton1Pos(352, 356, 10) end,
     },
-    ["T4"] = {
-        ["lines"]={{5,256,319,256}},
-        ["draw"]=function() drawTrim(319,250, 30, 12) end
+    {
+        ["name"] = "FS2",
+        ["type"] = TYPE_FUNCTION_SWITCH,
+        ["lines"] = { { 5, 380, 370, 380 }, { 370, 380, 384, 367 } },
+        ["draw"] = function() drawButton1Pos(384, 356, 10) end,
     },
-    ["T5"] = {
-        ["lines"]={{5,310,320,310}},
-        ["draw"]=function() drawTrim(320,300, 40, 16) end
+    {
+        ["name"] = "FS3",
+        ["type"] = TYPE_FUNCTION_SWITCH,
+        ["lines"] = { { 795, 380, 430, 380 }, { 430, 380, 416, 367 } },
+        ["draw"] = function() drawButton1Pos(416, 356, 10) end,
     },
-    ["T6"] = {
-        ["lines"]={{795,310,480,310}},
-        ["draw"]=function() drawTrim(440,300, 40, 16) end
+    {
+        ["name"] = "FS4",
+        ["type"] = TYPE_FUNCTION_SWITCH,
+        ["lines"] = { { 795, 356, 458, 356 } },
+        ["draw"] = function() drawButton1Pos(448, 356, 10) end,
     },
-    ["LH STICK"]={
-        ["draw"]=function() drawStick(242,241, 54) end
+    {
+        ["name"] = "FS5",
+        ["type"] = TYPE_FUNCTION_SWITCH,
+        ["lines"] = nil,
+        ["draw"] = nil,
     },
-    ["RH STICK"]={
-        ["draw"]=function() drawStick(559, 241, 54) end
+    {
+        ["name"] = "FS6",
+        ["type"] = TYPE_FUNCTION_SWITCH,
+        ["lines"] = nil,
+        ["draw"] = nil,
     },
 }

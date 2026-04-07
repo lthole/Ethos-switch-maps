@@ -65,3 +65,10 @@ function drawCurvedSlider(x, y, intR, extR, startAngle, endAngle) end
 ---@param filename string relative or full path filename
 ---@return nil\table
 function os.stat(filename) end
+
+TYPE_SWITCH = 1
+TYPE_POT = 2
+TYPE_SLIDER = 3
+TYPE_SLIDER_MIDDLE = 4
+TYPE_FUNCTION_SWITCH = 5
+TYPE_TRIM = 6
