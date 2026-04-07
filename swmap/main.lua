@@ -312,16 +312,16 @@ local function paint(widget)
         end
     end
     -- first draw controls
-    -- draw other controls after to be on top of sticks
     for _, specs in pairs(widget.radio) do
         if type(specs["draw"]) == "function" then specs["draw"]() end
     end
     -- next legends (on top)
     for _, specs in pairs(widget.radio) do
-        local name = specs["name"]
+        local name = specs["name"] or ""
+        local alias = specs["alias"] or specs["name"] or ""
         lcd.color(widget.TextColor or getDefaultTextColor())
         if specs["lines"] then
-            addLegend(widget[name .. "text"] or "", name, specs["lines"], specs["align"],
+            addLegend(widget[name .. "text"] or "", alias, specs["lines"], specs["align"],
                 specs["offset"])
         end
     end
@@ -480,11 +480,13 @@ local function configure(widget)
     local isFirst
     if type(widget.radio) == "table" then
         for _, specs in pairs(widget.radio) do
+            local name = specs["name"] or ""
+            local alias = specs["alias"] or specs["name"] or ""
             if specs.lines then -- no lines means no legend or disabled switches
-                line = panel:addLine(STR_TYPE_LABEL(specs.type, specs.name))
+                line = panel:addLine(STR_TYPE_LABEL(specs.type, alias))
                 local textField = form.addTextField(line, nil,
-                    function() return widget[specs.name .. "text"] or "" end,
-                    function(value) widget[specs.name .. "text"] = value end)
+                    function() return widget[name .. "text"] or "" end,
+                    function(value) widget[name .. "text"] = value end)
                 if isFirst == nil then
                     textField:focus()
                     isFirst = false

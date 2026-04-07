@@ -29,3 +29,16 @@ XE definitions file contains examples for Stick switches.
 To draw only a switch slot, use drawButtonSlot and comment the lines field.
 To activate a switch slot, uncomment the lines field and
 replace drawButtonSlot by drawButton1Pos, drawButton2Pos or drawButton3Pos.
+
+Instead of renaming switches, please first consider to use an alias.
+
+If you have a switch
+{
+    ["name"] = "SA",
+    ["alias] = "SW1",
+}
+
+SwMaps will show you SW1 in the widget, but will still be saving internally as SA.
+If you change the name, internally it will be saved under SW1.
+
+Changing just the alias allows to reuse the same model configuration file.
