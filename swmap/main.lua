@@ -76,7 +76,7 @@ local configurationPath="SCRIPTS:/swmap/models/"
 
 -- supported switches in display order
 local radioSwitches = {
-    "SA", "SB", "SC", "SD", "SE", "SF", "SG", "SH", "SI", "SJ", "SK", "SL",
+    "SA", "SB", "SC", "SD", "SE", "SF", "SG", "SH", "SI", "SJ", "SK", "SL", "SM", "SN",
     "LS", "RS", "L1", "L2",
     "S1", "S2", "S3", "S4",
     "T1", "T2", "T3", "T4", "T5", "T6",
@@ -246,7 +246,7 @@ local function paint(widget)
             lcd.color(lcd.themeColor(THEME_DEFAULT_COLOR))
             lcd.font(FONT_XL)
             local text = "Switch Maps"
-            local tw, th = lcd.getTextSize(text)
+            local _, th = lcd.getTextSize(text)
             lcd.drawText( w/2, h/2 - th/2, text, TEXT_CENTERED)
             lcd.font(FONT_S)
             lcd.drawText( w/2, h/2 + th/2, "lthole edition", TEXT_CENTERED)
@@ -296,8 +296,14 @@ local function paint(widget)
         end
     end
     -- first draw controls
-    for _, specs in pairs(widget.radio) do
-        if type(specs["draw"]) == "function" then specs["draw"]() end
+    -- draw sticks first to be under the other controls
+    if widget.radio['LH STICK'] and type(widget.radio['LH STICK']["draw"]) == "function" then widget.radio['LH STICK']["draw"]() end
+    if widget.radio['RH STICK'] and type(widget.radio['RH STICK']["draw"]) == "function" then widget.radio['RH STICK']["draw"]() end
+    -- draw other controls after to be on top of sticks
+    for id, specs in pairs(widget.radio) do
+        if id ~= 'LH STICK' and id ~= 'RH STICK' then
+             if type(specs["draw"]) == "function" then specs["draw"]() end
+        end
     end
     -- next legends (on top)
     for id, specs in pairs(widget.radio) do
@@ -576,6 +582,14 @@ end
 -- ***		     Drawing Methods		 	   		                                  ***
 -- They are available in the radio definitions files                   .              ***
 -- **************************************************************************************
+local function drawButtonSlot(cx, cy, r)
+    lcd.color(lcd.GREY(50))
+    if lcd.darkMode() then
+        lcd.drawFilledCircle(cx, cy, r)
+    else
+        lcd.drawCircle(cx, cy, r)
+    end
+end
 local function drawButton1Pos(cx, cy, r)
     lcd.color(lcd.darkMode() and GRAY_LIGHT or GRAY_DARK)
     lcd.drawFilledCircle(cx, cy, r)
@@ -599,11 +613,11 @@ local function drawButton3Pos(cx, cy, r)
 end
 local function drawPot(cx, cy, r)
     local rcos30 = 0.866 * r
-    lcd.color(GRAY_LIGHT)
+    lcd.color(lcd.darkMode() and GRAY_LIGHT or lcd.GREY(180))
     lcd.drawFilledCircle(cx, cy, r)
     lcd.color(GRAY_DARK)
     lcd.drawFilledCircle(cx, cy, rcos30)
-    lcd.color(GRAY_LIGHT)
+    lcd.color(lcd.darkMode() and GRAY_LIGHT or lcd.GREY(180))
     lcd.drawFilledTriangle(cx, cy, cx - (r /2), cy + rcos30, cx + (r/2), cy + rcos30)
     lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
     lcd.drawFilledCircle(cx, cy - r + 2, 4)
@@ -646,24 +660,25 @@ local function drawTrim(x, y, w, h)
 end
 local function drawSlider(x, y , w, h)
     local rulerOffset = 5
-    local rulerHeight = 3
-    lcd.color(lcd.darkMode() and GRAY_LIGHT or GRAY_DARK)
+    local rulerHeight = lcd.darkMode() and 3 or 6
+    lcd.color(lcd.darkMode() and GRAY_LIGHT or lcd.GREY(180))
     lcd.drawFilledRectangle(x, y, w, h)
     lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
     lcd.drawFilledRectangle(x - rulerOffset, math.ceil(y + (h / 2)), w + (rulerOffset * 2), rulerHeight)
 end
 local function drawCurvedSlider(x, y, intR, extR, startAngle, endAngle)
-    lcd.color(lcd.darkMode() and GRAY_LIGHT or GRAY_DARK)
+    lcd.color(lcd.darkMode() and GRAY_LIGHT or lcd.GREY(180))
     lcd.drawAnnulusSector(x, y, intR, extR, startAngle, endAngle)
     lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
+    local cursorWidth = lcd.darkMode() and 3 or 6
     if (startAngle + endAngle) / 2 == 270 then --left slider
-        lcd.drawFilledRectangle(x - extR, y - 1, math.abs(extR - intR), 3)
+        lcd.drawFilledRectangle(x - extR, y - math.floor(cursorWidth/2), math.abs(extR - intR), cursorWidth)
     elseif (startAngle + endAngle) / 2 == 90 then --right slider
-        lcd.drawFilledRectangle(x + extR, y - 1, -math.abs(extR - intR), 3)
+        lcd.drawFilledRectangle(x + extR, y - math.floor(cursorWidth/2), -math.abs(extR - intR), cursorWidth)
     elseif (startAngle + endAngle) == 360 then --top slider
-        lcd.drawFilledRectangle(x - 1, y - extR, 3, math.abs(extR - intR))
+        lcd.drawFilledRectangle(x - math.floor(cursorWidth/2), y - extR, cursorWidth, math.abs(extR - intR))
     elseif (startAngle + endAngle) == 180 then --bottom slider
-        lcd.drawFilledRectangle(x - 1, y + extR, 3, -math.abs(extR - intR))
+        lcd.drawFilledRectangle(x - math.floor(cursorWidth/2), y + extR, cursorWidth, -math.abs(extR - intR))
     else
         log("unknow type slider", ANSI_RED)
     end
@@ -671,12 +686,21 @@ end
 local function drawStick(cx, cy, r)
     local margin = 8
     local rcos30 = 0.866 * r
-    lcd.color(GRAY_LIGHT)
-    lcd.drawFilledCircle(cx, cy, r)
-    lcd.color(GRAY_DARK)
-    lcd.drawFilledRectangle(cx - rcos30 + margin, cy - (r / 2), (rcos30 - margin) * 2, r)
+    local stickCenterWidth = 6
+    if not lcd.darkMode() then
+        lcd.color(lcd.GREY(180))
+        lcd.drawFilledCircle(cx, cy, r)
+        lcd.color(lcd.RGB(0xd6, 0xd2, 0xd6))
+        lcd.drawFilledRectangle(cx - rcos30 + margin, cy - (r / 2), (rcos30 - margin) * 2, r)
+        stickCenterWidth = 8
+    else
+        lcd.color(GRAY_LIGHT)
+        lcd.drawFilledCircle(cx, cy, r)
+        lcd.color(GRAY_DARK)
+        lcd.drawFilledRectangle(cx - rcos30 + margin, cy - (r / 2), (rcos30 - margin) * 2, r)
+    end
     lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
-    lcd.drawFilledCircle(cx, cy, 6)
+    lcd.drawFilledCircle(cx, cy, stickCenterWidth)
 end
 
 -- **************************************************************************************
@@ -689,6 +713,7 @@ build = function(widget)
     local function load(filename)
         local env = { -- add some method to parse the definition
             drawStick=drawStick,
+            drawButtonSlot=drawButtonSlot,
             drawButton1Pos=drawButton1Pos,
             drawButton2Pos=drawButton2Pos,
             drawButton3Pos=drawButton3Pos,

@@ -7,6 +7,12 @@
 ---@param r integer radius of the stick
 function drawStick(cx, cy, r) end
 
+---Draws a button empty slot
+---@param cx integer centre of the stick x axis
+---@param cy integer centre of stick y axis
+---@param r integer radius of the stick
+function drawButtonSlot(cx, cy, r) end
+
 ---Draws a Momentary button (1 POS)
 ---@param cx integer centre of the stick x axis
 ---@param cy integer centre of stick y axis
