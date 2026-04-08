@@ -99,12 +99,14 @@ return {
         ["type"] = TYPE_SLIDER,
         ["lines"] = { { 5, 107, 248, 107 }, { 248, 107, 308, 46 } },
         ["draw"] = function() drawCurvedSlider(319, 74, 34, 44, 320, 40) end,
+        ["alias"] = "L1",
     },
     {
         ["name"] = "RS",
         ["type"] = TYPE_SLIDER,
         ["lines"] = { { 779, 107, 536, 107 }, { 536, 107, 476, 46 } },
         ["draw"] = function() drawCurvedSlider(465, 74, 34, 44, 320, 40) end,
+        ["alias"] = "L2",
     },
     {
         ["name"] = "S1",
