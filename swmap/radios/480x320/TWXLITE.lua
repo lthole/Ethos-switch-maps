@@ -1,4 +1,4 @@
--- swmap TWXLITE RII definition for 784x316
+-- swmap TWXLITE definition for 480x320
 
 --[[ important:
   in lines the first two points of the first line are the text coordinates
@@ -13,50 +13,57 @@
 -- name is the name of the switch, name as you wish, it appears as legend prefix
 -- the order of the switches defines the order on the configure panel
 
+local function drawCrossTrim(x, y, size, thickness)
+    lcd.color(lcd.GREY(50))
+    local half = size / 2
+    local halfThickness = thickness / 2
+    lcd.drawFilledRectangle(x - half, y - halfThickness, size, thickness)
+    lcd.drawFilledRectangle(x - halfThickness, y - half, thickness, size)
+end
 return {
     {
         ["name"] = "LH STICK",
-        ["draw"] = function() drawStick(234, 169, 54) end,
+        ["draw"] = function() drawStick(100, 169, 44) end,
     },
     {
         ["name"] = "RH STICK",
-        ["draw"] = function() drawStick(550, 169, 54) end,
+        ["draw"] = function() drawStick(380, 169, 44) end,
     },
     {
         ["name"] = "SA",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 5, 77, 222, 77 } },
-        ["draw"] = function() drawButton3Pos(234, 77, 12) end,
+        ["lines"] = { { 5, 114, 132, 114 } },
+        ["draw"] = function() drawButton3Pos(144, 114, 12) end,
     },
     {
         ["name"] = "SB",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 779, 77, 562, 77 } },
-        ["draw"] = function() drawButton3Pos(550, 77, 12) end,
+        ["lines"] = { { 475, 114, 348, 114 } },
+        ["draw"] = function() drawButton3Pos(336, 114, 12) end,
     },
     {
         ["name"] = "SC",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 5, 17, 198, 17 } },
-        ["draw"] = function() drawButton2Pos(210, 17, 12) end,
+        ["lines"] = { { 5, 56, 108, 56 } },
+        ["draw"] = function() drawButton2Pos(120, 56, 12) end,
     },
     {
         ["name"] = "SD",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 779, 17, 586, 17 } },
-        ["draw"] = function() drawButton2Pos(574, 17, 12) end,
+        ["lines"] = { { 475, 56, 372, 56 } },
+        ["draw"] = function() drawButton2Pos(360, 56, 12) end,
     },
     {
         ["name"] = "SE",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 5, 47, 217, 47 } },
-        ["draw"] = function() drawButton1Pos(227, 47, 10) end,
+        ["lines"] = { { 5, 84, 127, 84 } },
+        ["draw"] = function() drawButton1Pos(137, 84, 10) end,
     },
     {
         ["name"] = "SF",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 779, 47, 567, 47 } },
-        ["draw"] = function() drawButton1Pos(557, 47, 10) end,
+        ["lines"] = { { 475, 84, 353, 84 } },
+        ["draw"] = function() drawButton1Pos(343, 84, 10) end,
     },
     {
         ["name"] = "SG",
@@ -97,15 +104,16 @@ return {
     {
         ["name"] = "LS",
         ["type"] = TYPE_SLIDER,
-        ["lines"] = { { 5, 107, 248, 107 }, { 248, 107, 308, 46 } },
-        ["draw"] = function() drawCurvedSlider(319, 74, 34, 44, 320, 40) end,
+        ["lines"] = { { 166, 57, 312, 57 }, { 194, 57, 194, 67 } },
+        ["draw"] = function() drawCurvedSlider(194, 112, 34, 44, 320, 40) end,
         ["alias"] = "L1",
     },
     {
         ["name"] = "RS",
         ["type"] = TYPE_SLIDER,
-        ["lines"] = { { 779, 107, 536, 107 }, { 536, 107, 476, 46 } },
-        ["draw"] = function() drawCurvedSlider(465, 74, 34, 44, 320, 40) end,
+        ["lines"] = { { 312, 114, 166, 114 }, { 286, 114, 286, 77 } },
+        ["draw"] = function() drawCurvedSlider(286, 112, 34, 44, 320, 40) end,
+        ["offset"] = -2,
         ["alias"] = "L2",
     },
     {
@@ -127,64 +135,72 @@ return {
         ["draw"] = nil,
     },
     {
+        ["name"] = "T1T2",
+        ["draw"] = function() drawCrossTrim(284, 190, 40, 12) end,
+    },
+    {
+        ["name"] = "T3T4",
+        ["draw"] = function() drawCrossTrim(196, 190, 40, 12) end,
+    },
+    {
         ["name"] = "T1",
         ["type"] = TYPE_TRIM,
-        ["lines"] = { { 779, 184, 473, 184 } },
-        ["draw"] = function() drawTrim(443, 178, 30, 12) end,
+        ["lines"] = { { 475, 210, 316, 210 }, { 316, 210, 304, 196 } },
+        ["draw"] = nil,
     },
     {
         ["name"] = "T2",
         ["type"] = TYPE_TRIM,
-        ["lines"] = { { 779, 211, 440, 211 }, { 440, 211, 424, 198 } },
-        ["draw"] = function() drawTrim(412, 167, 12, 30) end,
+        ["lines"] = { { 475, 234, 310, 234 }, { 310, 234, 290, 210 } },
+        ["draw"] = nil,
     },
     {
         ["name"] = "T3",
         ["type"] = TYPE_TRIM,
-        ["lines"] = { { 5, 211, 344, 211 }, { 344, 211, 360, 198 } },
-        ["draw"] = function() drawTrim(360, 167, 12, 30) end,
+        ["lines"] = { { 5, 234, 170, 234 }, { 170, 234, 190, 210 } },
+        ["draw"] = nil,
     },
     {
         ["name"] = "T4",
         ["type"] = TYPE_TRIM,
-        ["lines"] = { { 5, 184, 311, 184 } },
-        ["draw"] = function() drawTrim(311, 178, 30, 12) end,
+        ["lines"] = { { 5, 210, 164, 210 }, { 164, 210, 176, 196 } },
+        ["draw"] = nil,
     },
     {
         ["name"] = "T5",
         ["type"] = TYPE_TRIM,
-        ["lines"] = { { 5, 238, 312, 238 } },
-        ["draw"] = function() drawTrim(312, 228, 40, 16) end,
+        ["lines"] = { { 5, 258, 164, 258 } },
+        ["draw"] = function() drawTrim(164, 245, 40, 16) end,
     },
     {
         ["name"] = "T6",
         ["type"] = TYPE_TRIM,
-        ["lines"] = { { 779, 238, 472, 238 } },
-        ["draw"] = function() drawTrim(432, 228, 40, 16) end,
+        ["lines"] = { { 475, 258, 316, 258 } },
+        ["draw"] = function() drawTrim(276, 245, 40, 16) end,
     },
     {
         ["name"] = "FS1",
         ["type"] = TYPE_FUNCTION_SWITCH,
-        ["lines"] = { { 5, 284, 334, 284 } },
-        ["draw"] = function() drawButton1Pos(344, 284, 10) end,
+        ["lines"] = { { 5, 284, 173, 284 } },
+        ["draw"] = function() drawButton1Pos(183, 284, 10) end,
     },
     {
         ["name"] = "FS2",
         ["type"] = TYPE_FUNCTION_SWITCH,
-        ["lines"] = { { 5, 308, 362, 308 }, { 362, 308, 376, 295 } },
-        ["draw"] = function() drawButton1Pos(376, 284, 10) end,
+        ["lines"] = { { 5, 308, 205, 308 }, { 205, 308, 213, 293 } },
+        ["draw"] = function() drawButton1Pos(221, 284, 10) end,
     },
     {
         ["name"] = "FS3",
         ["type"] = TYPE_FUNCTION_SWITCH,
-        ["lines"] = { { 779, 308, 422, 308 }, { 422, 308, 408, 295 } },
-        ["draw"] = function() drawButton1Pos(408, 284, 10) end,
+        ["lines"] = { { 475, 308, 275, 308 }, { 275, 308, 267, 293 } },
+        ["draw"] = function() drawButton1Pos(259, 284, 10) end,
     },
     {
         ["name"] = "FS4",
         ["type"] = TYPE_FUNCTION_SWITCH,
-        ["lines"] = { { 779, 284, 450, 284 } },
-        ["draw"] = function() drawButton1Pos(440, 284, 10) end,
+        ["lines"] = { { 475, 284, 307, 284 } },
+        ["draw"] = function() drawButton1Pos(297, 284, 10) end,
     },
     {
         ["name"] = "FS5",
