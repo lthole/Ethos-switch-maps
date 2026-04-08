@@ -265,11 +265,15 @@ local function paint(widget)
         return
     end
     -- we still need to be sure widget was loaded for the widget resolution
-    if type(widget.radio) ~= "table" or widget.radioWidth ~= w or widget.radioHeight ~= h then
-        widget.radio, widget.radioWidth, widget.radioHeight = loadRadioDefinition(w, h)
+    if widget.radio ~= false and (widget.radioWidth ~= w or widget.radioHeight ~= h) then
+        widget.radio = loadRadioDefinition(w, h)
+        widget.radioWidth, widget.radioHeight = w, h
+        -- at this stage we know we called loadRadioDefinition with the real widget size
+        -- if it fails, we set widget.radio to false to not check again in paint()
+        if widget.radio == nil then widget.radio = false end
     end
     -- alert if non supported definition
-    if widget.radio == false or widget.radio == nil then
+    if type(widget.radio) ~= "table" then
         lcd.color(lcd.themeColor(THEME_PRIMARY_COLOR or THEME_DEFAULT_COLOR))
         lcd.drawText(5, 30, string.format("%sx%s : unsupported widget size for %s", w, h, sys.board))
         if not isFullScreen(w, h) then
@@ -405,7 +409,8 @@ local function configure(widget)
     if type(widget.radio) ~= "table" then
         -- happens when configuring widget from screen without having displayed it first
         -- in that case we load the full screen resolution
-        widget.radio, widget.radioWidth, widget.radioHeight = loadRadioDefinition(sys.lcdWidth, sys.lcdHeight)
+        widget.radio = loadRadioDefinition(sys.lcdWidth, sys.lcdHeight)
+        widget.radioWidth, widget.radioHeight = sys.lcdWidth, sys.lcdHeight
     end
     local function _checkIfEmpty()
         for k, _ in pairs(widget) do
@@ -822,12 +827,10 @@ loadRadioDefinition = function(w, h)
     elseif os.stat(swmapFile) then
         data = load(swmapFile)
     else
-        w = nil
-        h = nil
         log(string.format("%s not found", customFile), ANSI_YELLOW)
         log(string.format("%s not found", swmapFile), ANSI_YELLOW)
     end
-    return data, w, h
+    return data
 end
 -- **************************************************************************************
 -- ***		     build widget		 	   		                                      ***
@@ -837,8 +840,10 @@ local function build(widget)
     -- here we set widget.radio
     if debug_mode then log("Build called") end
     local w, h = lcd.getWindowSize()
-    if type(widget.radio) ~= "table" or widget.radioWidth ~= w or widget.radioHeight ~= h then
-        widget.radio, widget.radioWidth, widget.radioHeight = loadRadioDefinition(w, h)
+    -- load only if the size changed, otherwise we keep the previous one
+    if widget.radioWidth ~= w or widget.radioHeight ~= h then
+        widget.radio = loadRadioDefinition(w, h)
+        widget.radioWidth, widget.radioHeight = w, h
     end
     -- he we set colors in case darkmode was changed
     inactiveSwitchColor = lcd.darkMode() and lcd.RGB(0x21, 0x20, 0x21) or lcd.RGB(0xf7, 0xf3, 0xf7)
