@@ -30,13 +30,15 @@ return {
         ["name"] = "SA",
         ["type"] = TYPE_SWITCH,
         ["lines"] = { { 5, 64, 180, 64 }, { 180, 64, 190, 78 } },
-        ["draw"] = function() drawButton3Pos(190, 90, 12) end
+        ["draw"] = function() drawButton3Pos(190, 90, 12) end,
+        ["alias"] = "1",
     },
     {
         ["name"] = "SB",
         ["type"] = TYPE_SWITCH,
         ["lines"] = { { 218, 64, 390, 64 }, { 238, 64, 238, 78 } },
-        ["draw"] = function() drawButton2Pos(238, 90, 12) end
+        ["draw"] = function() drawButton2Pos(238, 90, 12) end,
+        ["alias"] = "2",
     },
     -- to activate the switch uncomment lines and change draw
     {
@@ -44,20 +46,23 @@ return {
         ["type"] = TYPE_SWITCH,
         --["lines"] = { { 390, 94, 298, 94 } },
         ["draw"] = function() drawButtonSlot(286, 90, 12) end,
-        ["align"] = TEXT_RIGHT
+        ["align"] = TEXT_RIGHT,
+        ["alias"] = "3",
     },
     {
         ["name"] = "SD",
         ["type"] = TYPE_SWITCH,
         ["lines"] = { { 5, 152, 180, 152 }, { 180, 152, 190, 139 } },
-        ["draw"] = function() drawButton3Pos(190, 125, 12) end
+        ["draw"] = function() drawButton3Pos(190, 125, 12) end,
+        ["alias"] = "4",
     },
     {
         ["name"] = "SE",
         ["type"] = TYPE_SWITCH,
         ["lines"] = { { 218, 150, 390, 150 }, { 238, 137, 238, 150 } },
         ["draw"] = function() drawButton3Pos(238, 125, 12) end,
-        ["offset"] = -2
+        ["offset"] = -2,
+        ["alias"] = "5",
     },
     -- to activate the switch uncomment lines and change draw
     {
@@ -65,7 +70,8 @@ return {
         ["type"] = TYPE_SWITCH,
         --["lines"] = { { 390, 127, 298, 127 } },
         ["draw"] = function() drawButtonSlot(286, 125, 12) end,
-        ["align"] = TEXT_RIGHT
+        ["align"] = TEXT_RIGHT,
+        ["alias"] = "6",
     },
     -- to activate the switch uncomment lines and change draw
     {
@@ -73,20 +79,23 @@ return {
         ["type"] = TYPE_SWITCH,
         --["lines"] = { { 410, 94, 502, 94 } },
         ["draw"] = function() drawButtonSlot(514, 90, 12) end,
-        ["align"] = TEXT_LEFT
+        ["align"] = TEXT_LEFT,
+        ["alias"] = "7",
     },
     {
         ["name"] = "SH",
         ["type"] = TYPE_SWITCH,
         ["lines"] = { { 582, 64, 410, 64 }, { 562, 64, 562, 78 } },
         ["draw"] = function() drawButton1Pos(562, 90, 12) end,
-        ["align"] = TEXT_RIGHT
+        ["align"] = TEXT_RIGHT,
+        ["alias"] = "8",
     },
     {
         ["name"] = "SI",
         ["type"] = TYPE_SWITCH,
         ["lines"] = { { 795, 64, 620, 64 }, { 620, 64, 610, 78 } },
-        ["draw"] = function() drawButton3Pos(610, 90, 12) end
+        ["draw"] = function() drawButton3Pos(610, 90, 12) end,
+        ["alias"] = "9",
     },
     -- to activate the switch uncomment lines and change draw
     {
@@ -94,7 +103,8 @@ return {
         ["type"] = TYPE_SWITCH,
         --["lines"] = { { 410, 127, 502, 127 } },
         ["draw"] = function() drawButtonSlot(514, 125, 12) end,
-        ["align"] = TEXT_LEFT
+        ["align"] = TEXT_LEFT,
+        ["alias"] = "10",
     },
     {
         ["name"] = "SK",
@@ -102,13 +112,15 @@ return {
         ["lines"] = { { 582, 150, 410, 150 }, { 562, 137, 562, 150 } },
         ["draw"] = function() drawButton3Pos(562, 125, 12) end,
         ["offset"] = -2,
-        ["align"] = TEXT_RIGHT
+        ["align"] = TEXT_RIGHT,
+        ["alias"] = "11",
     },
     {
         ["name"] = "SL",
         ["type"] = TYPE_SWITCH,
         ["lines"] = { { 795, 152, 620, 152 }, { 620, 152, 610, 139 } },
-        ["draw"] = function() drawButton3Pos(610, 125, 12) end
+        ["draw"] = function() drawButton3Pos(610, 125, 12) end,
+        ["alias"] = "12",
     },
     -- Left Center Stick momentary switch, uncomment to show
     -- {
