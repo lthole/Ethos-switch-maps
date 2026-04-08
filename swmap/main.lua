@@ -740,7 +740,26 @@ local function drawCurvedSlider(x, y, intR, extR, startAngle, endAngle)
     elseif (startAngle + endAngle) == 180 then    --bottom slider
         lcd.drawFilledRectangle(x - math.floor(cursorWidth / 2), y + extR, cursorWidth, -math.abs(extR - intR))
     else
-        log("unknow type slider", ANSI_RED)
+        local theta = math.rad((startAngle + endAngle) / 2)
+        local sinTheta = math.sin(theta)
+        local cosTheta = math.cos(theta)
+        local Ax = x + intR * sinTheta
+        local Ay = y - intR * cosTheta
+        local d = extR - intR
+        -- midpoint M (from A in heading direction)
+        local Mx = Ax + d * sinTheta
+        local My = Ay - d * cosTheta
+        -- perpendicular direction (to form base BC)
+        local perpX = cosTheta
+        local perpY = sinTheta
+        -- half width of base
+        local h = cursorWidth
+        -- points B and C
+        local Bx = Mx + h * perpX
+        local By = My + h * perpY
+        local Cx = Mx - h * perpX
+        local Cy = My - h * perpY
+        lcd.drawFilledTriangle(Ax, Ay, Bx, By, Cx, Cy)
     end
 end
 local function drawStick(cx, cy, r)
