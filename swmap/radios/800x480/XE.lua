@@ -198,14 +198,14 @@ return {
         ["name"] = "S3",
         ["type"] = TYPE_SLIDER_MIDDLE,
         ["lines"] = { { 795, 90, 675, 90 } },
-        ["draw"] = function() drawPot(660, 90, 15) end
+        ["draw"] = function() drawPot(660, 90, 15) end,
         ["alias"] = "P3",
     },
     {
         ["name"] = "S4",
         ["type"] = TYPE_POT,
         ["lines"] = { { 795, 125, 675, 125 } },
-        ["draw"] = function() drawPot(660, 125, 15) end
+        ["draw"] = function() drawPot(660, 125, 15) end,
         ["alias"] = "P4",
     },
     {
