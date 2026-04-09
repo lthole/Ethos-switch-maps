@@ -16,7 +16,7 @@ To make it easier to configure widgets for similar models, there is an upload me
 3. Select text and lines colour. Note that the controls colour is the same as the ‘Highlight colour’ defined in System/General.
 4. In full screen mode you can add up to two notes, and display the model name.
 
-Custom radio definition files may be created to add unsupported radios (see radios/custom/readme.txt)
+Custom radio definition files may be created to add unsupported radios or to modify provided layouts (see radios/custom/readme.txt). Please note that the XE versions include switch aliasing, so the switches are numbered S1 to S12.
 
 My widget draws on earlier versions by ronron, Static and Benno. I have also benefited from strgaltdel’s help and Lua Tutorial in GitHub. Bertrand very kindly reviewed it and made some valuable suggestions. Thanks to @flyingeek for the improvements to the later versions, and thanks to @Helischorsch for the XE map.
 
