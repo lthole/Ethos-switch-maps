@@ -5,6 +5,8 @@ Here is my revised Switch Mapping widget for the
 - X18R, X18RS
 - Twin XLite RII
 - X14/X14S/X14RS but only full screen 640x360
+- TW X-LITE/TW X-LITES full screen support (480x320)
+- TW X-LITE RII uses L1 and L2 alias
 
 My version does not require loading a bitmap background for the switches, because large bitmaps use a large amount of valuable ram. Instead I just draw them.
 
