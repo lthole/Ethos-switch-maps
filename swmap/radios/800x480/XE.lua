@@ -31,14 +31,14 @@ return {
         ["type"] = TYPE_SWITCH,
         ["lines"] = { { 5, 64, 180, 64 }, { 180, 64, 190, 78 } },
         ["draw"] = function() drawButton3Pos(190, 90, 12) end,
-        ["alias"] = "1",
+        ["alias"] = "S1",
     },
     {
         ["name"] = "SB",
         ["type"] = TYPE_SWITCH,
         ["lines"] = { { 218, 64, 390, 64 }, { 238, 64, 238, 78 } },
         ["draw"] = function() drawButton2Pos(238, 90, 12) end,
-        ["alias"] = "2",
+        ["alias"] = "S2",
     },
     -- to activate the switch uncomment lines and change draw
     {
@@ -47,14 +47,14 @@ return {
         --["lines"] = { { 390, 94, 298, 94 } },
         ["draw"] = function() drawButtonSlot(286, 90, 12) end,
         ["align"] = TEXT_RIGHT,
-        ["alias"] = "3",
+        ["alias"] = "S3",
     },
     {
         ["name"] = "SD",
         ["type"] = TYPE_SWITCH,
         ["lines"] = { { 5, 152, 180, 152 }, { 180, 152, 190, 139 } },
         ["draw"] = function() drawButton3Pos(190, 125, 12) end,
-        ["alias"] = "4",
+        ["alias"] = "S4",
     },
     {
         ["name"] = "SE",
@@ -62,7 +62,7 @@ return {
         ["lines"] = { { 218, 150, 390, 150 }, { 238, 137, 238, 150 } },
         ["draw"] = function() drawButton3Pos(238, 125, 12) end,
         ["offset"] = -2,
-        ["alias"] = "5",
+        ["alias"] = "S5",
     },
     -- to activate the switch uncomment lines and change draw
     {
@@ -71,7 +71,7 @@ return {
         --["lines"] = { { 390, 127, 298, 127 } },
         ["draw"] = function() drawButtonSlot(286, 125, 12) end,
         ["align"] = TEXT_RIGHT,
-        ["alias"] = "6",
+        ["alias"] = "S6",
     },
     -- to activate the switch uncomment lines and change draw
     {
@@ -80,7 +80,7 @@ return {
         --["lines"] = { { 410, 94, 502, 94 } },
         ["draw"] = function() drawButtonSlot(514, 90, 12) end,
         ["align"] = TEXT_LEFT,
-        ["alias"] = "7",
+        ["alias"] = "S7",
     },
     {
         ["name"] = "SH",
@@ -88,14 +88,14 @@ return {
         ["lines"] = { { 582, 64, 410, 64 }, { 562, 64, 562, 78 } },
         ["draw"] = function() drawButton1Pos(562, 90, 12) end,
         ["align"] = TEXT_RIGHT,
-        ["alias"] = "8",
+        ["alias"] = "S8",
     },
     {
         ["name"] = "SI",
         ["type"] = TYPE_SWITCH,
         ["lines"] = { { 795, 64, 620, 64 }, { 620, 64, 610, 78 } },
         ["draw"] = function() drawButton3Pos(610, 90, 12) end,
-        ["alias"] = "9",
+        ["alias"] = "S9",
     },
     -- to activate the switch uncomment lines and change draw
     {
@@ -104,7 +104,7 @@ return {
         --["lines"] = { { 410, 127, 502, 127 } },
         ["draw"] = function() drawButtonSlot(514, 125, 12) end,
         ["align"] = TEXT_LEFT,
-        ["alias"] = "10",
+        ["alias"] = "S10",
     },
     {
         ["name"] = "SK",
@@ -113,21 +113,22 @@ return {
         ["draw"] = function() drawButton3Pos(562, 125, 12) end,
         ["offset"] = -2,
         ["align"] = TEXT_RIGHT,
-        ["alias"] = "11",
+        ["alias"] = "S11",
     },
     {
         ["name"] = "SL",
         ["type"] = TYPE_SWITCH,
         ["lines"] = { { 795, 152, 620, 152 }, { 620, 152, 610, 139 } },
         ["draw"] = function() drawButton3Pos(610, 125, 12) end,
-        ["alias"] = "12",
+        ["alias"] = "S12",
     },
     -- Left Center Stick momentary switch, uncomment to show
     -- {
     --     ["name"] = "SM",
     --     ["type"] = TYPE_SWITCH,
     --     ["lines"] = { { 5, 265, 234, 265 } },
-    --     ["draw"] = function() drawButton1Pos(242, 265, 8) end
+    --     ["draw"] = function() drawButton1Pos(242, 265, 8) end,
+    --     ["alias"] = "S13",
     -- },
     -- Right Center Stick momentary switch, uncomment to show
     -- {
@@ -135,6 +136,7 @@ return {
     --     ["type"] = TYPE_SWITCH,
     --     ["lines"] = { { 795, 265, 566, 265 } },
     --     ["draw"] = function() drawButton1Pos(558, 265, 8) end
+    --     ["alias"] = "S14",
     -- },
     -- Left Center Stick 3POS switch, uncomment to show
     -- {
@@ -182,25 +184,29 @@ return {
         ["name"] = "S1",
         ["type"] = TYPE_POT,
         ["lines"] = { { 5, 90, 125, 90 } },
-        ["draw"] = function() drawPot(140, 90, 15) end
+        ["draw"] = function() drawPot(140, 90, 15) end,
+        ["alias"] = "P1",
     },
     {
         ["name"] = "S2",
         ["type"] = TYPE_POT,
         ["lines"] = { { 5, 125, 125, 125 } },
-        ["draw"] = function() drawPot(140, 125, 15) end
+        ["draw"] = function() drawPot(140, 125, 15) end,
+        ["alias"] = "P2",
     },
     {
         ["name"] = "S3",
         ["type"] = TYPE_SLIDER_MIDDLE,
         ["lines"] = { { 795, 90, 675, 90 } },
         ["draw"] = function() drawPot(660, 90, 15) end
+        ["alias"] = "P3",
     },
     {
         ["name"] = "S4",
         ["type"] = TYPE_POT,
         ["lines"] = { { 795, 125, 675, 125 } },
         ["draw"] = function() drawPot(660, 125, 15) end
+        ["alias"] = "P4",
     },
     {
         ["name"] = "T1",
