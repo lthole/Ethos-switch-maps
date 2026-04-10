@@ -97,16 +97,17 @@ return {
     {
         ["name"] = "LS",
         ["type"] = TYPE_SLIDER,
-        ["lines"] = { { 5, 179, 255, 179 }, { 255, 179, 316, 118 } },
-        ["draw"] = function() drawCurvedSlider(327, 146, 34, 44, 320, 40) end,
+        ["lines"] = { { 300, 89, 500, 89 }, { 327, 89, 327, 107 } },
+        ["draw"] = function() drawCurvedSlider(327, 151, 34, 44, 320, 40) end,
         ["alias"] = "L1",
     },
     {
         ["name"] = "RS",
         ["type"] = TYPE_SLIDER,
-        ["lines"] = { { 795, 179, 545, 179 }, { 545, 179, 484, 118 } },
-        ["draw"] = function() drawCurvedSlider(473, 146, 34, 44, 320, 40) end,
+        ["lines"] = { { 500, 149, 300, 149 }, { 473, 149, 473, 117 } },
+        ["draw"] = function() drawCurvedSlider(473, 151, 34, 44, 320, 40) end,
         ["alias"] = "L2",
+        ["offset"] = -2
     },
     {
         ["name"] = "S1",
