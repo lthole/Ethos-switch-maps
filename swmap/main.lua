@@ -523,6 +523,9 @@ local function configure(widget)
     if hasAliases then
         table.insert(displaySwitchNamesChoices, { STR("YesWithAlias"), 2 })
     end
+    if widget.DisplaySwitchNames > #displaySwitchNamesChoices then
+        widget.DisplaySwitchNames = #displaySwitchNamesChoices -- just in case
+    end
     form.addChoiceField(line, nil, displaySwitchNamesChoices,
         function() return widget.DisplaySwitchNames end,
         function(value) widget.DisplaySwitchNames = value end)
