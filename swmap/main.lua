@@ -168,7 +168,7 @@ local function readConfiguration(basename)
     local chunk = loadfile(getConfigurationFilePath(basename), "bt", { lcd = lcd }) -- load the config file passing only the lcd global variable
     if chunk then
         local config = chunk()
-        if config and config.DisplaySwitchNames then
+        if config and config.DisplaySwitchNames ~= nil then
             if type(config.DisplaySwitchNames) == "boolean" then
                 -- convert old boolean to new integer for backward compatibility
                 config.DisplaySwitchNames = config.DisplaySwitchNames and 1 or 0
