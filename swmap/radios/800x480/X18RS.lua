@@ -24,12 +24,12 @@ return {
     },
     {
         ["name"] = "RH STICK",
-        ["draw"] = function() drawStick(559, 241, 74) end,
+        ["draw"] = function() drawStick(558, 241, 74) end,
     },
     {
         ["name"] = "SA",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 5, 185, 177, 185 }, { 177, 185, 195, 163 } },
+        ["lines"] = { { 5, 153, 183, 153 } },
         ["draw"] = function() drawButton3Pos(195, 150, 12) end,
     },
     {
@@ -47,7 +47,7 @@ return {
     {
         ["name"] = "SD",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 795, 185, 623, 185 }, { 623, 185, 605, 163 } },
+        ["lines"] = { { 795, 153, 617, 153 } },
         ["draw"] = function() drawButton3Pos(605, 150, 12) end,
     },
     {
@@ -77,14 +77,14 @@ return {
     {
         ["name"] = "SI",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 5, 240, 111, 240 } },
-        ["draw"] = function() drawButton1Pos(111, 240, 8) end,
+        ["lines"] = { { 5, 235, 122, 235 } },
+        ["draw"] = function() drawButton1Pos(130, 235, 8) end,
     },
     {
         ["name"] = "SJ",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 795, 240, 689, 240 } },
-        ["draw"] = function() drawButton1Pos(689, 240, 8) end,
+        ["lines"] = { { 795, 235, 678, 235 } },
+        ["draw"] = function() drawButton1Pos(670, 235, 8) end,
     },
     {
         ["name"] = "SK",
@@ -101,14 +101,14 @@ return {
     {
         ["name"] = "LS",
         ["type"] = TYPE_SLIDER,
-        ["lines"] = { { 5, 216, 114, 216 }, { 114, 216, 138, 240 } },
-        ["draw"] = function() drawCurvedSlider(180, 240, 34, 44, 230, 310) end,
+        ["lines"] = { { 5, 190, 154, 190 } },
+        ["draw"] = function() drawCurvedSlider(195, 210, 34, 44, 265, 345) end,
     },
     {
         ["name"] = "RS",
         ["type"] = TYPE_SLIDER,
-        ["lines"] = { { 795, 216, 686, 216 }, { 686, 216, 662, 240 } },
-        ["draw"] = function() drawCurvedSlider(618, 240, 34, 44, 50, 130) end,
+        ["lines"] = { { 795, 190, 646, 190 } },
+        ["draw"] = function() drawCurvedSlider(605, 210, 34, 44, 15, 95) end,
     },
     {
         ["name"] = "S1",
@@ -134,18 +134,18 @@ return {
         ["name"] = "T1",
         ["type"] = TYPE_TRIM,
         ["lines"] = { { 795, 335, 576, 335 } },
-        ["draw"] = function() drawTrim(539, 327, 40, 16) end,
+        ["draw"] = function() drawTrim(538, 327, 40, 16) end,
     },
     {
         ["name"] = "T2",
         ["type"] = TYPE_TRIM,
-        ["lines"] = { { 795, 283, 479, 283 }, { 479, 283, 460, 264 } },
-        ["draw"] = function() drawTrim(451, 227, 16, 40) end,
+        ["lines"] = { { 795, 283, 479, 283 }, { 479, 283, 463, 267 } },
+        ["draw"] = function() drawTrim(455, 227, 16, 40) end,
     },
     {
         ["name"] = "T3",
         ["type"] = TYPE_TRIM,
-        ["lines"] = { { 5, 283, 319, 283 }, { 319, 283, 338, 264 } },
+        ["lines"] = { { 5, 283, 319, 283 }, { 319, 283, 335, 267 } },
         ["draw"] = function() drawTrim(331, 227, 16, 40) end,
     },
     {
