@@ -168,6 +168,12 @@ local function readConfiguration(basename)
     local chunk = loadfile(getConfigurationFilePath(basename), "bt", { lcd = lcd }) -- load the config file passing only the lcd global variable
     if chunk then
         local config = chunk()
+        if config and config.DisplaySwitchNames then
+            if type(config.DisplaySwitchNames) == "boolean" then
+                -- convert old boolean to new integer for backward compatibility
+                config.DisplaySwitchNames = config.DisplaySwitchNames and 1 or 0
+            end
+        end
         return config
     else
         -- might be normal for a new model
@@ -199,7 +205,7 @@ end
 local function defaultConfig()
     local widget = {
         DisplayAll = true,
-        DisplaySwitchNames = true,
+        DisplaySwitchNames = 0, -- 0: no, 1: yes, 2: yes with aliases if available
         TextColor = nil,
         DisplayVersion = true,
         DisplayModelName = true,
@@ -294,7 +300,7 @@ local function paint(widget)
             if not align and x < w / 2 then align = TEXT_LEFT end
             if not align and x >= w / 2 then align = TEXT_RIGHT end
             local labelOffsetX = 0
-            if widget.DisplaySwitchNames and prefix and prefix ~= "" then
+            if widget.DisplaySwitchNames > 0 and prefix and prefix ~= "" then
                 lcd.font(FONT_S_BOLD and FONT_S_BOLD or FONT_S)
                 local pw = lcd.getTextSize(prefix .. " ")
                 if align == TEXT_RIGHT then
@@ -327,7 +333,7 @@ local function paint(widget)
     for _, specs in pairs(widget.radio) do
         local name = specs["name"] or ""
         local alias = name
-        if widget.DisplayAliases then
+        if widget.DisplaySwitchNames == 2 then
             alias = specs["alias"] or specs["name"] or ""
         end
         lcd.color(widget.TextColor or getDefaultTextColor())
@@ -406,26 +412,17 @@ end
 
 local function fillSwitchPanel(panel, widget, hasAliases)
     local line
-    if hasAliases then
-        line = panel:addLine(STR("DisplayAliases"))
-        form.addBooleanField(line, nil,
-            function() return widget.DisplayAliases end,
-            function(value)
-                widget.DisplayAliases = value
-                panel:clear()
-                fillSwitchPanel(panel, widget, hasAliases)
-            end)
-    end
     local isFirst
     if type(widget.radio) == "table" then
         for _, specs in pairs(widget.radio) do
             local name = specs["name"] or ""
-            local alias = name
-            if widget.DisplayAliases then
-                alias = specs["alias"] or specs["name"] or ""
-            end
+            local alias = specs["alias"]
             if specs.lines then -- no lines means no legend or disabled switches
-                line = panel:addLine(STR_TYPE_LABEL(specs.type, alias))
+                if alias then
+                    line = panel:addLine(STR_TYPE_LABEL(specs.type, name .. " (" .. alias .. ")"))
+                else
+                    line = panel:addLine(STR_TYPE_LABEL(specs.type, name))
+                end
                 local textField = form.addTextField(line, nil,
                     function() return widget[name .. "text"] or "" end,
                     function(value) widget[name .. "text"] = value end)
@@ -522,7 +519,12 @@ local function configure(widget)
         function(value) widget.DisplayAll = value end)
 
     line = form.addLine(STR("DisplaySwitchNames"))
-    form.addBooleanField(line, nil, function() return widget.DisplaySwitchNames end,
+    local displaySwitchNamesChoices = { { STR("No"), 0 }, { STR("Yes"), 1 } }
+    if hasAliases then
+        table.insert(displaySwitchNamesChoices, { STR("YesWithAlias"), 2 })
+    end
+    form.addChoiceField(line, nil, displaySwitchNamesChoices,
+        function() return widget.DisplaySwitchNames end,
         function(value) widget.DisplaySwitchNames = value end)
 
     line = form.addLine(STR("TextColor"))
@@ -530,7 +532,7 @@ local function configure(widget)
         function() return widget.TextColor or getDefaultTextColor() end,
         function(value) widget.TextColor = value ~= getDefaultTextColor() and value or nil end)
 
-    panel = form.addExpansionPanel(STR("SwitchExpansionTitle"))
+    panel = form.addExpansionPanel(hasAliases and STR("SwitchExpansionTitleWithAlias") or STR("SwitchExpansionTitle"))
     fillSwitchPanel(panel, widget, hasAliases)
 
     local fullScreenPanel = form.addExpansionPanel(STR("FullScreenOptions"))

@@ -29,5 +29,8 @@ return {
     DisplayVersion = "Display script version?",
     DisplayModelName = "Display model's name?",
     FullScreenOptions = "Options for Full Screen only",
-    DisplayAliases = "Use switch aliases?"
+    SwitchExpansionTitleWithAlias = "Switch labels (alias)",
+    YesWithAlias = "Yes (alias)",
+    Yes = "Yes",
+    No = "No",
 }
