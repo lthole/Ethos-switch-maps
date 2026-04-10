@@ -203,6 +203,7 @@ local function defaultConfig()
         TextColor = nil,
         DisplayVersion = true,
         DisplayModelName = true,
+        DisplayAliases = false,
         Note1 = "",
         Note2 = "",
         NoteColor = nil,
@@ -325,7 +326,10 @@ local function paint(widget)
     -- next legends (on top)
     for _, specs in pairs(widget.radio) do
         local name = specs["name"] or ""
-        local alias = specs["alias"] or specs["name"] or ""
+        local alias = name
+        if widget.DisplayAliases then
+            alias = specs["alias"] or specs["name"] or ""
+        end
         lcd.color(widget.TextColor or getDefaultTextColor())
         if specs["lines"] then
             addLegend(widget[name .. "text"] or "", alias, specs["lines"], specs["align"],
@@ -400,7 +404,39 @@ local function event(widget, category, value, x, y)
     end
 end
 
-
+local function fillSwitchPanel(panel, widget, hasAliases)
+    local line
+    if hasAliases then
+        line = panel:addLine(STR("DisplayAliases"))
+        form.addBooleanField(line, nil,
+            function() return widget.DisplayAliases end,
+            function(value)
+                widget.DisplayAliases = value
+                panel:clear()
+                fillSwitchPanel(panel, widget, hasAliases)
+            end)
+    end
+    local isFirst
+    if type(widget.radio) == "table" then
+        for _, specs in pairs(widget.radio) do
+            local name = specs["name"] or ""
+            local alias = name
+            if widget.DisplayAliases then
+                alias = specs["alias"] or specs["name"] or ""
+            end
+            if specs.lines then -- no lines means no legend or disabled switches
+                line = panel:addLine(STR_TYPE_LABEL(specs.type, alias))
+                local textField = form.addTextField(line, nil,
+                    function() return widget[name .. "text"] or "" end,
+                    function(value) widget[name .. "text"] = value end)
+                if isFirst == nil then
+                    textField:focus()
+                    isFirst = false
+                end
+            end
+        end
+    end
+end
 -- **************************************************************************************
 -- ***		     configure widget	 	   		                                      ***
 -- *** Clicking the widget configure option triggers this handler.                    ***
@@ -422,6 +458,16 @@ local function configure(widget)
         return true
     end
     local isEmpty = _checkIfEmpty() -- cache
+    local function _checkIfAliases()
+        if type(widget.radio) ~= "table" then return false end
+        for _, specs in pairs(widget.radio) do
+            if specs["alias"] then
+                return true
+            end
+        end
+        return false
+    end
+    local hasAliases = _checkIfAliases() -- cache
 
     local function loadTemplate(basename)
         -- erase first
@@ -485,23 +531,8 @@ local function configure(widget)
         function(value) widget.TextColor = value ~= getDefaultTextColor() and value or nil end)
 
     panel = form.addExpansionPanel(STR("SwitchExpansionTitle"))
-    local isFirst
-    if type(widget.radio) == "table" then
-        for _, specs in pairs(widget.radio) do
-            local name = specs["name"] or ""
-            local alias = specs["alias"] or specs["name"] or ""
-            if specs.lines then -- no lines means no legend or disabled switches
-                line = panel:addLine(STR_TYPE_LABEL(specs.type, alias))
-                local textField = form.addTextField(line, nil,
-                    function() return widget[name .. "text"] or "" end,
-                    function(value) widget[name .. "text"] = value end)
-                if isFirst == nil then
-                    textField:focus()
-                    isFirst = false
-                end
-            end
-        end
-    end
+    fillSwitchPanel(panel, widget, hasAliases)
+
     local fullScreenPanel = form.addExpansionPanel(STR("FullScreenOptions"))
     line = fullScreenPanel:addLine(STR("DisplayModelName"))
     form.addBooleanField(line, nil, function() return widget.DisplayModelName end,
@@ -632,6 +663,7 @@ local function write(widget)
     end
     append("DisplayVersion", widget.DisplayVersion)
     append("DisplayModelName", widget.DisplayModelName)
+    append("DisplayAliases", widget.DisplayAliases)
     append("Note1", quote(widget.Note1))
     append("Note2", quote(widget.Note2))
     for key, value in pairs(widget) do

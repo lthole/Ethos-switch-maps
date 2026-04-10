@@ -28,5 +28,6 @@ return {
     Note2 = "Note2",
     DisplayVersion = "Display script version?",
     DisplayModelName = "Display model's name?",
-    FullScreenOptions = "Options for Full Screen only"
+    FullScreenOptions = "Options for Full Screen only",
+    DisplayAliases = "Use switch aliases?"
 }
