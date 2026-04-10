@@ -205,7 +205,7 @@ end
 local function defaultConfig()
     local widget = {
         DisplayAll = true,
-        DisplaySwitchNames = 0, -- 0: no, 1: yes, 2: yes with aliases if available
+        DisplaySwitchNames = 1, -- 0: no, 1: yes, 2: yes with aliases if available
         TextColor = nil,
         DisplayVersion = true,
         DisplayModelName = true,
@@ -519,16 +519,19 @@ local function configure(widget)
         function(value) widget.DisplayAll = value end)
 
     line = form.addLine(STR("DisplaySwitchNames"))
-    local displaySwitchNamesChoices = { { STR("No"), 0 }, { STR("Yes"), 1 } }
     if hasAliases then
-        table.insert(displaySwitchNamesChoices, { STR("YesWithAlias"), 2 })
+        local displaySwitchNamesChoices = { { STR("No"), 0 }, { STR("Yes"), 1 }, { STR("YesWithAlias"), 2 } }
+        if widget.DisplaySwitchNames > #displaySwitchNamesChoices then
+            widget.DisplaySwitchNames = #displaySwitchNamesChoices -- just in case
+        end
+        form.addChoiceField(line, nil, displaySwitchNamesChoices,
+            function() return widget.DisplaySwitchNames end,
+            function(value) widget.DisplaySwitchNames = value end)
+    else
+        form.addBooleanField(line, nil,
+            function() return widget.DisplaySwitchNames >= 1 end,
+            function(value) widget.DisplaySwitchNames = value and 1 or 0 end)
     end
-    if widget.DisplaySwitchNames > #displaySwitchNamesChoices then
-        widget.DisplaySwitchNames = #displaySwitchNamesChoices -- just in case
-    end
-    form.addChoiceField(line, nil, displaySwitchNamesChoices,
-        function() return widget.DisplaySwitchNames end,
-        function(value) widget.DisplaySwitchNames = value end)
 
     line = form.addLine(STR("TextColor"))
     form.addColorField(line, nil,
