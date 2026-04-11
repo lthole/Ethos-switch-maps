@@ -66,12 +66,24 @@ if debug_mode then log("SWMAP Debug MODE ON") end
 
 local defaultTextColorDark = lcd.RGB(0, 0xFF, 0xFF)
 local defaultTextColorLight = lcd.RGB(0x58, 0x5C, 0x58)
-local getDefaultTextColor = function() return lcd.darkMode() and defaultTextColorDark or defaultTextColorLight end
 
 -- Colors used to mimic Hardware Checks Page
 local GRAY_DARK = lcd.RGB(0x31, 0x31, 0x31)
 local GRAY_LIGHT = lcd.RGB(0x52, 0x51, 0x52)
-local inactiveSwitchColor -- depends on theme (light/dark) set in build
+local buttonSlotColor = lcd.GREY(50) -- only use in dark mode
+local potColor = GRAY_DARK
+local inactiveSwitchColor            -- depends on theme (light/dark) set in build
+local screenBgColor                  -- depends on theme (light/dark) set in build
+local primaryColor                   -- depends on theme (light/dark) set in build
+local defaultTextColor               -- depends on theme (light/dark) set in build
+local focusColor                     -- depends on theme (light/dark) set in build
+local buttonBgColor                  -- depends on theme (light/dark) set in build
+local sliderBgColor                  -- depends on theme (light/dark) set in build
+local potBgColor                     -- depends on theme (light/dark) set in build
+local trimBgColor                    -- depends on theme (light/dark) set in build
+local trimColor                      -- depends on theme (light/dark) set in build
+local stickBgColor                   -- depends on theme (light/dark) set in build
+local stickInnerColor                -- depends on theme (light/dark) set in build
 
 local configurationPath = "SCRIPTS:/swmap/models/"
 
@@ -118,12 +130,12 @@ local function getRadioId(board)
         return 'X20PRO'
     elseif board:sub(1, 2) == "XE" then
         return 'XE'
-    elseif board:sub(1, 5) == "X20RS" then
-        return 'X20R' -- explicitly show X20RS support
     elseif board:sub(1, 4) == "X20R" then
         return 'X20R'
     elseif board:sub(1, 4) == "X18R" then
         return 'X18RS'
+    elseif board:sub(1, 3) == "X18" then
+        return 'X18'
     elseif board == "TWXLITERII" then
         return 'TWXLITERII'
     elseif board:sub(1, 7) == "TWXLITE" then
@@ -257,12 +269,12 @@ local function paint(widget)
     local w, h = lcd.getWindowSize()
 
     -- hide focus color
-    lcd.color(lcd.darkMode() and lcd.RGB(0x10, 0x10, 0x10) or lcd.RGB(0xd6, 0xd2, 0xd6)) -- mimics Hardware Checks Page
+    lcd.color(screenBgColor) -- mimics Hardware Checks Page
     lcd.drawFilledRectangle(0, 0, w, h)
 
     -- for configure screens only
     if lcd.isConfiguring and lcd.isConfiguring() then
-        lcd.color(lcd.themeColor(THEME_PRIMARY_COLOR or THEME_DEFAULT_COLOR))
+        lcd.color(primaryColor)
         lcd.font(FONT_XL)
         local text = "Switch Maps"
         local _, th = lcd.getTextSize(text)
@@ -281,7 +293,7 @@ local function paint(widget)
     end
     -- alert if non supported definition
     if type(widget.radio) ~= "table" then
-        lcd.color(lcd.themeColor(THEME_PRIMARY_COLOR or THEME_DEFAULT_COLOR))
+        lcd.color(primaryColor)
         lcd.drawText(5, 30, string.format("%sx%s : unsupported widget size for %s", w, h, sys.board))
         if not isFullScreen(w, h) then
             local _, lineHeight = lcd.getTextSize("")
@@ -314,14 +326,18 @@ local function paint(widget)
                     labelOffsetX = -pw
                 end
             end
-            lcd.font(FONT_S)
-            lcd.drawText(x - labelOffsetX, y - (offset and offset or textOffsetY), label, align)
-
+            lcd.color(widget.TextColor or defaultTextColor)
             for _, rect in pairs(lines) do
                 lcd.pen(PEN_DASHED)
                 lcd.drawLine(rect[1], rect[2], rect[3], rect[4])
                 lcd.pen(PEN_SOLID)
             end
+            lcd.font(FONT_S)
+            lcd.color(screenBgColor) -- shadow
+            lcd.drawText(x - labelOffsetX - 1, y - (offset and offset or textOffsetY) - 1, label, align)
+            lcd.drawText(x - labelOffsetX + 1, y - (offset and offset or textOffsetY) + 1, label, align)
+            lcd.color(widget.TextColor or defaultTextColor)
+            lcd.drawText(x - labelOffsetX, y - (offset and offset or textOffsetY), label, align)
         end
     end
     -- first draw controls
@@ -335,7 +351,6 @@ local function paint(widget)
         if widget.DisplaySwitchNames == 2 then
             alias = specs["alias"] or specs["name"] or ""
         end
-        lcd.color(widget.TextColor or getDefaultTextColor())
         if specs["lines"] then
             addLegend(widget[name .. "text"] or "", alias, specs["lines"], specs["align"],
                 specs["offset"])
@@ -347,29 +362,29 @@ local function paint(widget)
     --
     if sys.simulation == true and debug_mode then
         lcd.font(FONT_S_BOLD and FONT_S_BOLD or FONT_S)
-        lcd.color(lcd.themeColor(THEME_PRIMARY_COLOR or THEME_DEFAULT_COLOR))
+        lcd.color(primaryColor)
         if isFullScreen(w, h) then
             lcd.drawText(18, 5, widget.curposx .. ", " .. widget.curposy)
         else
             lcd.color(lcd.GREY(5, 0.7))
             lcd.drawFilledRectangle(0, 0, 70, 15)
-            lcd.color(lcd.themeColor(THEME_PRIMARY_COLOR or THEME_DEFAULT_COLOR))
+            lcd.color(primaryColor)
             lcd.drawText(0, 0, widget.curposx .. ", " .. widget.curposy)
         end
     end
     if isFullScreen(w, h) then
         if widget.DisplayModelName then
             lcd.font(FONT_L_BOLD and FONT_L_BOLD or FONT_BOLD)
-            lcd.color(widget.TextColor or getDefaultTextColor())
+            lcd.color(widget.TextColor or defaultTextColor)
             lcd.drawText(18, 21, model.name())
         end
         if widget.DisplayVersion then
             -- show widget information on Full Screen, color based on lcd.hasFocus
             lcd.font(FONT_XS)
-            lcd.color(lcd.hasFocus() and lcd.themeColor(THEME_FOCUS_COLOR) or lcd.themeColor(14)) -- 14 is the theme color for widget titles
+            lcd.color(lcd.hasFocus() and focusColor or lcd.themeColor(14)) -- 14 is the theme color for widget titles
             lcd.drawText(w - 10, 10, STR("ScriptName") .. ' v' .. version, TEXT_RIGHT)
         end
-        lcd.color(widget.NoteColor or getDefaultTextColor())
+        lcd.color(widget.NoteColor or defaultTextColor)
         lcd.font(FONT_S)
         if widget.Note1 and widget.Note1 ~= "" then
             addLegend(widget.Note1, "", { { 5, h - 30, select(1, lcd.getTextSize(widget.Note1)) + 5, h - 30 } })
@@ -380,7 +395,7 @@ local function paint(widget)
     elseif lcd.hasFocus() then
         -- when not in full screen, displays simply FOCUS to give a hint
         lcd.font(FONT_BOLD)
-        lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
+        lcd.color(focusColor)
         lcd.drawText(w / 2, h - select(2, lcd.getTextSize("")) - 2, STR("Focus"), TEXT_CENTERED)
     end
     if debug_mode then log(string.format("paint time %sms", (os.clock() - timestamp) * 1000)) end
@@ -510,8 +525,8 @@ local function configure(widget)
 
     line = form.addLine(STR("TextColor"))
     form.addColorField(line, nil,
-        function() return widget.TextColor or getDefaultTextColor() end,
-        function(value) widget.TextColor = value ~= getDefaultTextColor() and value or nil end)
+        function() return widget.TextColor or defaultTextColor end,
+        function(value) widget.TextColor = value ~= defaultTextColor and value or nil end)
 
     panel = form.addExpansionPanel(hasAliases and STR("SwitchExpansionTitleWithAlias") or STR("SwitchExpansionTitle"))
     local isFirst
@@ -549,8 +564,8 @@ local function configure(widget)
     form.addTextField(line, nil, function() return widget.Note2 end, function(value) widget.Note2 = value end)
     line = fullScreenPanel:addLine(STR("NoteColor"))
     form.addColorField(line, nil,
-        function() return widget.NoteColor or getDefaultTextColor() end,
-        function(value) widget.NoteColor = value ~= getDefaultTextColor() and value or nil end)
+        function() return widget.NoteColor or defaultTextColor end,
+        function(value) widget.NoteColor = value ~= defaultTextColor and value or nil end)
 
     if count == 0 and isEmpty then
         panel:open(false)
@@ -684,7 +699,7 @@ end
 -- They are available in the radio definitions files                   .              ***
 -- **************************************************************************************
 local function drawButtonSlot(cx, cy, r)
-    lcd.color(lcd.GREY(50))
+    lcd.color(buttonSlotColor)
     if lcd.darkMode() then
         lcd.drawFilledCircle(cx, cy, r)
     else
@@ -692,7 +707,7 @@ local function drawButtonSlot(cx, cy, r)
     end
 end
 local function drawButton1Pos(cx, cy, r)
-    lcd.color(lcd.darkMode() and GRAY_LIGHT or GRAY_DARK)
+    lcd.color(buttonBgColor)
     lcd.drawFilledCircle(cx, cy, r)
     lcd.color(inactiveSwitchColor)
     lcd.drawFilledCircle(cx, cy, math.floor(math.max(r - 4, r / 2)))
@@ -700,11 +715,11 @@ end
 local function drawButton2Pos(cx, cy, r)
     local r3 = math.ceil(r / 3)
     local rcos15 = math.ceil(r * 0.97)
-    lcd.color(lcd.darkMode() and GRAY_LIGHT or GRAY_DARK)
+    lcd.color(buttonBgColor)
     lcd.drawFilledCircle(cx, cy, r)
     lcd.color(inactiveSwitchColor)
     lcd.drawFilledTriangle(cx, cy + r3, cx + r3, cy + rcos15, cx - r3, cy + rcos15)
-    lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
+    lcd.color(focusColor)
     lcd.drawFilledTriangle(cx - r3, cy - rcos15, cx + r3, cy - rcos15, cx, cy - r3)
 end
 local function drawButton3Pos(cx, cy, r)
@@ -714,20 +729,20 @@ local function drawButton3Pos(cx, cy, r)
 end
 local function drawPot(cx, cy, r)
     local rcos30 = 0.866 * r
-    lcd.color(lcd.darkMode() and GRAY_LIGHT or lcd.GREY(180))
+    lcd.color(potBgColor)
     lcd.drawFilledCircle(cx, cy, r)
-    lcd.color(GRAY_DARK)
+    lcd.color(potColor)
     lcd.drawFilledCircle(cx, cy, rcos30)
-    lcd.color(lcd.darkMode() and GRAY_LIGHT or lcd.GREY(180))
+    lcd.color(potBgColor)
     lcd.drawFilledTriangle(cx, cy, cx - (r / 2), cy + rcos30, cx + (r / 2), cy + rcos30)
-    lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
+    lcd.color(focusColor)
     lcd.drawFilledCircle(cx, cy - r + 2, 4)
 end
 local function drawTrim(x, y, w, h)
     -- TODO computations are wrong but Ethos is drawing angle line badly
-    lcd.color(lcd.darkMode() and GRAY_LIGHT or GRAY_DARK)
+    lcd.color(trimBgColor)
     lcd.drawFilledRectangle(x, y, w, h)
-    lcd.color(inactiveSwitchColor)
+    lcd.color(trimColor)
     if w > h then -- horizontal
         local marginX = 4
         local marginY = 2
@@ -761,15 +776,15 @@ end
 local function drawSlider(x, y, w, h)
     local rulerOffset = 5
     local rulerHeight = lcd.darkMode() and 3 or 6
-    lcd.color(lcd.darkMode() and GRAY_LIGHT or lcd.GREY(180))
+    lcd.color(sliderBgColor)
     lcd.drawFilledRectangle(x, y, w, h)
-    lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
+    lcd.color(focusColor)
     lcd.drawFilledRectangle(x - rulerOffset, math.ceil(y + (h / 2)), w + (rulerOffset * 2), rulerHeight)
 end
 local function drawCurvedSlider(x, y, intR, extR, startAngle, endAngle)
-    lcd.color(lcd.darkMode() and GRAY_LIGHT or lcd.GREY(180))
+    lcd.color(sliderBgColor)
     lcd.drawAnnulusSector(x, y, intR, extR, startAngle, endAngle)
-    lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
+    lcd.color(focusColor)
     local cursorWidth = lcd.darkMode() and 3 or 6
     if (startAngle + endAngle) / 2 == 270 then    --left slider
         lcd.drawFilledRectangle(x - extR, y - math.floor(cursorWidth / 2), math.abs(extR - intR), cursorWidth)
@@ -805,20 +820,12 @@ end
 local function drawStick(cx, cy, r)
     local margin = 8
     local rcos30 = 0.866 * r
-    local stickCenterWidth = 6
-    if not lcd.darkMode() then
-        lcd.color(lcd.GREY(180))
-        lcd.drawFilledCircle(cx, cy, r)
-        lcd.color(lcd.RGB(0xd6, 0xd2, 0xd6))
-        lcd.drawFilledRectangle(cx - rcos30 + margin, cy - (r / 2), (rcos30 - margin) * 2, r)
-        stickCenterWidth = 8
-    else
-        lcd.color(GRAY_LIGHT)
-        lcd.drawFilledCircle(cx, cy, r)
-        lcd.color(GRAY_DARK)
-        lcd.drawFilledRectangle(cx - rcos30 + margin, cy - (r / 2), (rcos30 - margin) * 2, r)
-    end
-    lcd.color(lcd.themeColor(THEME_FOCUS_COLOR))
+    local stickCenterWidth = lcd.darkMode() and 6 or 8
+    lcd.color(stickBgColor)
+    lcd.drawFilledCircle(cx, cy, r)
+    lcd.color(stickInnerColor)
+    lcd.drawFilledRectangle(cx - rcos30 + margin, cy - (r / 2), (rcos30 - margin) * 2, r)
+    lcd.color(focusColor)
     lcd.drawFilledCircle(cx, cy, stickCenterWidth)
 end
 
@@ -882,6 +889,17 @@ local function build(widget)
     end
     -- he we set colors in case darkmode was changed
     inactiveSwitchColor = lcd.darkMode() and lcd.RGB(0x21, 0x20, 0x21) or lcd.RGB(0xf7, 0xf3, 0xf7)
+    screenBgColor = lcd.darkMode() and lcd.RGB(0x10, 0x10, 0x10) or lcd.RGB(0xd6, 0xd2, 0xd6)
+    primaryColor = lcd.themeColor(THEME_PRIMARY_COLOR or THEME_DEFAULT_COLOR)
+    defaultTextColor = lcd.darkMode() and defaultTextColorDark or defaultTextColorLight
+    focusColor = lcd.themeColor(THEME_FOCUS_COLOR)
+    buttonBgColor = lcd.darkMode() and GRAY_LIGHT or GRAY_DARK
+    sliderBgColor = lcd.darkMode() and GRAY_LIGHT or lcd.GREY(180)
+    potBgColor = sliderBgColor
+    trimBgColor = buttonBgColor
+    trimColor = inactiveSwitchColor
+    stickBgColor = sliderBgColor
+    stickInnerColor = lcd.darkMode() and GRAY_DARK or lcd.RGB(0xd6, 0xd2, 0xd6)
     -- update translation file if needed
     if i18n.getLocale() ~= system.getLocale() then
         local locale = system.getLocale()
