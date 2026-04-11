@@ -68,10 +68,8 @@ local defaultTextColorDark = lcd.RGB(0, 0xFF, 0xFF)
 local defaultTextColorLight = lcd.RGB(0x58, 0x5C, 0x58)
 
 -- Colors used to mimic Hardware Checks Page
-local GRAY_DARK = lcd.RGB(0x31, 0x31, 0x31)
-local GRAY_LIGHT = lcd.RGB(0x52, 0x51, 0x52)
 local buttonSlotColor = lcd.GREY(50) -- only use in dark mode
-local potColor = GRAY_DARK
+local potColor                       -- depends on theme (light/dark) set in build
 local inactiveSwitchColor            -- depends on theme (light/dark) set in build
 local screenBgColor                  -- depends on theme (light/dark) set in build
 local primaryColor                   -- depends on theme (light/dark) set in build
@@ -84,6 +82,7 @@ local trimBgColor                    -- depends on theme (light/dark) set in bui
 local trimColor                      -- depends on theme (light/dark) set in build
 local stickBgColor                   -- depends on theme (light/dark) set in build
 local stickInnerColor                -- depends on theme (light/dark) set in build
+local secondaryColor                 -- depends on theme (light/dark) set in build
 
 local configurationPath = "SCRIPTS:/swmap/models/"
 
@@ -382,7 +381,7 @@ local function paint(widget)
         if widget.DisplayVersion then
             -- show widget information on Full Screen, color based on lcd.hasFocus
             lcd.font(FONT_XS)
-            lcd.color(lcd.hasFocus() and focusColor or lcd.themeColor(14)) -- 14 is the theme color for widget titles
+            lcd.color(lcd.hasFocus() and focusColor or secondaryColor)
             lcd.drawText(w - 10, 10, STR("ScriptName") .. ' v' .. version, TEXT_RIGHT)
         end
         lcd.color(widget.NoteColor or defaultTextColor)
@@ -889,18 +888,69 @@ local function build(widget)
         widget.radioWidth, widget.radioHeight = w, h
     end
     -- he we set colors in case darkmode was changed
-    inactiveSwitchColor = lcd.darkMode() and lcd.RGB(0x21, 0x20, 0x21) or lcd.RGB(0xf7, 0xf3, 0xf7)
-    screenBgColor = lcd.darkMode() and lcd.RGB(0x10, 0x10, 0x10) or lcd.RGB(0xd6, 0xd2, 0xd6)
+    if sys.major >= 26 then
+        secondaryColor = lcd.themeColor(THEME_SECONDARY_COLOR)
+        if lcd.darkMode() then
+            screenBgColor = lcd.themeColor(THEME_PRIMARY_BGCOLOR)
+            potColor = screenBgColor
+            buttonBgColor = lcd.RGB(0x52, 0x54, 0x58)
+            sliderBgColor = buttonBgColor
+            inactiveSwitchColor = screenBgColor
+            -- PRIMARY_COLOR = #F8FCF8 = DEFAULT_COLOR
+            -- SECONDARY_COLOR = #B0B0B0
+            -- PRIMARY_BGCOLOR = #182028
+            -- SECONDARY_BGCOLOR = #283038 = DEFAULT_BGCOLOR
+            -- WARNING_COLOR = #E02018
+            -- FOCUS_COLOR = #F8B038
+            -- FOCUS_BGCOLOR = #283038 = DEFAULT_BGCOLOR
+        else
+            screenBgColor = lcd.RGB(0xee, 0xef, 0xf7)
+            buttonBgColor = lcd.themeColor(THEME_PRIMARY_COLOR)   -- lcd.RGB(0x52, 0x51, 0x52)
+            potColor = buttonBgColor
+            sliderBgColor = lcd.themeColor(THEME_PRIMARY_BGCOLOR) -- lcd.RGB(0xB8, 0xB8, 0xB8)
+            inactiveSwitchColor = screenBgColor
+            -- PRIMARY_COLOR = #585458 = DEFAULT_COLOR
+            -- SECONDARY_COLOR = #707470
+            -- PRIMARY_BGCOLOR = #D0D4D0
+            -- SECONDARY_BGCOLOR = #C8C8C8 = DEFAULT_BGCOLOR
+            -- WARNING_COLOR = #E02018
+            -- FOCUS_COLOR = #F8B038
+            -- FOCUS_BGCOLOR = #C8C8C8 = DEFAULT_BGCOLOR
+        end
+    else
+        potColor = lcd.RGB(0x31, 0x31, 0x31)
+        secondaryColor = lcd.themeColor(14)                       -- 14 is the theme color for widget titles
+        if lcd.darkMode() then
+            screenBgColor = lcd.themeColor(THEME_DEFAULT_BGCOLOR) -- lcd.RGB(0x10, 0x10, 0x10)
+            buttonBgColor = lcd.RGB(0x52, 0x51, 0x52)
+            sliderBgColor = buttonBgColor
+            inactiveSwitchColor = screenBgColor
+            -- DEFAULT_COLOR = #F8FCF8
+            -- DEFAULT_BGCOLOR = #202020
+            -- WARNING_COLOR = #E02018
+            -- FOCUS_COLOR = #F8C000
+            -- FOCUS_BGCOLOR = #202020
+        else
+            screenBgColor = lcd.RGB(0xd6, 0xd2, 0xd6)
+            buttonBgColor = potColor
+            sliderBgColor = lcd.RGB(0xB8, 0xB8, 0xB8)
+            inactiveSwitchColor = lcd.themeColor(THEME_DEFAULT_BGCOLOR) -- lcd.RGB(0xd6, 0xd2, 0xd6)
+            -- DEFAULT_COLOR = #585458
+            -- DEFAULT_BGCOLOR = #F0F0F0
+            -- WARNING_COLOR = #E02018
+            -- FOCUS_COLOR = #F8C000
+            -- FOCUS_BGCOLOR = #A0A0A0
+        end
+    end
     primaryColor = lcd.themeColor(THEME_PRIMARY_COLOR or THEME_DEFAULT_COLOR)
     defaultTextColor = lcd.darkMode() and defaultTextColorDark or defaultTextColorLight
     focusColor = lcd.themeColor(THEME_FOCUS_COLOR)
-    buttonBgColor = lcd.darkMode() and GRAY_LIGHT or GRAY_DARK
-    sliderBgColor = lcd.darkMode() and GRAY_LIGHT or lcd.GREY(180)
+    stickInnerColor = screenBgColor
     potBgColor = sliderBgColor
     trimBgColor = buttonBgColor
     trimColor = inactiveSwitchColor
     stickBgColor = sliderBgColor
-    stickInnerColor = lcd.darkMode() and GRAY_DARK or lcd.RGB(0xd6, 0xd2, 0xd6)
+
     -- update translation file if needed
     if i18n.getLocale() ~= system.getLocale() then
         local locale = system.getLocale()
