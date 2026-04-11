@@ -102,13 +102,13 @@ return {
         ["name"] = "LS",
         ["type"] = TYPE_SLIDER,
         ["lines"] = { { 5, 190, 154, 190 } },
-        ["draw"] = function() drawCurvedSlider(195, 210, 34, 44, 265, 345) end,
+        ["draw"] = function() drawCurvedSlider(220, 225, 64, 74, 280, 325) end,
     },
     {
         ["name"] = "RS",
         ["type"] = TYPE_SLIDER,
         ["lines"] = { { 795, 190, 646, 190 } },
-        ["draw"] = function() drawCurvedSlider(605, 210, 34, 44, 15, 95) end,
+        ["draw"] = function() drawCurvedSlider(580, 225, 64, 74, 35, 80) end,
     },
     {
         ["name"] = "S1",
