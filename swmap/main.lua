@@ -311,6 +311,7 @@ local function paint(widget)
             if not align and x < w / 2 then align = TEXT_LEFT end
             if not align and x >= w / 2 then align = TEXT_RIGHT end
             local labelOffsetX = 0
+            lcd.color(widget.TextColor or defaultTextColor)
             if widget.DisplaySwitchNames > 0 and prefix and prefix ~= "" then
                 lcd.font(FONT_S_BOLD and FONT_S_BOLD or FONT_S)
                 local pw = lcd.getTextSize(prefix .. " ")
