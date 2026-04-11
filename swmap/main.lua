@@ -144,6 +144,8 @@ local function getRadioId(board)
         return 'X14RS'
     elseif board:sub(1, 3) == "T14" then
         return 'X14RS'
+    elseif board:sub(1, 3) == "V15" then
+        return 'V15'
     else
         return 'X20'
     end
