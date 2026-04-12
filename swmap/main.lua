@@ -922,13 +922,15 @@ local function build(widget)
             -- FOCUS_COLOR = #F8B038
             -- FOCUS_BGCOLOR = #C8C8C8 = DEFAULT_BGCOLOR
         end
+        stickInnerColor = screenBgColor
     else
-        potColor = lcd.RGB(0x31, 0x31, 0x31)
         secondaryColor = lcd.themeColor(14)                       -- 14 is the theme color for widget titles
         if lcd.darkMode() then
             screenBgColor = lcd.themeColor(THEME_DEFAULT_BGCOLOR) -- lcd.RGB(0x10, 0x10, 0x10)
+            potColor = lcd.RGB(0x31, 0x31, 0x31)
             buttonBgColor = lcd.RGB(0x52, 0x51, 0x52)
             sliderBgColor = buttonBgColor
+            stickInnerColor = potColor
             inactiveSwitchColor = screenBgColor
             -- DEFAULT_COLOR = #F8FCF8
             -- DEFAULT_BGCOLOR = #202020
@@ -937,9 +939,11 @@ local function build(widget)
             -- FOCUS_BGCOLOR = #202020
         else
             screenBgColor = lcd.RGB(0xd6, 0xd2, 0xd6)
+            potColor = lcd.RGB(0x52, 0x51, 0x52)
             buttonBgColor = potColor
             sliderBgColor = lcd.RGB(0xB8, 0xB8, 0xB8)
             inactiveSwitchColor = lcd.themeColor(THEME_DEFAULT_BGCOLOR) -- lcd.RGB(0xd6, 0xd2, 0xd6)
+            stickInnerColor = screenBgColor
             -- DEFAULT_COLOR = #585458
             -- DEFAULT_BGCOLOR = #F0F0F0
             -- WARNING_COLOR = #E02018
@@ -950,7 +954,6 @@ local function build(widget)
     primaryColor = lcd.themeColor(THEME_PRIMARY_COLOR or THEME_DEFAULT_COLOR)
     defaultTextColor = lcd.darkMode() and defaultTextColorDark or defaultTextColorLight
     focusColor = lcd.themeColor(THEME_FOCUS_COLOR)
-    stickInnerColor = screenBgColor
     potBgColor = sliderBgColor
     trimBgColor = buttonBgColor
     trimColor = inactiveSwitchColor
@@ -978,8 +981,7 @@ local function init()
         build = build,
         create = create,
         paint = paint,
-        configure =
-            configure,
+        configure = configure,
         write = write,
         event = event,
         title = false
