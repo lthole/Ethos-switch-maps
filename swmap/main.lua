@@ -778,13 +778,13 @@ local function drawTrim(x, y, w, h)
         )
     end
 end
-local function drawSlider(x, y, w, h)
-    local rulerOffset = 5
+local function drawSlider(x, y, w, h, rulerOffset)
+    rulerOffset = rulerOffset or 5
     local rulerHeight = lcd.darkMode() and 3 or 6
     lcd.color(sliderBgColor)
     lcd.drawFilledRectangle(x, y, w, h)
     lcd.color(focusColor)
-    lcd.drawFilledRectangle(x - rulerOffset, math.ceil(y + (h / 2)), w + (rulerOffset * 2), rulerHeight)
+    lcd.drawFilledRectangle(x - rulerOffset, math.ceil(y + ((h - rulerHeight) / 2)), w + (rulerOffset * 2), rulerHeight)
 end
 local function drawCurvedSlider(x, y, intR, extR, startAngle, endAngle)
     lcd.color(sliderBgColor)
