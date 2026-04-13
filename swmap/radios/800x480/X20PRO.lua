@@ -27,7 +27,7 @@ return {
     {
         ["name"] = "SA",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 5, 185, 177, 185 }, { 177, 185, 195, 163 } },
+        ["lines"] = { { 5, 153, 185, 153 } },
         ["draw"] = function() drawButton3Pos(195, 150, 12) end,
     },
     {
@@ -45,7 +45,7 @@ return {
     {
         ["name"] = "SD",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 795, 185, 623, 185 }, { 623, 185, 605, 163 } },
+        ["lines"] = { { 795, 153, 615, 153 } },
         ["draw"] = function() drawButton3Pos(605, 150, 12) end,
     },
     {
@@ -75,38 +75,66 @@ return {
     {
         ["name"] = "SI",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 5, 240, 111, 240 } },
-        ["draw"] = function() drawButton1Pos(111, 240, 8) end,
+        ["lines"] = { { 5, 244, 112, 244 } },
+        ["draw"] = function() drawButton1Pos(120, 244, 8) end,
     },
     {
         ["name"] = "SJ",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 795, 240, 689, 240 } },
-        ["draw"] = function() drawButton1Pos(689, 240, 8) end,
+        ["lines"] = { { 795, 244, 688, 244 } },
+        ["draw"] = function() drawButton1Pos(680, 244, 8) end,
     },
     {
         ["name"] = "SK",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 5, 156, 103, 156 } },
-        ["draw"] = function() drawButton2Pos(111, 156, 8) end,
+        ["lines"] = { { 5, 174, 112, 174 } },
+        ["draw"] = function() drawButton2Pos(120, 174, 8) end,
     },
     {
         ["name"] = "SL",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 795, 156, 697, 156 } },
-        ["draw"] = function() drawButton2Pos(689, 156, 8) end,
+        ["lines"] = { { 795, 174, 688, 174 } },
+        ["draw"] = function() drawButton2Pos(680, 174, 8) end,
     },
+    -- Left Center Stick momentary switch, uncomment to show
+    -- {
+    --     ["name"] = "SM",
+    --     ["type"] = TYPE_SWITCH,
+    --     ["lines"] = { { 5, 265, 234, 265 } },
+    --     ["draw"] = function() drawButton1Pos(242, 265, 8) end,
+    -- },
+    -- Right Center Stick momentary switch, uncomment to show
+    -- {
+    --     ["name"] = "SN",
+    --     ["type"] = TYPE_SWITCH,
+    --     ["lines"] = { { 795, 265, 566, 265 } },
+    --     ["draw"] = function() drawButton1Pos(558, 265, 8) end,
+    -- },
+    -- Left Center Stick 3POS switch, uncomment to show
+    -- {
+    --     ["name"] = "SX",
+    --     ["type"] = TYPE_SWITCH,
+    --     ["lines"] = { { 5, 223, 223, 223 }, { 223, 223, 232, 232 } },
+    --     ["draw"] = function() drawButton3Pos(242, 241, 12) end,
+    -- },
+    -- Right Center Stick 3POS switch, uncomment to show
+    -- {
+    --     ["name"] = "SY",
+    --     ["type"] = TYPE_SWITCH,
+    --     ["lines"] = { { 795, 223, 577, 223 }, { 577, 223, 568, 232 } },
+    --     ["draw"] = function() drawButton3Pos(558, 241, 12) end,
+    -- },
     {
         ["name"] = "LS",
         ["type"] = TYPE_SLIDER,
-        ["lines"] = { { 5, 216, 114, 216 }, { 114, 216, 138, 240 } },
-        ["draw"] = function() drawCurvedSlider(180, 240, 34, 44, 230, 310) end,
+        ["lines"] = { { 5, 202, 145, 202 } },
+        ["draw"] = function() drawSlider(145, 180, 10, 40, 1) end,
     },
     {
         ["name"] = "RS",
         ["type"] = TYPE_SLIDER,
-        ["lines"] = { { 795, 216, 686, 216 }, { 686, 216, 662, 240 } },
-        ["draw"] = function() drawCurvedSlider(618, 240, 34, 44, 50, 130) end,
+        ["lines"] = { { 795, 202, 655, 202 } },
+        ["draw"] = function() drawSlider(645, 180, 10, 40, 1) end,
     },
     {
         ["name"] = "S1",
@@ -139,13 +167,13 @@ return {
     {
         ["name"] = "T2",
         ["type"] = TYPE_TRIM,
-        ["lines"] = { { 795, 283, 479, 283 }, { 479, 283, 460, 264 } },
+        ["lines"] = { { 795, 286, 481, 286 }, { 481, 286, 462, 264 } },
         ["draw"] = function() drawTrim(451, 227, 16, 40) end,
     },
     {
         ["name"] = "T3",
         ["type"] = TYPE_TRIM,
-        ["lines"] = { { 5, 283, 319, 283 }, { 319, 283, 338, 264 } },
+        ["lines"] = { { 5, 286, 319, 286 }, { 319, 286, 338, 264 } },
         ["draw"] = function() drawTrim(331, 227, 16, 40) end,
     },
     {

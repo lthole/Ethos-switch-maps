@@ -27,7 +27,7 @@ return {
     {
         ["name"] = "SA",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 5, 117, 177, 117 }, { 177, 117, 196, 91 } },
+        ["lines"] = { { 5, 88, 185, 88 } },
         ["draw"] = function() drawButton3Pos(195, 80, 12) end,
     },
     {
@@ -45,7 +45,7 @@ return {
     {
         ["name"] = "SD",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 779, 117, 607, 117 }, { 607, 117, 588, 91 } },
+        ["lines"] = { { 779, 88, 599, 88 } },
         ["draw"] = function() drawButton3Pos(589, 80, 12) end,
     },
     {
@@ -75,38 +75,68 @@ return {
     {
         ["name"] = "SI",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 5, 170, 111, 170 } },
-        ["draw"] = function() drawButton1Pos(111, 170, 8) end,
+        ["lines"] = { { 5, 174, 112, 174 } },
+        ["draw"] = function() drawButton1Pos(120, 168, 8) end,
     },
     {
         ["name"] = "SJ",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 779, 170, 673, 170 } },
-        ["draw"] = function() drawButton1Pos(673, 170, 8) end,
+        ["lines"] = { { 779, 174, 672, 174 } },
+        ["draw"] = function() drawButton1Pos(664, 168, 8) end,
     },
     {
         ["name"] = "SK",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 5, 88, 103, 88 } },
-        ["draw"] = function() drawButton2Pos(111, 85, 8) end,
+        ["lines"] = { { 5, 111, 112, 111 } },
+        ["draw"] = function() drawButton2Pos(120, 105, 8) end,
     },
     {
         ["name"] = "SL",
         ["type"] = TYPE_SWITCH,
-        ["lines"] = { { 779, 88, 681, 88 } },
-        ["draw"] = function() drawButton2Pos(673, 85, 8) end,
+        ["lines"] = { { 779, 111, 672, 111 } },
+        ["draw"] = function() drawButton2Pos(664, 105, 8) end,
     },
+    -- Left Center Stick momentary switch, uncomment to show
+    -- {
+    -- ["name"] = "SM",
+    -- ["type"] = TYPE_SWITCH,
+    -- ["lines"] = { { 242, 126, 295, 126 }, { 189, 126, 242, 126 }, { 242, 126, 242, 138 } },
+    -- ["draw"] = function() drawButton1Pos(242, 146, 8) end,
+    -- ["align"] = TEXT_CENTERED,
+    -- },
+    -- Right Center Stick momentary switch, uncomment to show
+    -- {
+    -- ["name"] = "SN",
+    -- ["type"] = TYPE_SWITCH,
+    -- ["lines"] = { { 542, 126, 489, 126 }, { 595, 126, 542, 126 }, { 542, 126, 542, 138 } },
+    -- ["draw"] = function() drawButton1Pos(542, 146, 8) end,
+    -- ["align"] = TEXT_CENTERED,
+    -- },
+    -- Left Center Stick 3POS switch, uncomment to show
+    -- {
+    -- ["name"] = "SX",
+    -- ["type"] = TYPE_SWITCH,
+    -- ["lines"] = { { 5, 154, 223, 154 }, { 223, 154, 232, 166 } },
+    -- ["draw"] = function() drawButton3Pos(242, 171, 12) end,
+    -- },
+    -- Right Center Stick 3POS switch, uncomment to show
+    -- {
+    -- ["name"] = "SY",
+    -- ["type"] = TYPE_SWITCH,
+    -- ["lines"] = { { 779, 154, 561, 154 }, { 561, 154, 552, 166 } },
+    -- ["draw"] = function() drawButton3Pos(542, 171, 12) end,
+    -- },
     {
         ["name"] = "LS",
         ["type"] = TYPE_SLIDER,
-        ["lines"] = { { 5, 144, 114, 144 }, { 114, 144, 138, 166 } },
-        ["draw"] = function() drawCurvedSlider(180, 170, 34, 44, 230, 310) end,
+        ["lines"] = { { 5, 132, 145, 132 } },
+        ["draw"] = function() drawSlider(145, 112, 10, 40, 1) end,
     },
     {
         ["name"] = "RS",
         ["type"] = TYPE_SLIDER,
-        ["lines"] = { { 779, 144, 670, 144 }, { 670, 144, 646, 166 } },
-        ["draw"] = function() drawCurvedSlider(604, 170, 34, 44, 50, 130) end,
+        ["lines"] = { { 779, 132, 639, 132 } },
+        ["draw"] = function() drawSlider(634, 112, 10, 40, 1) end,
     },
     {
         ["name"] = "S1",
