@@ -40,6 +40,7 @@
 -- 2026-03-31 add support for Twin XLite RII, X18R, X18RS, also X14/X14S/X14RS but only full screen 640x360 (thanks to @flyingeek)
 -- 2026-04-09 New XE map with space improved for legends, Light theme improved for readability, custom files improvements (thanks to @flyingeek)
 -- 2026-04-11 adds configurable aliases (thanks to @flyingeek)
+-- 2026-04-14 see Release note 1.2.2 for details (thanks to @flyingeek)
 --
 -- **************************************************************************************
 -- ***         widget startup code                                                    ***
@@ -47,7 +48,7 @@
 -- *** load (radio start).                                                            ***
 -- **************************************************************************************
 
-local version = "1.2.1."
+local version = "1.2.2."
 local loadRadioDefinition -- defined here as configure needs it
 -- Get information for Transmitter
 local sys = system.getVersion()
