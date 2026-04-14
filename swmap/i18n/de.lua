@@ -28,5 +28,9 @@ return {
     Note2 = "Hinweis 2",
     DisplayVersion = "Skriptversion anzeigen?",
     DisplayModelName = "Modellnamen anzeigen?",
-    FullScreenOptions = "Optionen nur für Vollbildmodus"
+    FullScreenOptions = "Optionen nur für Vollbildmodus",
+    SwitchExpansionTitleWithAlias = "Schaltername (Alias)",
+    YesWithAlias = "Ja (Alias)",
+    Yes = "Ja",
+    No = "Nein",
 }

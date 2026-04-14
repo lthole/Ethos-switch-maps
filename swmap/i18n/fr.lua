@@ -28,5 +28,9 @@ return {
     Note2 = "Note2",
     DisplayVersion = "Afficher la version du script ?",
     DisplayModelName = "Afficher le nom du modèle ?",
-    FullScreenOptions = "Options du Plein Ecran uniquement"
+    FullScreenOptions = "Options du Plein Ecran uniquement",
+    SwitchExpansionTitleWithAlias = "Etiquette des inters (alias)",
+    YesWithAlias = "Oui (alias)",
+    Yes = "Oui",
+    No = "Non",
 }

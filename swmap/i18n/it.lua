@@ -28,5 +28,9 @@ return {
     Note2 = "Nota2",
     DisplayVersion = "Mostra Versione script?",
     DisplayModelName = "Mostra nome modello?",
-    FullScreenOptions = "Opzioni solo per Schermo Pieno"
+    FullScreenOptions = "Opzioni solo per Schermo Pieno",
+    SwitchExpansionTitleWithAlias = "Etichetta Switch (alias)",
+    YesWithAlias = "Si (alias)",
+    Yes = "Si",
+    No = "No",
 }

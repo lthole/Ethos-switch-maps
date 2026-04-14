@@ -49,7 +49,8 @@ function drawTrim(x, y, w, h) end
 ---@param y integer top left y position
 ---@param w integer width
 ---@param h integer height
-function drawSlider(x, y, w, h) end
+---@param rulerOffset integer|nil ruler x-offset (both side of the slider), default to 5
+function drawSlider(x, y, w, h, rulerOffset) end
 
 ---Draws a curved slider (left, right, top or bottom depending on angle)
 ---Same parameters than lcd.drawAnnulusSector
