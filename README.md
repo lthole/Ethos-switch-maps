@@ -7,6 +7,9 @@ Here is my revised Switch Mapping widget for the
 - X14/X14S/X14RS but only full screen 640x360
 - TW X-LITE/TW X-LITES full screen support (480x320)
 - TW X-LITE RII uses L1 and L2 alias
+- Turnigy T14 640x360 full screen
+- Kavan V15 640x360 full screen
+- X18 and X18S 480x320 full screen
 
 My version does not require loading a bitmap background for the switches, because large bitmaps use a large amount of valuable ram. Instead I just draw them.
 
