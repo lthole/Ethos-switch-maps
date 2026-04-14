@@ -536,10 +536,10 @@ local function configure(widget)
     panel = form.addExpansionPanel(hasAliases and STR("SwitchExpansionTitleWithAlias") or STR("SwitchExpansionTitle"))
     local isFirst
     if type(widget.radio) == "table" then
-        for _, specs in pairs(widget.radio) do
-            local name = specs["name"] or ""
+        for _, specs in ipairs(widget.radio) do
+            local name = specs["name"]
             local alias = specs["alias"]
-            if specs.lines then -- no lines means no legend or disabled switches
+            if name and specs.lines then -- no lines means no legend or disabled switches
                 if alias then
                     line = panel:addLine(STR_TYPE_LABEL(specs.type, name .. " (" .. alias .. ")"))
                 else
@@ -688,9 +688,11 @@ local function write(widget)
     append("DisplayModelName", widget.DisplayModelName)
     append("Note1", quote(widget.Note1))
     append("Note2", quote(widget.Note2))
-    for key, value in pairs(widget) do
-        if key:sub(-4) == "text" then
-            append(key, quote(value))
+    for _, specs in ipairs(widget.radio) do
+        local name = specs["name"]
+        if name and specs.lines then -- no lines means no legend or disabled switches
+            local key = name .. "text"
+            append(key, quote(widget[key] or ""))
         end
     end
     f:write("}")
