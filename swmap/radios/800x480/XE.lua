@@ -135,7 +135,7 @@ return {
     --     ["name"] = "SN",
     --     ["type"] = TYPE_SWITCH,
     --     ["lines"] = { { 795, 265, 566, 265 } },
-    --     ["draw"] = function() drawButton1Pos(558, 265, 8) end
+    --     ["draw"] = function() drawButton1Pos(558, 265, 8) end,
     --     ["alias"] = "S14",
     -- },
     -- Left Center Stick 3POS switch, uncomment to show
