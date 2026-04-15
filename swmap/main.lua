@@ -41,6 +41,7 @@
 -- 2026-04-09 New XE map with space improved for legends, Light theme improved for readability, custom files improvements (thanks to @flyingeek)
 -- 2026-04-11 adds configurable aliases (thanks to @flyingeek)
 -- 2026-04-14 see Release note 1.2.2 for details (thanks to @flyingeek)
+-- 2026-04-15 see Release note 1.2.3 for details (thanks to @flyingeek)
 --
 -- **************************************************************************************
 -- ***         widget startup code                                                    ***
@@ -48,7 +49,7 @@
 -- *** load (radio start).                                                            ***
 -- **************************************************************************************
 
-local version = "1.2.2."
+local version = "1.2.3"
 local loadRadioDefinition -- defined here as configure needs it
 -- Get information for Transmitter
 local sys = system.getVersion()
