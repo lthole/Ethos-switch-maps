@@ -646,8 +646,8 @@ end
 -- **************************************************************************************
 --
 local function write(widget)
-    if debug_mode and type(widget.radio) ~= "table" then
-        log("No radio definition found, skipping write", ANSI_YELLOW)
+    if type(widget.radio) ~= "table" then
+        if debug_mode then log("No radio definition found, skipping write", ANSI_YELLOW) end
         return
     end
     if debug_mode then log("Writing config to file: " .. getConfigurationFilePath()) end
