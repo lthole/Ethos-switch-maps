@@ -897,7 +897,7 @@ local function build(widget)
         widget.radioWidth, widget.radioHeight = w, h
     end
     -- he we set colors in case darkmode was changed
-    if sys.major >= 26 then
+    if (sys.major or 0) >= 26 then
         secondaryColor = lcd.themeColor(THEME_SECONDARY_COLOR)
         if lcd.darkMode() then
             screenBgColor = lcd.themeColor(THEME_PRIMARY_BGCOLOR)
