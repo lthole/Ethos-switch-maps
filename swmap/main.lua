@@ -311,7 +311,7 @@ local function paint(widget)
     lcd.font(FONT_S)
     local _, textOffsetY = lcd.getTextSize("") -- the legend is by default textOffset above the line
     local function addLegend(label, prefix, lines, align, offset)
-        if widget.DisplayAll or label ~= "" then
+        if (widget.DisplayAll or label ~= "") and lines[1] then
             local x = lines[1][1]
             local y = lines[1][2]
             if not align and x < w / 2 then align = TEXT_LEFT end
