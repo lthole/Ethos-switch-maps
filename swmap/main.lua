@@ -311,7 +311,7 @@ local function paint(widget)
     lcd.font(FONT_S)
     local _, textOffsetY = lcd.getTextSize("") -- the legend is by default textOffset above the line
     local function addLegend(label, prefix, lines, align, offset)
-        if widget.DisplayAll or label ~= "" then
+        if (widget.DisplayAll or label ~= "") and lines[1] then
             local x = lines[1][1]
             local y = lines[1][2]
             if not align and x < w / 2 then align = TEXT_LEFT end
@@ -646,8 +646,8 @@ end
 -- **************************************************************************************
 --
 local function write(widget)
-    if debug_mode and type(widget.radio) ~= "table" then
-        log("No radio definition found, skipping write", ANSI_YELLOW)
+    if type(widget.radio) ~= "table" then
+        if debug_mode then log("No radio definition found, skipping write", ANSI_YELLOW) end
         return
     end
     if debug_mode then log("Writing config to file: " .. getConfigurationFilePath()) end
@@ -748,37 +748,52 @@ local function drawPot(cx, cy, r)
     lcd.drawFilledCircle(cx, cy - r + 2, 4)
 end
 local function drawTrim(x, y, w, h)
-    -- TODO computations are wrong but Ethos is drawing angle line badly
     lcd.color(trimBgColor)
     lcd.drawFilledRectangle(x, y, w, h)
     lcd.color(trimColor)
-    if w > h then -- horizontal
+    local x0, y0 = x, y
+    local x1, y1 = x + w - 1, y + h - 1
+    local cx = x0 + math.floor(w / 2) -- floor(w/2) rather than floor((x0+x1)/2): avoids left/up bias for even dimensions
+    local cy = y0 + math.floor(h / 2)
+    if w > h then                     -- horizontal
         local marginX = 4
         local marginY = 2
-        lcd.drawLine(x + (w / 2), y, x + (w / 2), y + h)
+        local leftApexX = math.min(x1, x0 + marginX)
+        local rightApexX = math.max(x0, x1 - marginX)
+        local leftBaseX = math.max(x0, cx - marginX)
+        local rightBaseX = math.min(x1, x1 - math.floor(w / 2) + marginX) -- mirror of leftBaseX: x1-floor(w/2) instead of cx, so both arrows have equal depth
+        local topY = math.min(y1, y0 + marginY)
+        local bottomY = math.max(y0, y1 - marginY)
+        lcd.drawLine(cx, y0, cx, y1)
         lcd.drawFilledTriangle(
-            x + marginX, y + (h / 2),
-            x + (w / 2) - marginX, y + marginY,
-            x + (w / 2) - marginX, y + h - marginY
+            leftApexX, cy,
+            leftBaseX, topY,
+            leftBaseX, bottomY
         )
         lcd.drawFilledTriangle(
-            x + w - marginX + 1, y + (h / 2),
-            x + (w / 2) + marginX - 1, y + marginY,
-            x + (w / 2) + marginX - 1, y + h - marginY
+            rightApexX, cy,
+            rightBaseX, topY,
+            rightBaseX, bottomY
         )
     else -- vertical
         local marginX = 2
         local marginY = 4
-        lcd.drawLine(x, y + (h / 2), x + w, y + (h / 2))
+        local topApexY = math.min(y1, y0 + marginY)
+        local bottomApexY = math.max(y0, y1 - marginY)
+        local topBaseY = math.max(y0, cy - marginY)
+        local bottomBaseY = math.min(y1, y1 - math.floor(h / 2) + marginY) -- mirror of topBaseY: y1-floor(h/2) instead of cy, so both arrows have equal depth
+        local leftX = math.min(x1, x0 + marginX)
+        local rightX = math.max(x0, x1 - marginX)
+        lcd.drawLine(x0, cy, x1, cy)
         lcd.drawFilledTriangle(
-            x + (w / 2), y + marginY,
-            x + marginX, y + (h / 2) - marginY,
-            x + w - marginX, y + (h / 2) - marginY
+            cx, topApexY,
+            leftX, topBaseY,
+            rightX, topBaseY
         )
         lcd.drawFilledTriangle(
-            x + (w / 2), y + h - marginY,
-            x + marginX, y + (h / 2) + marginY,
-            x + w - marginX, y + (h / 2) + marginY
+            cx, bottomApexY,
+            leftX, bottomBaseY,
+            rightX, bottomBaseY
         )
     end
 end
@@ -897,7 +912,7 @@ local function build(widget)
         widget.radioWidth, widget.radioHeight = w, h
     end
     -- he we set colors in case darkmode was changed
-    if sys.major >= 26 then
+    if (sys.major or 0) >= 26 then
         secondaryColor = lcd.themeColor(THEME_SECONDARY_COLOR)
         if lcd.darkMode() then
             screenBgColor = lcd.themeColor(THEME_PRIMARY_BGCOLOR)
