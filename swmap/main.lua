@@ -42,6 +42,7 @@
 -- 2026-04-11 adds configurable aliases (thanks to @flyingeek)
 -- 2026-04-14 see Release note 1.2.2 for details (thanks to @flyingeek)
 -- 2026-04-15 see Release note 1.2.3 for details (thanks to @flyingeek)
+-- 2026-05-04 see Release note 1.2.4 for details (thanks to @flyingeek)
 --
 -- **************************************************************************************
 -- ***         widget startup code                                                    ***
@@ -49,7 +50,7 @@
 -- *** load (radio start).                                                            ***
 -- **************************************************************************************
 
-local version = "1.2.3"
+local version = "1.2.4"
 local loadRadioDefinition -- defined here as configure needs it
 -- Get information for Transmitter
 local sys = system.getVersion()
