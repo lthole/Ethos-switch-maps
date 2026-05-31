@@ -54,7 +54,7 @@ local version = "1.2.4"
 local loadRadioDefinition -- defined here as configure needs it
 -- Get information for Transmitter
 local sys = system.getVersion()
-
+local HAS_THEMES = THEME_PAGE_BGCOLOR ~= nil
 local debug_mode = false -- sys.simulation or true or false only
 local ANSI_BLACK = "\27[1;30m"
 local ANSI_RED = "\27[1;31m"
@@ -66,27 +66,28 @@ local function log(text, ansiColor)
     local ANSI_RESET = "\27[0m"
     print(ansiColor .. "[swmap] " .. tostring(text) .. ANSI_RESET)
 end
+local function legacyDarkMode()
+    ---@diagnostic disable-next-line: deprecated
+    return lcd.darkMode and lcd.darkMode() or false
+end
 if debug_mode then log("SWMAP Debug MODE ON") end
 
-local defaultTextColorDark = lcd.RGB(0, 0xFF, 0xFF)
-local defaultTextColorLight = lcd.RGB(0x58, 0x5C, 0x58)
-
--- Colors used to mimic Hardware Checks Page
-local buttonSlotColor = lcd.GREY(50) -- only use in dark mode
-local potColor                       -- depends on theme (light/dark) set in build
-local inactiveSwitchColor            -- depends on theme (light/dark) set in build
-local screenBgColor                  -- depends on theme (light/dark) set in build
-local primaryColor                   -- depends on theme (light/dark) set in build
-local defaultTextColor               -- depends on theme (light/dark) set in build
-local focusColor                     -- depends on theme (light/dark) set in build
-local buttonBgColor                  -- depends on theme (light/dark) set in build
-local sliderBgColor                  -- depends on theme (light/dark) set in build
-local potBgColor                     -- depends on theme (light/dark) set in build
-local trimBgColor                    -- depends on theme (light/dark) set in build
-local trimColor                      -- depends on theme (light/dark) set in build
-local stickBgColor                   -- depends on theme (light/dark) set in build
-local stickInnerColor                -- depends on theme (light/dark) set in build
-local secondaryColor                 -- depends on theme (light/dark) set in build
+-- Theme colors, all set in build
+local buttonSlotColor
+local potColor
+local inactiveSwitchColor
+local screenBgColor
+local primaryColor
+local defaultTextColor
+local focusColor
+local buttonBgColor
+local sliderBgColor
+local potBgColor
+local trimBgColor
+local trimColor
+local stickBgColor
+local stickInnerColor
+local secondaryColor
 
 local configurationPath = "SCRIPTS:/swmap/models/"
 
@@ -169,7 +170,7 @@ local function STR_TYPE_LABEL(type, name)
 end
 
 -- **************************************************************************************
--- ***		     read widget	 	   		                                          ***
+-- ***               read widget                                                      ***
 -- *** The parameters written by the write handler should, of course, also be loaded  ***
 -- *** when the model is loaded (or otherwise). This is done by the read handler.     ***
 -- **************************************************************************************
@@ -202,7 +203,7 @@ local function readConfiguration(basename)
 end
 
 -- **************************************************************************************
--- ***		     name widget					                                      ***
+-- ***               name widget                                                      ***
 -- **************************************************************************************
 
 local function name() -- name script, appears in widget selection list
@@ -211,8 +212,8 @@ end
 
 
 -- **************************************************************************************
--- ***		    startup (onetime) handler		                                      ***
--- ***	         returns widget vars			                                      ***
+-- ***             startup (onetime) handler                                          ***
+-- ***                 returns widget vars                                            ***
 -- *** The create handler is executed the first time the script is called, for        ***
 -- *** example, when the screen of a widget is activated for the first time.          ***
 -- *** time. In the create handler, the "central data structure" or an array is       ***
@@ -266,7 +267,7 @@ end
 
 
 -- **************************************************************************************
--- ***		     "display handler"					                                  ***
+-- ***                   "display handler"                                            ***
 -- *** The paint handler is responsible for graphical representations in a script,    ***
 -- *** therefore only necessary in scripts that display something on the screen.      ***
 -- **************************************************************************************
@@ -384,7 +385,7 @@ local function paint(widget)
         if widget.DisplayModelName then
             lcd.font(FONT_L_BOLD and FONT_L_BOLD or FONT_BOLD)
             lcd.color(widget.TextColor or defaultTextColor)
-            lcd.drawText(18, 21, model.name())
+            lcd.drawText(10, 20, model.name())
         end
         if widget.DisplayVersion then
             -- show widget information on Full Screen, color based on lcd.hasFocus
@@ -410,7 +411,7 @@ local function paint(widget)
 end
 
 -- **************************************************************************************
--- ***		     monitor events		 	   		                                      ***
+-- ***              monitor events                                                    ***
 -- *** This handler is used to process "external events," usually user interventions. ***
 -- *** For example, touching a screen, pressing control buttons (Page Up/Down),       ***
 -- *** scroll wheel, etc.                                                             ***
@@ -433,7 +434,7 @@ local function event(widget, category, value, x, y)
 end
 
 -- **************************************************************************************
--- ***		     configure widget	 	   		                                      ***
+-- ***              configure widget                                                  ***
 -- *** Clicking the widget configure option triggers this handler.                    ***
 -- **************************************************************************************
 --
@@ -495,9 +496,9 @@ local function configure(widget)
         config["S3text"] = "Volume"
         applyConfig(widget, config)
     end
-    local function buildChoices()                                            -- build a choice list for the form
-        local choices = {}                                                   -- choices for the form
-        local indexes = {}                                                   -- index to retrieve the basename of the selected file
+    local function buildChoices() -- build a choice list for the form
+        local choices = {} -- choices for the form
+        local indexes = {} -- index to retrieve the basename of the selected file
         local modelFileName = getConfigurationFilePath():match("[^/]*.lua$") -- current model configuration basename
         for i, f in pairs(system.listFiles(configurationPath)) do
             if f:sub(-4) == ".lua" and f ~= modelFileName then
@@ -640,7 +641,7 @@ end
 
 
 -- **************************************************************************************
--- ***		     write widget	 	   		                                          ***
+-- ***              write widget                                                      ***
 -- *** The write handler saves model-specific parameters to the model file.           ***
 -- *** Typically, changes in values in the config handler trigger this write action.  ***
 -- *** Of course, the handler must have already been defined by the init handler.     ***
@@ -674,19 +675,9 @@ local function write(widget)
     append("DisplayAll", widget.DisplayAll)
     append("DisplaySwitchNames", widget.DisplaySwitchNames)
     -- extra check to remove color when it is the default for old config
-    if lcd.darkMode() then
-        if widget.TextColor and widget.TextColor ~= defaultTextColorDark then append("TextColor", color(widget.TextColor)) end
-        if widget.NoteColor and widget.NoteColor ~= defaultTextColorDark then append("NoteColor", color(widget.NoteColor)) end
-    else
-        if widget.TextColor and widget.TextColor ~= defaultTextColorLight then
-            append("TextColor",
-                color(widget.TextColor))
-        end
-        if widget.NoteColor and widget.NoteColor ~= defaultTextColorLight then
-            append("NoteColor",
-                color(widget.NoteColor))
-        end
-    end
+    if widget.TextColor and widget.TextColor ~= defaultTextColor then append("TextColor", color(widget.TextColor)) end
+    if widget.NoteColor and widget.NoteColor ~= defaultTextColor then append("NoteColor", color(widget.NoteColor)) end
+
     append("DisplayVersion", widget.DisplayVersion)
     append("DisplayModelName", widget.DisplayModelName)
     append("Note1", quote(widget.Note1))
@@ -705,12 +696,14 @@ local function write(widget)
 end
 
 -- **************************************************************************************
--- ***		     Drawing Methods		 	   		                                  ***
+-- ***                 Drawing Methods                                                ***
 -- They are available in the radio definitions files                   .              ***
 -- **************************************************************************************
 local function drawButtonSlot(cx, cy, r)
     lcd.color(buttonSlotColor)
-    if lcd.darkMode() then
+    if HAS_THEMES then
+        lcd.drawFilledCircle(cx, cy, r)
+    elseif legacyDarkMode() then
         lcd.drawFilledCircle(cx, cy, r)
     else
         lcd.drawCircle(cx, cy, r)
@@ -756,7 +749,7 @@ local function drawTrim(x, y, w, h)
     local x1, y1 = x + w - 1, y + h - 1
     local cx = x0 + math.floor(w / 2) -- floor(w/2) rather than floor((x0+x1)/2): avoids left/up bias for even dimensions
     local cy = y0 + math.floor(h / 2)
-    if w > h then                     -- horizontal
+    if w > h then -- horizontal
         local marginX = 4
         local marginY = 2
         local leftApexX = math.min(x1, x0 + marginX)
@@ -800,7 +793,10 @@ local function drawTrim(x, y, w, h)
 end
 local function drawSlider(x, y, w, h, rulerOffset)
     rulerOffset = rulerOffset or 5
-    local rulerHeight = lcd.darkMode() and 3 or 6
+    local rulerHeight = 3
+    if not HAS_THEMES and not legacyDarkMode() then
+        rulerHeight = 6
+    end
     lcd.color(sliderBgColor)
     lcd.drawFilledRectangle(x, y, w, h)
     lcd.color(focusColor)
@@ -810,14 +806,17 @@ local function drawCurvedSlider(x, y, intR, extR, startAngle, endAngle)
     lcd.color(sliderBgColor)
     lcd.drawAnnulusSector(x, y, intR, extR, startAngle, endAngle)
     lcd.color(focusColor)
-    local cursorWidth = lcd.darkMode() and 3 or 6
-    if (startAngle + endAngle) / 2 == 270 then    --left slider
+    local cursorWidth = 3
+    if not HAS_THEMES and not legacyDarkMode() then
+        cursorWidth = 6
+    end
+    if (startAngle + endAngle) / 2 == 270 then --left slider
         lcd.drawFilledRectangle(x - extR, y - math.floor(cursorWidth / 2), math.abs(extR - intR), cursorWidth)
     elseif (startAngle + endAngle) / 2 == 90 then --right slider
         lcd.drawFilledRectangle(x + extR, y - math.floor(cursorWidth / 2), -math.abs(extR - intR), cursorWidth)
-    elseif (startAngle + endAngle) == 360 then    --top slider
+    elseif (startAngle + endAngle) == 360 then --top slider
         lcd.drawFilledRectangle(x - math.floor(cursorWidth / 2), y - extR, cursorWidth, math.abs(extR - intR))
-    elseif (startAngle + endAngle) == 180 then    --bottom slider
+    elseif (startAngle + endAngle) == 180 then --bottom slider
         lcd.drawFilledRectangle(x - math.floor(cursorWidth / 2), y + extR, cursorWidth, -math.abs(extR - intR))
     else
         local theta = math.rad((startAngle + endAngle) / 2)
@@ -845,7 +844,10 @@ end
 local function drawStick(cx, cy, r)
     local margin = 8
     local rcos30 = 0.866 * r
-    local stickCenterWidth = lcd.darkMode() and 6 or 8
+    local stickCenterWidth = 6
+    if not HAS_THEMES and not legacyDarkMode() then
+        stickCenterWidth = 8
+    end
     lcd.color(stickBgColor)
     lcd.drawFilledCircle(cx, cy, r)
     lcd.color(stickInnerColor)
@@ -900,7 +902,7 @@ loadRadioDefinition = function(w, h)
     return data
 end
 -- **************************************************************************************
--- ***		     build widget		 	   		                                      ***
+-- ***                build widget                                                    ***
 -- This handler is called after widget.create and on each layout change.              ***
 -- **************************************************************************************
 local function build(widget)
@@ -912,47 +914,33 @@ local function build(widget)
         widget.radio = loadRadioDefinition(w, h)
         widget.radioWidth, widget.radioHeight = w, h
     end
-    -- he we set colors in case darkmode was changed
+    -- he we set colors in case theme  was changed
     if (sys.major or 0) >= 26 then
         secondaryColor = lcd.themeColor(THEME_SECONDARY_COLOR)
-        if lcd.darkMode() then
-            screenBgColor = lcd.themeColor(THEME_PRIMARY_BGCOLOR)
-            stickInnerColor = lcd.themeColor(THEME_SECONDARY_BGCOLOR)
-            inactiveSwitchColor = stickInnerColor
-            potColor = stickInnerColor
-            buttonBgColor = lcd.RGB(0x52, 0x54, 0x58)
-            sliderBgColor = buttonBgColor
-            stickBgColor = buttonBgColor
-            potBgColor = buttonBgColor
-            -- SCREEN BACKGROUNG lcd.RGB(0x10, 0x10, 0x10)
-            -- PRIMARY_COLOR = #F8FCF8 = DEFAULT_COLOR
-            -- SECONDARY_COLOR = #B0B0B0
-            -- PRIMARY_BGCOLOR = #182028
-            -- SECONDARY_BGCOLOR = #283038 = DEFAULT_BGCOLOR
-            -- WARNING_COLOR = #E02018
-            -- FOCUS_COLOR = #F8B038
-            -- FOCUS_BGCOLOR = #283038 = DEFAULT_BGCOLOR
-        else
-            screenBgColor = lcd.themeColor(THEME_PRIMARY_BGCOLOR)
-            stickInnerColor = screenBgColor
-            inactiveSwitchColor = lcd.RGB(0xee, 0xef, 0xf7)
-            buttonBgColor = lcd.RGB(0x52, 0x51, 0X52)
-            potColor = buttonBgColor
-            stickBgColor = lcd.RGB(0xB9, 0xBD, 0xBA)
-            sliderBgColor = buttonBgColor -- stickBgColor
-            potBgColor = stickBgColor
-            --- SCREEN BACKGROUND lcd.RGB(0xee, 0xef, 0xf7)
-            -- PRIMARY_COLOR = #585458 = DEFAULT_COLOR
-            -- SECONDARY_COLOR = #707470
-            -- PRIMARY_BGCOLOR = #D0D4D0
-            -- SECONDARY_BGCOLOR = #C8C8C8 = DEFAULT_BGCOLOR
-            -- WARNING_COLOR = #E02018
-            -- FOCUS_COLOR = #F8B038
-            -- FOCUS_BGCOLOR = #C8C8C8 = DEFAULT_BGCOLOR
+        if HAS_THEMES then -- 26.1.0-RC2
+            screenBgColor = lcd.themeColor(THEME_PAGE_BGCOLOR)
+            sliderBgColor = lcd.themeColor(THEME_BUTTON_BORDER_COLOR)
+        else -- 26.1.0-RC1
+            local darkMode = legacyDarkMode()
+            screenBgColor = darkMode and lcd.GREY(0x10) or lcd.RGB(0xED, 0xEC, 0xF1)
+            sliderBgColor = darkMode and lcd.RGB(0x45, 0x4E, 0x57) or lcd.GREY(0xA0)
         end
-    else
-        secondaryColor = lcd.themeColor(14)                       -- 14 is the theme color for widget titles
-        if lcd.darkMode() then
+        buttonBgColor = sliderBgColor
+        stickBgColor = sliderBgColor
+        potBgColor = sliderBgColor
+        trimBgColor = sliderBgColor
+        stickInnerColor = lcd.themeColor(THEME_PRIMARY_BGCOLOR)
+        buttonSlotColor = lcd.themeColor(THEME_SECONDARY_BGCOLOR)
+        potColor = stickInnerColor
+        inactiveSwitchColor = stickInnerColor
+        trimColor = stickInnerColor
+        primaryColor = lcd.themeColor(THEME_PRIMARY_COLOR or THEME_DEFAULT_COLOR)
+        defaultTextColor = primaryColor
+        focusColor = lcd.themeColor(THEME_HIGHLIGHT_COLOR or THEME_FOCUS_COLOR)
+    else -- 1.x.x
+        buttonSlotColor = lcd.GREY(50)
+        secondaryColor = lcd.themeColor(14) -- 14 is the theme color for widget titles
+        if legacyDarkMode() then
             screenBgColor = lcd.themeColor(THEME_DEFAULT_BGCOLOR) -- lcd.RGB(0x10, 0x10, 0x10)
             potColor = lcd.RGB(0x31, 0x31, 0x31)
             buttonBgColor = lcd.RGB(0x52, 0x51, 0x52)
@@ -960,11 +948,11 @@ local function build(widget)
             stickInnerColor = potColor
             inactiveSwitchColor = screenBgColor
             potBgColor = buttonBgColor
-            -- DEFAULT_COLOR = #F8FCF8
-            -- DEFAULT_BGCOLOR = #202020
-            -- WARNING_COLOR = #E02018
-            -- FOCUS_COLOR = #F8C000
-            -- FOCUS_BGCOLOR = #202020
+        -- DEFAULT_COLOR = #F8FCF8
+        -- DEFAULT_BGCOLOR = #202020
+        -- WARNING_COLOR = #E02018
+        -- FOCUS_COLOR = #F8C000
+        -- FOCUS_BGCOLOR = #202020
         else
             screenBgColor = lcd.RGB(0xd6, 0xd2, 0xd6)
             potColor = lcd.RGB(0x52, 0x51, 0x52)
@@ -980,12 +968,12 @@ local function build(widget)
         end
         stickBgColor = sliderBgColor
         potBgColor = sliderBgColor
+        primaryColor = lcd.themeColor(THEME_PRIMARY_COLOR or THEME_DEFAULT_COLOR)
+        defaultTextColor = legacyDarkMode() and lcd.RGB(0, 0xFF, 0xFF) or lcd.RGB(0x58, 0x5C, 0x58)
+        focusColor = lcd.themeColor(THEME_FOCUS_COLOR)
+        trimBgColor = buttonBgColor
+        trimColor = inactiveSwitchColor
     end
-    primaryColor = lcd.themeColor(THEME_PRIMARY_COLOR or THEME_DEFAULT_COLOR)
-    defaultTextColor = lcd.darkMode() and defaultTextColorDark or defaultTextColorLight
-    focusColor = lcd.themeColor(THEME_FOCUS_COLOR)
-    trimBgColor = buttonBgColor
-    trimColor = inactiveSwitchColor
 
     -- update translation file if needed
     if i18n.getLocale() ~= system.getLocale() then
@@ -996,7 +984,7 @@ local function build(widget)
 end
 
 -- **************************************************************************************
--- ***		     init widget		 	   		                                      ***
+-- ***                 init widget                                                    ***
 -- This handler is called during the transmitter's boot process.                      ***
 -- The transmitter makes a list of all Lua scripts with their unique                  ***
 -- "keys" and their types (widget, systemTool, etc.)                                  ***

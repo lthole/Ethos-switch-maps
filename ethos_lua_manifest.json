@@ -1,0 +1,23 @@
+{
+    "manifestVersion": 1,
+    "name": "Switch Maps",
+    "key": "lthole.swmap",
+    "version": "1.2.4",
+    "releaseNotes": {
+        "format": "markdown",
+        "content": "See the README.md for details\n\nFind updates and report issues on [GitHub](https://github.com/lthole/ethos-switch-maps)"
+    },
+    "folder": "swmap",
+    "files": [
+        "swmap/main.lua",
+        "swmap/radios/480x320/*",
+        "swmap/radios/640x360/*",
+        "swmap/radios/784x316/*",
+        "swmap/radios/800x480/*",
+        "swmap/radios/custom/readme.txt",
+        "swmap/radios/custom/radio_definition.d.lua",
+        "swmap/models/placeholder.txt",
+        "swmap/i18n/*",
+        "README.md"
+    ]
+}

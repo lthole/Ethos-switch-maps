@@ -1,0 +1,14 @@
+align_continuous_assign_statement = false
+never_indent_before_if_condition = true
+never_indent_comment_on_if_branch = true
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+align_array_table = false
+align_continuous_assign_statement = false
+align_continuous_inline_comment = false
+align_continuous_parameter_list = false
+align_continuous_variable_declaration = false
+align_continuous_table = false
+align_continuous_table_field = false

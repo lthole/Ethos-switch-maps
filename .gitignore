@@ -7,3 +7,5 @@ swmap/models/*.lua
 swmap/radios/custom/*.lua
 .luarc.json
 simulator
+library
+requirements.txt
