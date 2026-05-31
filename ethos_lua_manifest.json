@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "name": "Switch Maps",
     "key": "lthole.swmap",
-    "version": "1.2.4",
+    "version": "1.2.5",
     "releaseNotes": {
         "format": "markdown",
         "content": "See the README.md for details\n\nFind updates and report issues on [GitHub](https://github.com/lthole/ethos-switch-maps)"
